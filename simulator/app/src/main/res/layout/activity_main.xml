@@ -1,0 +1,126 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/my_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimaryDark"
+        android:theme="@style/ToolbarTheme"
+        android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:titleTextAppearance="@style/ToolbarTitleText"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/my_toolbar">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="16dp"> <!-- Add padding at the bottom -->
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="16dp"
+                android:text="Scan a PKOC NFC or BLE Credential"
+                android:textColor="@color/colorPrimaryDark"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/readerLocationUUID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Reader Location UUID: "
+                android:textSize="16sp"
+                android:layout_below="@id/textView"
+                android:layout_marginTop="16dp"
+                android:layout_centerHorizontal="false"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/readerSiteUUID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Reader Site UUID: "
+                android:textSize="16sp"
+                android:layout_below="@id/readerLocationUUID"
+                android:layout_marginTop="8dp"
+                android:layout_centerHorizontal="false"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/sitePublicKey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Site Public Key: "
+                android:textSize="16sp"
+                android:layout_below="@id/readerSiteUUID"
+                android:layout_marginTop="8dp"
+                android:layout_centerHorizontal="false"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/nfcadvertisingStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="NFC Advertising Status: "
+                android:textSize="16sp"
+                android:layout_below="@id/sitePublicKey"
+                android:layout_marginTop="8dp"
+                android:layout_centerHorizontal="false"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/bleadvertisingStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BLE Advertising Status: "
+                android:textSize="16sp"
+                android:layout_below="@+id/nfcadvertisingStatus"
+                android:layout_marginTop="8dp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/emailButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Email PKOC Information"
+                android:layout_below="@id/bleadvertisingStatus"
+                android:layout_marginTop="16dp"
+                android:layout_centerHorizontal="true"
+                android:visibility="gone"/> <!-- Initially hidden -->
+
+            <Button
+                android:id="@+id/scanButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Scan New Tag"
+                android:layout_below="@id/emailButton"
+                android:layout_marginTop="16dp"
+                android:layout_centerHorizontal="true"
+                android:visibility="gone"/> <!-- Initially hidden -->
+
+            <Button
+                android:id="@+id/rdrButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Show Reader Details"
+                android:layout_below="@+id/bleadvertisingStatus"
+                android:layout_marginTop="16dp"
+                android:layout_centerHorizontal="true"
+                android:visibility="visible"/> <!-- Initially visible -->
+
+        </RelativeLayout>
+    </ScrollView>
+
+</RelativeLayout>

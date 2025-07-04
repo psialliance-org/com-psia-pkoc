@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary branding colors -->
+    <color name="colorPrimary">#69737B</color>
+    <color name="colorPrimaryDark">#9CC3C9</color>
+    <color name="colorAccent">#CBCFD3</color>
+
+    <!-- Additional colors -->
+    <color name="colorBackground">#FFFFFF</color>
+    <color name="colorTextPrimary">#000000</color>
+    <color name="colorTextSecondary">#364566</color>
+</resources>
