@@ -1,0 +1,48 @@
+<resources>
+    <string name="app_name" translatable="false">PSIA BLE PKOC App</string>
+    <string name="BTconnFail">Connection Failed</string>
+    <string name="BTConnected">Connected to Device: </string>
+    <string name="sBTdevNF">"Bluetooth device not found!"</string>
+    <string name="sBTstaNF">Status: Bluetooth not found</string>
+    <string name="BTEnable">Bluetooth enabled</string>
+    <string name="sBTturON">Bluetooth turned on</string>
+    <string name="BTisON">Bluetooth is already on</string>
+    <string name="sEnabled">Enabled</string>
+    <string name="sDisabled">Disabled</string>
+    <string name="sBTdisabl">Bluetooth disabled</string>
+    <string name="BTnotOn">Bluetooth not on</string>
+    <string name="LocationNotOn">Location services are disabled</string>
+    <string name="lt_bluetooth_status">Bluetooth status</string>
+    <string name="BTturOff">Bluetooth turned off</string>
+    <string name="cConnet">Connecting…</string>
+    <string name="DisStart">Discovery started</string>
+    <string name="show_paired_devices">Show Paired Devices</string>
+    <string name="DisStop">Discovery stopped</string>
+    <string name="status">"Status: "</string>
+    <string name="discover_new_devices">Discover new device</string>
+    <string name="stop_discovery">Stop discovery</string>
+    <string name="elatec_GmbH" translatable="false">Elatec GmbH</string>
+    <string name="lock_image">Lock Image</string>
+    <string name="uncompressed">Normal Flow</string>
+
+    <string name="settings">Settings</string>
+    <string name="auto_discover_devices">Auto Discover Devices</string>
+    <string name="enable_ranging">Enable Ranging</string>
+    <string name="unlock_range">Unlock Range</string>
+    <string name="about">About</string>
+    <string name="about_content">This application was developed by Johnson Controls International (Thank you to Luke Ruter!) in conjunction with ELATEC Inc. (Jason Ouellette) and the Physical Security Interoperability Alliance members.</string>
+    <string name="about_PKOC">PKOC (Public Key Open Credential) is an open standard that uses an asymmetric encryption key as an access control credential.</string>
+    <string name="about_version">version: 2.1.0</string>
+    <string name="psia" translatable="false">PSIA</string>
+    <string name="pkoc_flow_mode">PKOC Flow Setting</string>
+    <string name="discovery_and_connection_settings">Discovery and Connection Settings</string>
+    <string name="near">near</string>
+    <string name="far">far</string>
+    <string name="display_settings">Display Settings</string>
+    <string name="display_device_mac_address">Display Device MAC Address</string>
+    <string name="end_user_license_agreement">End User License Agreement</string>
+    <string name="accept">Accept</string>
+    <string name="cancel">Cancel</string>
+    <string name="echde_perfect_secrecy">ECDHE Perfect Secrecy</string>
+    <string name="nfc_tech_list">nfc_tech_list</string>
+</resources>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph.xml"
+    app:startDestination="@id/sendCredentialFragment">
+
+    <fragment
+        android:id="@+id/sendCredentialFragment"
+        android:name="com.psia.pkoc.SendCredentialFragment"
+        android:label="@string/app_name"
+        tools:layout="@layout/fragment_send_credential" >
+        <action
+            android:id="@+id/action_sendCredentialFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_sendCredentialFragment_to_aboutFragment"
+            app:destination="@id/aboutFragment" />
+        <action
+            android:id="@+id/action_sendCredentialFragment_to_eulaFragment"
+            app:destination="@id/eulaFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.psia.pkoc.SettingsFragment"
+        android:label="Settings"
+        tools:layout="@layout/fragment_settings" >
+        <action
+            android:id="@+id/action_settingsFragment_to_sendCredentialFragment"
+            app:destination="@id/sendCredentialFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/aboutFragment"
+        android:name="com.psia.pkoc.AboutFragment"
+        android:label="About"
+        tools:layout="@layout/fragment_about" >
+        <action
+            android:id="@+id/action_aboutFragment_to_sendCredentialFragment"
+            app:destination="@id/sendCredentialFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/eulaFragment"
+        android:name="com.psia.pkoc.EulaFragment"
+        android:label="End User License Agreement" >
+        <action
+            android:id="@+id/action_eulaFragment_to_sendCredentialFragment"
+            app:destination="@id/sendCredentialFragment" />
+    </fragment>
+</navigation>
