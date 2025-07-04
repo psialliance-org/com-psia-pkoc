@@ -196,6 +196,37 @@ public class SendCredentialFragment extends Fragment
         binding = FragmentSendCredentialBinding.inflate(inflater, container, false);
 
         mBTArrayAdapter = new ListModelAdapter(requireActivity());
+        Log.i("SendCredentialFragment", "mBTArrayAdapter is not null");
+        binding.discover.setOnClickListener(v -> setIsScanning(!_IsScanning));
+
+        SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+        Log.d("Public key is null?", String.valueOf(GetPublicKey() == null));
+        Log.d("Value of public key", String.valueOf(GetPublicKey()));
+        if (GetPublicKey() == null)
+        {
+            Log.i("SendCredentialFragment", "Create key pair");
+            CreateKeyPair();
+            long currentTimeInSeconds = System.currentTimeMillis() / 1000; // change this back to 1000 when done troubleshooting
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putLong(PKOC_Preferences.PKOC_CreationTime, currentTimeInSeconds);
+            editor.apply();
+        }
+
+        int transmissionTypeInt = sharedPref.getInt(PKOC_Preferences.PKOC_TransmissionType, PKOC_TransmissionType.BLE.ordinal());
+        PKOC_TransmissionType transmissionType = PKOC_TransmissionType.values()[transmissionTypeInt];
+
+        if (transmissionType == PKOC_TransmissionType.NFC)
+        {
+            binding.discover.setVisibility(View.GONE);
+            binding.devicesListView.setVisibility(View.GONE);
+            binding.centerInstruction.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            binding.discover.setVisibility(View.VISIBLE);
+            binding.devicesListView.setVisibility(View.VISIBLE);
+            binding.centerInstruction.setVisibility(View.GONE);
+        }
         mBTAdapter = BluetoothAdapter.getDefaultAdapter(); // get a handle on the bluetooth radio
 
         binding.devicesListView.setAdapter(mBTArrayAdapter); // assign model to view
@@ -233,26 +264,6 @@ public class SendCredentialFragment extends Fragment
                                         Manifest.permission.BLUETOOTH_ADMIN,
                                 }, 1);
             }
-        }
-
-        if (mBTArrayAdapter == null) {
-            Log.i("SendCredentialFragment", "mBTArrayAdapter is null");
-            Toast.makeText(this.getContext(), getString(R.string.sBTdevNF), Toast.LENGTH_SHORT).show();
-        } else {
-            Log.i("SendCredentialFragment", "mBTArrayAdapter is not null");
-            binding.discover.setOnClickListener(v -> setIsScanning(!_IsScanning));
-        }
-        Log.d("Public key is null?", String.valueOf(GetPublicKey() == null));
-        Log.d("Value of public key", String.valueOf(GetPublicKey()));
-        if (GetPublicKey() == null)
-        {
-            Log.i("SendCredentialFragment", "Create key pair");
-            CreateKeyPair();
-            long currentTimeInSeconds = System.currentTimeMillis() / 1000; // change this back to 1000 when done troubleshooting
-            SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putLong(PKOC_Preferences.PKOC_CreationTime, currentTimeInSeconds);
-            editor.apply();
         }
 
         LoadUserPreferences();
@@ -352,6 +363,25 @@ public class SendCredentialFragment extends Fragment
         }
 
         SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+
+        int transmissionTypeInt = sharedPref.getInt(PKOC_Preferences.PKOC_TransmissionType, PKOC_TransmissionType.BLE.ordinal());
+        PKOC_TransmissionType transmissionType = PKOC_TransmissionType.values()[transmissionTypeInt];
+
+        if (transmissionType == PKOC_TransmissionType.NFC)
+        {
+            binding.discover.setVisibility(View.GONE);
+            binding.devicesListView.setVisibility(View.GONE);
+            binding.centerInstruction.setVisibility(View.VISIBLE);
+
+            return;
+        }
+        else
+        {
+            binding.discover.setVisibility(View.VISIBLE);
+            binding.devicesListView.setVisibility(View.VISIBLE);
+            binding.centerInstruction.setVisibility(View.GONE);
+        }
+
         boolean AutoDiscover = sharedPref.getBoolean(PKOC_Preferences.AutoDiscoverDevices, false);
 
         Log.i("SendCredentialFragment", "AutoDiscover: " + AutoDiscover);

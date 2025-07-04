@@ -49,4 +49,6 @@
     <string name="aiddescription">AID group</string>
     <string name="near_field_communication">Near-Field Communication</string>
     <string name="bluetooth_low_energy">Bluetooth Low Energy</string>
+    <string name="this_image_is_a_closed_door">This image is a closed door.</string>
+    <string name="please_present_device_to_reader_to_unlock">Please present device to reader to unlock.</string>
 </resources>

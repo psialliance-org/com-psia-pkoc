@@ -1,7 +1,7 @@
 package com.psia.pkoc;
 
 /**
- * BLE packet type for TLV-encoded data
+ * NFC packet type for TLV-encoded data
  */
 public enum NFC_PacketType
 {
