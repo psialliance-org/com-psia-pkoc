@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">PSIA BLE PKOC App</string>
+    <string name="app_name" translatable="false">PSIA PKOC Credential App</string>
     <string name="BTconnFail">Connection Failed</string>
     <string name="BTConnected">Connected to Device: </string>
     <string name="sBTdevNF">"Bluetooth device not found!"</string>
@@ -32,7 +32,7 @@
     <string name="about">About</string>
     <string name="about_content">This application was developed by Johnson Controls International (Thank you to Luke Ruter!) in conjunction with ELATEC Inc. (Jason Ouellette) and the Physical Security Interoperability Alliance members.</string>
     <string name="about_PKOC">PKOC (Public Key Open Credential) is an open standard that uses an asymmetric encryption key as an access control credential.</string>
-    <string name="about_version">version: 2.1.0</string>
+    <string name="about_version">version: BLE-3.0, NFC-1.63</string>
     <string name="psia" translatable="false">PSIA</string>
     <string name="pkoc_flow_mode">PKOC Flow Setting</string>
     <string name="discovery_and_connection_settings">Discovery and Connection Settings</string>
@@ -45,4 +45,8 @@
     <string name="cancel">Cancel</string>
     <string name="echde_perfect_secrecy">ECDHE Perfect Secrecy</string>
     <string name="nfc_tech_list">nfc_tech_list</string>
+    <string name="servicedesc">PKOC NFC Service</string>
+    <string name="aiddescription">AID group</string>
+    <string name="near_field_communication">Near-Field Communication</string>
+    <string name="bluetooth_low_energy">Bluetooth Low Energy</string>
 </resources>

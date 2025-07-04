@@ -22,7 +22,19 @@ public class TLVProvider
      * @param data Message content
      * @return TLV encoded byte array
      */
-    public static byte[] GetTLV(BLE_PacketType type, byte[] data)
+    public static byte[] GetBleTLV(BLE_PacketType type, byte[] data)
+    {
+        byte[] prepend = new byte[] { type.getType(), (byte) data.length };
+        return Arrays.concatenate(prepend, data);
+    }
+
+    /**
+     * Get Type Length Value encoded byte array
+     * @param type Message type
+     * @param data Message content
+     * @return TLV encoded byte array
+     */
+    public static byte[] GetNfcTLV(NFC_PacketType type, byte[] data)
     {
         byte[] prepend = new byte[] { type.getType(), (byte) data.length };
         return Arrays.concatenate(prepend, data);
@@ -33,7 +45,7 @@ public class TLVProvider
      * @param encodedData TLV encoded byte array
      * @return BLE_Packet containing type and decoded byte array
      */
-    public static BLE_Packet GetValue(byte[] encodedData)
+    public static BLE_Packet GetBleValue(byte[] encodedData)
     {
         BLE_PacketType packetType = BLE_PacketType.decode(encodedData[0]);
 
@@ -44,11 +56,27 @@ public class TLVProvider
     }
 
     /**
+     * Get Value of encoded Type Length Value message
+     * @param encodedData TLV encoded byte array
+     * @return NFC_Packet containing type and decoded byte array
+     */
+    public static NFC_Packet GetNfcValue(byte[] encodedData)
+    {
+        NFC_PacketType packetType = NFC_PacketType.decode(encodedData[0]);
+
+        byte[] decodedData = new byte[encodedData[1]];
+        arraycopy(encodedData, 2, decodedData, 0, encodedData[1]);
+
+        return new NFC_Packet(packetType, decodedData);
+    }
+
+
+    /**
      * Get values of a message containing TLV encoded data
      * @param data byte array containing one or more TLV encoded messages
      * @return Array list of messages to be read
      */
-    public static ArrayList<BLE_Packet> GetValues(byte[] data)
+    public static ArrayList<BLE_Packet> GetBleValues(byte[] data)
     {
         ArrayList<BLE_Packet> gattTypeDataArrayList = new ArrayList<>();
 
@@ -62,7 +90,35 @@ public class TLVProvider
         {
             byte[] dataToProcess = new byte[data.length - processedDataLength];
             arraycopy(data, processedDataLength, dataToProcess, 0, data.length - processedDataLength);
-            BLE_Packet gTypeData = GetValue(dataToProcess);
+            BLE_Packet gTypeData = GetBleValue(dataToProcess);
+            gattTypeDataArrayList.add(gTypeData);
+            processedDataLength += gTypeData.Data.length + 2;
+        }
+        while (processedDataLength < data.length);
+
+        return gattTypeDataArrayList;
+    }
+
+    /**
+     * Get values of a message containing TLV encoded data
+     * @param data byte array containing one or more TLV encoded messages
+     * @return Array list of messages to be read
+     */
+    public static ArrayList<NFC_Packet> GetNfcValues(byte[] data)
+    {
+        ArrayList<NFC_Packet> gattTypeDataArrayList = new ArrayList<>();
+
+        if (data.length < 2) //not long enough to be a TLV
+        {
+            return gattTypeDataArrayList;
+        }
+
+        int processedDataLength = 0;
+        do
+        {
+            byte[] dataToProcess = new byte[data.length - processedDataLength];
+            arraycopy(data, processedDataLength, dataToProcess, 0, data.length - processedDataLength);
+            NFC_Packet gTypeData = GetNfcValue(dataToProcess);
             gattTypeDataArrayList.add(gTypeData);
             processedDataLength += gTypeData.Data.length + 2;
         }

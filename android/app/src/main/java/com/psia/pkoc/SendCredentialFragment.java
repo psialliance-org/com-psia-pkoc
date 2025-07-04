@@ -10,6 +10,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
@@ -74,7 +75,6 @@ public class SendCredentialFragment extends Fragment
 
     private static Handler updateUIHandler;
     private static Handler timeoutHandler;
-    private static BluetoothDevice thedevice;
 
     /**
      * Helper function to set button background color
@@ -173,7 +173,7 @@ public class SendCredentialFragment extends Fragment
         {
             mBTAdapter.getBluetoothLeScanner().stopScan(mLeScanCallback);
             binding.discover.setText(R.string.discover_new_devices);
-            setButtonColor(binding.discover, 0xFF29B582);
+            setButtonColor(binding.discover, 0xFF9CC3C9);
         }
     }
 
@@ -529,8 +529,11 @@ public class SendCredentialFragment extends Fragment
             String Name = result.getDevice().getName();
             if (Name == null || Name.isEmpty()) {
                 // Try to extract the device name from the scan record
-                byte[] scanRecord = result.getScanRecord().getBytes();
-                Name = parseDeviceName(scanRecord);
+                ScanRecord scanRecord = result.getScanRecord();
+                if (scanRecord != null) {
+                    byte[] scanRecordBytes = scanRecord.getBytes();
+                    Name = parseDeviceName(scanRecordBytes);
+                }
             }
             if (Name == null || Name.isEmpty()) {
                 Name = "Unknown Reader";

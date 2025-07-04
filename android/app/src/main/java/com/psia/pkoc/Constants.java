@@ -24,12 +24,12 @@ public class Constants
             ));
 
     public static final ArrayList<SiteModel> KnownSites = new ArrayList<>(Collections.singletonList
+    (
+        new SiteModel
             (
-                    new SiteModel
-                            (
-                                    UUID.fromString("b9897ed0-5272-4341-979a-b69850112d80"),
-                                    Hex.decode("04b71bb4b0de53f06a09ea6c91b483a898645005a30ec9422b95a67908f640abac440b1e4e705db4a626f7ac4e4dcfeba9f7157872446e61f58282c426f4e838af")
-                            )
-            ));
+                UUID.fromString("b9897ed0-5272-4341-979a-b69850112d80"),
+                Hex.decode("04b71bb4b0de53f06a09ea6c91b483a898645005a30ec9422b95a67908f640abac440b1e4e705db4a626f7ac4e4dcfeba9f7157872446e61f58282c426f4e838af")
+            )
+    ));
 }
 

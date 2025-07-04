@@ -48,6 +48,18 @@ public class SettingsFragment extends Fragment
         EnableRangingSwitch = binding.enableRangingSwitch;
         RangeSeekBar = binding.rangingSlider;
 
+        binding.TransmissionRadioGroup.setOnCheckedChangeListener((group, checkedId) ->
+        {
+            if (checkedId == binding.NfcButton.getId())
+            {
+                binding.BleSettings.setVisibility(View.GONE);
+            }
+            else
+            {
+                binding.BleSettings.setVisibility(View.VISIBLE);
+            }
+        });
+
         EnableRangingSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
         {
             if(isChecked)
@@ -72,6 +84,18 @@ public class SettingsFragment extends Fragment
         });
 
         SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
+
+        int transmissionTypeInt = sharedPref.getInt(PKOC_Preferences.PKOC_TransmissionType, PKOC_TransmissionType.BLE.ordinal());
+        PKOC_TransmissionType transmissionType = PKOC_TransmissionType.values()[transmissionTypeInt];
+
+        if (transmissionType == PKOC_TransmissionType.NFC)
+        {
+            binding.TransmissionRadioGroup.check(binding.NfcButton.getId());
+        }
+        else
+        {
+            binding.TransmissionRadioGroup.check(binding.BleButton.getId());
+        }
 
         int ToFlow_int = sharedPref.getInt(PKOC_Preferences.PKOC_TransmissionFlow, PKOC_ConnectionType.Uncompressed.ordinal());
         ToFlow = PKOC_ConnectionType.values()[ToFlow_int];
@@ -120,9 +144,20 @@ public class SettingsFragment extends Fragment
         if(BtnGrp.getCheckedRadioButtonId() == binding.ECHDEComplete.getId())
             ToFlow = PKOC_ConnectionType.ECHDE_Full;
 
+        PKOC_TransmissionType transmissionType;
+        if (binding.TransmissionRadioGroup.getCheckedRadioButtonId() == binding.NfcButton.getId())
+        {
+            transmissionType = PKOC_TransmissionType.NFC;
+        }
+        else
+        {
+            transmissionType = PKOC_TransmissionType.BLE;
+        }
+
         SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
 
+        editor.putInt(PKOC_Preferences.PKOC_TransmissionType, transmissionType.ordinal());
         editor.putInt(PKOC_Preferences.PKOC_TransmissionFlow, ToFlow.ordinal());
         editor.putBoolean(PKOC_Preferences.AutoDiscoverDevices, AutoDiscoverSwitch.isChecked());
         editor.putBoolean(PKOC_Preferences.EnableRanging, EnableRangingSwitch.isChecked());

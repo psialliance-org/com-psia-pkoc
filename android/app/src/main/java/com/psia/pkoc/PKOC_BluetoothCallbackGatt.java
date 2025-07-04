@@ -27,7 +27,6 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Objects;
-import java.nio.ByteOrder;
 import java.util.Arrays;
 
 /**
@@ -66,7 +65,7 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
 
         Log.d("handleDatagrams", "This is getting called for both normal and perfect data flows: " + Arrays.toString(datagrams));
         //This is called in Normal Flow and ECHDE Flow to populate the datagram.
-        ArrayList<BLE_Packet> gattTypes = TLVProvider.GetValues(datagrams);
+        ArrayList<BLE_Packet> gattTypes = TLVProvider.GetBleValues(datagrams);
 
         for (int a = 0; a < gattTypes.size(); a++) {
             byte[] data = gattTypes.get(a).Data;
@@ -169,7 +168,7 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
                 Log.d("handleDatagrams", "transientKeyPair was null, creating new one");
                 byte[] transientPublicKeyEncoded = _flowModel.transientKeyPair.getPublic().getEncoded();
                 byte[] transientPublicKey = getUncompressedPublicKeyBytes(transientPublicKeyEncoded);
-                byte[] transientPublicKeyTLV = TLVProvider.GetTLV(BLE_PacketType.UncompressedTransientPublicKey, transientPublicKey);
+                byte[] transientPublicKeyTLV = TLVProvider.GetBleTLV(BLE_PacketType.UncompressedTransientPublicKey, transientPublicKey);
 
                 BluetoothGattService requiredService = tryGetService(gatt); //gatt.getService(Constants.ServiceUUID);
 
@@ -228,17 +227,17 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
     private void completeTransaction (BluetoothGatt gatt)
     {
         Log.d("completeTransaction", "completeTransaction called " + completeTransactionCounter + " times");
-        byte[] pkTLVBytes = TLVProvider.GetTLV(BLE_PacketType.PublicKey, getUncompressedPublicKeyBytes());
+        byte[] pkTLVBytes = TLVProvider.GetBleTLV(BLE_PacketType.PublicKey, getUncompressedPublicKeyBytes());
 
         byte[] toSign = generateSignatureMessage();
         byte[] SignedMessage = GetSignedMessage(toSign);
         byte[] SignatureWithoutASM = TLVProvider.RemoveASNHeaderFromSignature(SignedMessage);
-        byte[] SignatureTLV = TLVProvider.GetTLV(BLE_PacketType.DigitalSignature, SignatureWithoutASM);
+        byte[] SignatureTLV = TLVProvider.GetBleTLV(BLE_PacketType.DigitalSignature, SignatureWithoutASM);
 
         SharedPreferences sharedPref = mainActivity.getPreferences(Context.MODE_PRIVATE);
         int pkocCreationTime = (int) sharedPref.getLong(PKOC_Preferences.PKOC_CreationTime, System.currentTimeMillis());
         byte[] creationTime = ByteBuffer.allocate(4).putInt(pkocCreationTime).array();
-        byte[] creationTimeTLV = TLVProvider.GetTLV(BLE_PacketType.LastUpdateTime, creationTime);
+        byte[] creationTimeTLV = TLVProvider.GetBleTLV(BLE_PacketType.LastUpdateTime, creationTime);
         byte[] protocolversionTLV = new byte[]{0x03, 0x00, 0x00, 0x00, 0x01};
         //byte[] secureMessage = org.bouncycastle.util.Arrays.concatenate(pkTLVBytes, SignatureTLV, creationTimeTLV, protocolversionTLV);
         byte[] secureMessage = org.bouncycastle.util.Arrays.concatenate(pkTLVBytes, SignatureTLV, creationTimeTLV);
@@ -260,7 +259,7 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
             Log.d("completeTransaction", "Encrypted data: " + Arrays.toString(encrypted));
 
 
-           secureMessage = TLVProvider.GetTLV(BLE_PacketType.EncryptedDataFollows, encrypted);
+           secureMessage = TLVProvider.GetBleTLV(BLE_PacketType.EncryptedDataFollows, encrypted);
 
             // Dhruv Commented this out and replaced with line above to return properly formatted TLV
             //secureMessage = org.bouncycastle.util.Arrays.concatenate(encryptTLV, encrypted);
@@ -475,7 +474,7 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
                     byte[] unencryptedData = CryptoProvider.getFromAES256(_flowModel.sharedSecret, encryptedData, _flowModel.Counter);
                     _flowModel.Counter++;
                     Log.d("CharacteristicChanged", "Decrypted data: " + Arrays.toString(unencryptedData));
-                    packetsFromMessage.addAll(TLVProvider.GetValues(unencryptedData));
+                    packetsFromMessage.addAll(TLVProvider.GetBleValues(unencryptedData));
                     offset2 += length + 2;
                 } else {
                     byte[] data = new byte[length];
