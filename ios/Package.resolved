@@ -1,0 +1,32 @@
+{
+  "pins" : [
+    {
+      "identity" : "bigint",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/attaswift/BigInt.git",
+      "state" : {
+        "revision" : "793a7fac0bfc318e85994bf6900652e827aef33e",
+        "version" : "5.4.1"
+      }
+    },
+    {
+      "identity" : "cryptoswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/krzyzanowskim/CryptoSwift.git",
+      "state" : {
+        "revision" : "678d442c6f7828def400a70ae15968aef67ef52d",
+        "version" : "1.8.3"
+      }
+    },
+    {
+      "identity" : "toast-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/BastiaanJansen/toast-swift",
+      "state" : {
+        "revision" : "9a40b722b6eeb9683d47e3584501e81525741291",
+        "version" : "2.1.2"
+      }
+    }
+  ],
+  "version" : 2
+}

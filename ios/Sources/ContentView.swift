@@ -1,0 +1,144 @@
+import SwiftUI
+import CoreBluetooth
+import CryptoKit
+
+struct ContentView : View
+{
+    @State var settingsLinkSelected = false
+    @State var aboutLinkSelected = false
+    
+    @State var _transmissionType : TransmissionType = TransmissionType.BLE
+    @State var _showDeviceIdentifier : Bool = false
+
+    func loadValues()
+    {
+        if let transmissionType : Int = UserDefaults.standard.integer(forKey: TransmissionTypeSelected) as Int?
+        {
+            let transmissionTypeSelected = TransmissionType(rawValue: transmissionType)
+            if (transmissionTypeSelected != nil)
+            {
+                _transmissionType = transmissionTypeSelected!
+            }
+        }
+
+        if let showDeviceIdentifier: Bool = UserDefaults.standard.bool(forKey: DisplayMAC) as Bool?
+        {
+            _showDeviceIdentifier = showDeviceIdentifier
+        }
+    }
+
+    func loadSecureKeysData()
+    {
+        KeyStore.load()
+        {
+            result in switch result
+            {
+                case .failure(let error):
+                    print("ERROR/WARNING: \(error)")
+                    CryptoProvider.generateAndSendPublishKey()
+                    {
+                        _ in
+                        print("DEBUG: New keys created!")
+                        print("DEBUG: Saving these keys to storage")
+                        storeSecureKeyData()
+                        
+                        let secondsStamp = Int(Date().timeIntervalSince1970)
+                        UserDefaults.standard.set(secondsStamp, forKey: PKOC_CreationTime)
+                    }
+                case .success(let keys):
+                    do
+                    {
+                        try CryptoProvider.loadKeys(privateKey: P256.Signing.PrivateKey(rawRepresentation: keys.privateKey), publicKey: P256.Signing.PublicKey(rawRepresentation: keys.publicKey))
+                    }
+                    catch
+                    {
+                            print("Error: Error in converting keys from storage to app data")
+                            fatalError()
+                    }
+            }
+        }
+    }
+    
+    func storeSecureKeyData()
+    {
+        KeyStore.save(keyData: KeyData(publicKey: CryptoProvider.exportPublicKey().rawRepresentation, privateKey: CryptoProvider.exportPrivateKey().rawRepresentation))
+        {
+            result in switch result
+            {
+            case .success( _):
+                print("Saving to persistent storage successful")
+            case .failure(let error):
+                print("ERROR saving to persistent storage: \(error)")
+            }
+        }
+    }
+    
+    var body : some View
+    {
+        let navigationViewStyleForView = StackNavigationViewStyle()
+
+        NavigationView
+        {
+            VStack
+            {
+                if (_transmissionType == TransmissionType.BLE)
+                {
+                    UpdatingListView(showDeviceIdentifier: _showDeviceIdentifier)
+                }
+                else
+                {
+                    PresentDeviceView()
+                }
+                                
+                Image(uiImage: UIImage(named: ProductImages.PSIA_Logo_Typographic)!)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .padding(16)
+            }
+            .onAppear()
+            {
+                loadValues()
+                loadSecureKeysData()
+            }
+            .navigationTitle("PSIA Experience")
+            .toolbar
+            {
+                let placement = ToolbarItemPlacement.topBarTrailing
+            
+                ToolbarItemGroup(placement: placement)
+                {
+                    Menu
+                    {
+                        Button(action:
+                        {
+                            settingsLinkSelected = true
+                        }, label:
+                        {
+                            Label("Settings", systemImage: "gearshape")
+                        }).navigationTitle("Settings")
+                        Button(action:
+                        {
+                            aboutLinkSelected = true
+                        }, label:
+                        {
+                            Label("About", systemImage: "info.circle")
+                        }).navigationTitle("About")
+                    }
+                    label:
+                    {
+                        Label("Add", systemImage: "ellipsis.circle")
+                    }
+                }
+            }
+            .background(NavigationLink(destination: SettingsView().navigationTitle("Settings"), isActive: $settingsLinkSelected)
+            {
+                EmptyView()
+            }.hidden())
+            .background(NavigationLink(destination: AboutView().navigationTitle("About"), isActive: $aboutLinkSelected)
+            {
+                EmptyView()
+            }.hidden())
+        }
+        .navigationViewStyle(navigationViewStyleForView)
+    }
+}
