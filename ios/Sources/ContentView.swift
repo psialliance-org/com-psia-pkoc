@@ -8,7 +8,6 @@ struct ContentView : View
     @State var aboutLinkSelected = false
     
     @State var _transmissionType : TransmissionType = TransmissionType.BLE
-    @State var _showDeviceIdentifier : Bool = false
 
     func loadValues()
     {
@@ -19,11 +18,6 @@ struct ContentView : View
             {
                 _transmissionType = transmissionTypeSelected!
             }
-        }
-
-        if let showDeviceIdentifier: Bool = UserDefaults.standard.bool(forKey: DisplayMAC) as Bool?
-        {
-            _showDeviceIdentifier = showDeviceIdentifier
         }
     }
 
@@ -83,7 +77,7 @@ struct ContentView : View
             {
                 if (_transmissionType == TransmissionType.BLE)
                 {
-                    UpdatingListView(showDeviceIdentifier: _showDeviceIdentifier)
+                    UpdatingListView()
                 }
                 else
                 {

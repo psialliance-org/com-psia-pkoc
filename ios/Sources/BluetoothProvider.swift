@@ -108,7 +108,7 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
                 name = "Reader"
             }
             
-            var progressTint = Color.green
+            var progressTint = Color(hex: 0x9CC3C9)
             
             if let enableRanging: Bool = UserDefaults.standard.bool(forKey: EnableRanging) as Bool?
             {
@@ -167,7 +167,7 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
 
                             if let index = discoveredPeripherals.firstIndex(where: { $0.peripheral == peripheral })
                             {
-                                discoveredPeripherals[index].progressTint = Color.green
+                                discoveredPeripherals[index].progressTint = Color(hex: 0x9CC3C9)
                                 objectWillChange.send()
                             }
                         }
@@ -410,7 +410,7 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
                     if (packet.data[0] == ReaderUnlockStatus.AccessGranted.rawValue)
                     {
                         iconName = "lock.open.fill"
-                        iconTint = Color.green
+                        iconTint = Color(hex: 0x9CC3C9)
                     }
                     
                     if let index = discoveredPeripherals.firstIndex(where: { $0.peripheral == peripheral })

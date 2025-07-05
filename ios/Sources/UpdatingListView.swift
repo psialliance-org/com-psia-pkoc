@@ -3,16 +3,24 @@ import SwiftUI
 import CoreBluetooth
 import CryptoKit
 
+extension Color
+{
+    init(hex: UInt, alpha: Double = 1)
+    {
+        self.init(
+            .sRGB,
+            red: Double((hex >> 16) & 0xff) / 255,
+            green: Double((hex >> 08) & 0xff) / 255,
+            blue: Double((hex >> 00) & 0xff) / 255,
+            opacity: alpha
+        )
+    }
+}
+
 struct UpdatingListView : View
 {
     @ObservedObject private var _bluetoothScanner = BluetoothProvider()
-    @State var _showDeviceIdentifier: Bool = false
-    
-    init(showDeviceIdentifier : Bool)
-    {
-        _showDeviceIdentifier = showDeviceIdentifier
-    }
-    
+        
     var body: some View
     {
         HStack
@@ -41,7 +49,7 @@ struct UpdatingListView : View
                     }
                 }
                 .padding()
-                .background(_bluetoothScanner.isScanning ? Color.red : Color.green)
+                .background(_bluetoothScanner.isScanning ? Color.red : Color(hex: 0x9CC3C9))
                 .foregroundColor(Color.white)
                 .cornerRadius(5.0)
                 Spacer()
@@ -64,11 +72,14 @@ struct UpdatingListView : View
                             .font(.title2)
                             .bold()
 
-                        if (_showDeviceIdentifier)
+                        if let showDeviceIdentifier: Bool = UserDefaults.standard.bool(forKey: DisplayMAC) as Bool?
                         {
-                            Text(discoveredPeripheral.peripheral.identifier.uuidString)
-                                .font(.headline)
-                                .foregroundColor(.gray)
+                            if (showDeviceIdentifier)
+                            {
+                                Text(discoveredPeripheral.peripheral.identifier.uuidString)
+                                    .font(.headline)
+                                    .foregroundColor(.gray)
+                            }
                         }
                         
                         if #available(iOS 16.0, *)
