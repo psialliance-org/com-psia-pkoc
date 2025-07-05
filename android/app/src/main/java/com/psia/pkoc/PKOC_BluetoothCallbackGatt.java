@@ -238,8 +238,6 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
         int pkocCreationTime = (int) sharedPref.getLong(PKOC_Preferences.PKOC_CreationTime, System.currentTimeMillis());
         byte[] creationTime = ByteBuffer.allocate(4).putInt(pkocCreationTime).array();
         byte[] creationTimeTLV = TLVProvider.GetBleTLV(BLE_PacketType.LastUpdateTime, creationTime);
-        byte[] protocolversionTLV = new byte[]{0x03, 0x00, 0x00, 0x00, 0x01};
-        //byte[] secureMessage = org.bouncycastle.util.Arrays.concatenate(pkTLVBytes, SignatureTLV, creationTimeTLV, protocolversionTLV);
         byte[] secureMessage = org.bouncycastle.util.Arrays.concatenate(pkTLVBytes, SignatureTLV, creationTimeTLV);
         if (_flowModel.connectionType == PKOC_ConnectionType.ECHDE_Full && _flowModel.readerValid) {
             Log.d("completeTransaction", "ECHDE Flow build secure message using bouncycastle - BONG");

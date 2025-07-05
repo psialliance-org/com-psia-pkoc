@@ -613,7 +613,6 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
         
         if (self._flowModel?.connectionType == PKOC_ConnectionType.ECDHE_Full)
         {
-            let encryptedDataFollowsTLV = TLVProvider.getTLV(type: BLE_PacketType.EncryptedDataFollows, data: [0x01])
             let encryptedData = CryptoProvider.getAES256(secretKey: self._flowModel!.sharedSecret!, data: packet, counter: _flowModel!.counter)
             _flowModel?.counter += 1
             
@@ -623,7 +622,7 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
                 return
             }
             
-            packet = encryptedDataFollowsTLV + encryptedData!
+            packet = TLVProvider.getTLV(type: BLE_PacketType.EncryptedDataFollows, data: encryptedData!)
         }
         
         print(Data(packet).hexadecimal())

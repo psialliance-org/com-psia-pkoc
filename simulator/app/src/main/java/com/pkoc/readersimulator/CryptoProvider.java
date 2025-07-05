@@ -28,6 +28,7 @@ import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Objects;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
@@ -109,8 +110,10 @@ public class CryptoProvider {
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, parameterSpec);
             return cipher.doFinal(message);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            Log.d("MainActivity", Objects.requireNonNull(e.getMessage()));
         }
+
+        return new byte[0];
     }
 
     /**
