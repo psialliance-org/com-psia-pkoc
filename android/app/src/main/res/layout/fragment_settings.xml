@@ -18,7 +18,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/pkoc_flow_mode" />
+            android:text="@string/select_a_transmission_mechanism" />
 
         <RadioGroup
             android:id="@+id/TransmissionRadioGroup"
