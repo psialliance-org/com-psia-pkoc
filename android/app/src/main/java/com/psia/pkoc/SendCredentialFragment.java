@@ -13,13 +13,17 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.BlendMode;
 import android.graphics.BlendModeColorFilter;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -75,6 +79,22 @@ public class SendCredentialFragment extends Fragment
 
     private static Handler updateUIHandler;
     private static Handler timeoutHandler;
+
+    private final BroadcastReceiver nfcReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Drawable originalDrawable = ContextCompat.getDrawable(context, R.drawable.door_closed_64);
+            Drawable newDrawable = ContextCompat.getDrawable(context, R.drawable.door_open_64);
+
+            binding.centerInstruction.setCompoundDrawablesWithIntrinsicBounds(
+                    null, newDrawable, null, null
+            );
+
+            binding.centerInstruction.postDelayed(() ->
+                    binding.centerInstruction.setCompoundDrawablesWithIntrinsicBounds(
+                    null, originalDrawable, null, null), 2000);
+        };
+    };
 
     /**
      * Helper function to set button background color
@@ -198,6 +218,9 @@ public class SendCredentialFragment extends Fragment
         mBTArrayAdapter = new ListModelAdapter(requireActivity());
         Log.i("SendCredentialFragment", "mBTArrayAdapter is not null");
         binding.discover.setOnClickListener(v -> setIsScanning(!_IsScanning));
+
+        IntentFilter filter = new IntentFilter("com.psia.pkoc.CREDENTIAL_SENT");
+        ContextCompat.registerReceiver(requireActivity(), nfcReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED);
 
         SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
         Log.d("Public key is null?", String.valueOf(GetPublicKey() == null));
