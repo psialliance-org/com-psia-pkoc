@@ -20,6 +20,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import android.text.SpannableStringBuilder;
@@ -154,9 +157,8 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
 
         // Check for Bluetooth and location permissions
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                || ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED
-                || ContextCompat.checkSelfPermission(this, Manifest.permission_group.NEARBY_DEVICES) != PackageManager.PERMISSION_GRANTED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
                 ActivityCompat.requestPermissions(this,
                         new String[]{
                                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -165,7 +167,6 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                                 Manifest.permission.BLUETOOTH_ADMIN,
                                 Manifest.permission.BLUETOOTH_CONNECT,
                                 Manifest.permission.BLUETOOTH_SCAN,
-                                Manifest.permission_group.NEARBY_DEVICES
                         }, 1);
             } else {
                 ActivityCompat.requestPermissions(this,
@@ -176,13 +177,46 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                         }, 1);
             }
         }
+        else
+        {
+            initializeBluetooth();
+        }
+    }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        boolean allGranted = true;
+        for (int result : grantResults) {
+            if (result != PackageManager.PERMISSION_GRANTED) {
+                allGranted = false;
+                break;
+            }
+        }
+
+        if (allGranted)
+        {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                initializeBluetooth();
+            }
+            else
+            {
+                Log.d("onCreate", "Bluetooth permissions have not been granted.");
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private void initializeBluetooth()
+    {
         // Initialize Bluetooth
         Log.d("onCreate", "Initializing Bluetooth");
         mBluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
         BluetoothAdapter mBluetoothAdapter = mBluetoothManager.getAdapter();
         mBluetoothAdapter.setName("PSIA Reader Simulator");
-
 
         if (!checkBluetoothSupport(mBluetoothAdapter)) {
             Log.d("onCreate", "Bluetooth not supported");
@@ -193,7 +227,6 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         Log.d("onCreate", "Starting BLE advertising and server");
         startAdvertising();
         startServer();
-
     }
 
     private void displayValues() {
