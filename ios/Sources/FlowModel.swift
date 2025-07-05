@@ -9,5 +9,5 @@ struct FlowModel
     var sharedSecret : [UInt8]?
     var status : ReaderUnlockStatus = ReaderUnlockStatus.Unknown
     var site : SiteModel?
-    var counter : Int = 1
+    var counter : Int = 0
 }
