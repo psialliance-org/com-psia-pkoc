@@ -290,8 +290,6 @@ public class SendCredentialFragment extends Fragment
         }
     }
 
-
-
     private void initializeFragmentForNfc()
     {
         binding.discover.setVisibility(View.GONE);
@@ -420,8 +418,6 @@ public class SendCredentialFragment extends Fragment
         {
             if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED)
             {
-                super.onDestroyView();
-                binding = null;
                 return;
             }
         }
@@ -429,8 +425,6 @@ public class SendCredentialFragment extends Fragment
         {
             if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED)
             {
-                super.onDestroyView();
-                binding = null;
                 return;
             }
         }
