@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.BlendMode;
 import android.graphics.BlendModeColorFilter;
 import android.graphics.Color;
@@ -343,6 +344,11 @@ public class SendCredentialFragment extends Fragment
 
                 chosenDevice.setIsBusy(false);
 
+                if (!isAdded())
+                {
+                    return;
+                }
+
                 if (msg.what == ReaderUnlockStatus.AccessGranted.ordinal())
                 {
                     Log.i("SendCredentialFragment", "Access Granted");
@@ -448,6 +454,17 @@ public class SendCredentialFragment extends Fragment
 
     private void initializeFragment()
     {
+        // hide the logo in horizontal orientation as vertical space becomes more valuable
+        int orientation = getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE)
+        {
+            binding.imageView.setVisibility(View.GONE);
+        }
+        else
+        {
+            binding.imageView.setVisibility(View.VISIBLE);
+        }
+
         SharedPreferences sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE);
         int transmissionTypeInt = sharedPref.getInt(PKOC_Preferences.PKOC_TransmissionType, PKOC_TransmissionType.BLE.ordinal());
         PKOC_TransmissionType transmissionType = PKOC_TransmissionType.values()[transmissionTypeInt];
