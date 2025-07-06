@@ -94,7 +94,7 @@ struct ContentView : View
                 loadValues()
                 loadSecureKeysData()
             }
-            .navigationTitle("PSIA Experience")
+            .navigationTitle("PSIA PKOC Credential")
             .toolbar
             {
                 let placement = ToolbarItemPlacement.topBarTrailing
