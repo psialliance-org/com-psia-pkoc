@@ -70,6 +70,7 @@ public class PKOC_HostApduService extends HostApduService
                 response = Arrays.concatenate(publicKeyTlv, signatureTlv, Hex.decode(SUCCESS_STATUS));
 
                 Intent intent = new Intent("com.psia.pkoc.CREDENTIAL_SENT");
+                intent.setPackage(getPackageName());
                 sendBroadcast(intent);
             }
         }

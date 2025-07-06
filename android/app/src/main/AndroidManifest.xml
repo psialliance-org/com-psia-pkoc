@@ -8,17 +8,17 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.NFC" />
 
-    <uses-feature android:name="android.hardware.nfc.hce" />
+    <uses-feature
+        android:name="android.hardware.nfc.hce"
+        android:required="false" />
 
     <uses-feature
         android:name="android.hardware.bluetooth"
         android:required="false" />
+
     <uses-feature
         android:name="android.hardware.bluetooth_le"
         android:required="false" />
@@ -52,7 +52,6 @@
 
         <activity
             android:name=".MainActivity"
-            android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden"
             android:exported="true"
             tools:ignore="LockedOrientationActivity">

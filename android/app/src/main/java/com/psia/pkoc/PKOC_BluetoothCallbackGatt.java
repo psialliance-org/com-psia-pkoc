@@ -73,22 +73,22 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
 
             switch (gattTypes.get(a).PacketType) {
                 case ProtocolVersion:
-                    Log.d("handleDatagrams", "ProtocolVersion data: " + gattTypes.get(a).Data);
+                    Log.d("handleDatagrams", "ProtocolVersion data: " + Arrays.toString(gattTypes.get(a).Data));
                     _flowModel.reader.setProtocolVersion(gattTypes.get(a).Data);
                     break;
 
                 case CompressedTransientPublicKey:
-                    Log.d("handleDatagrams", "CompressedTransientPublicKey data: " + gattTypes.get(a).Data);
+                    Log.d("handleDatagrams", "CompressedTransientPublicKey data: " + Arrays.toString(gattTypes.get(a).Data));
                     _flowModel.reader.setReaderTransientPublicKey(gattTypes.get(a).Data);
                     break;
 
                 case ReaderLocationIdentifier:
-                    Log.d("handleDatagrams", "ReaderLocationIdentifier data: " + gattTypes.get(a).Data);
+                    Log.d("handleDatagrams", "ReaderLocationIdentifier data: " + Arrays.toString(gattTypes.get(a).Data));
                     _flowModel.reader.setReaderIdentifier(gattTypes.get(a).Data);
                     break;
 
                 case SiteIdentifier:
-                    Log.d("handleDatagrams", "SiteIdentifier data: " + gattTypes.get(a).Data);
+                    Log.d("handleDatagrams", "SiteIdentifier data: " + Arrays.toString(gattTypes.get(a).Data));
                     _flowModel.reader.setSiteIdentifier(gattTypes.get(a).Data);
                     break;
 
