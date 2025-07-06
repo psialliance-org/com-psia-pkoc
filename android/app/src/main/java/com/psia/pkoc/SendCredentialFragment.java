@@ -230,11 +230,19 @@ public class SendCredentialFragment extends Fragment
         }
     }
 
+    /**
+     * Helper function to increase readability of permission check
+     * @param permission Permission to check
+     * @return Boolean if the permission is granted
+     */
     private Boolean hasPermission(String permission)
     {
         return ContextCompat.checkSelfPermission(this.requireContext(), permission) == PackageManager.PERMISSION_GRANTED;
     }
 
+    /***
+     * Request NFC permissions
+     */
     private void requestNfcPermissions()
     {
         NfcManager nfcManager = (NfcManager) requireContext().getSystemService(Context.NFC_SERVICE);
@@ -260,6 +268,9 @@ public class SendCredentialFragment extends Fragment
         }
     }
 
+    /***
+     * Request Bluetooth permissions
+     */
     private void requestBluetoothPermissions()
     {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
@@ -291,6 +302,9 @@ public class SendCredentialFragment extends Fragment
         }
     }
 
+    /**
+     * Initialize Fragment for NFC usage
+     */
     private void initializeFragmentForNfc()
     {
         binding.discover.setVisibility(View.GONE);
@@ -303,11 +317,17 @@ public class SendCredentialFragment extends Fragment
         ContextCompat.registerReceiver(requireActivity(), nfcReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED);
     }
 
+    /**
+     * Teardown/cleanup of NFC usage
+     */
     private void teardownFragmentForNfc()
     {
         requireActivity().unregisterReceiver(nfcReceiver);
     }
 
+    /**
+     * Initialize fragment for BLE usage
+     */
     private void initializeFragmentForBle()
     {
         binding.discover.setVisibility(View.VISIBLE);
