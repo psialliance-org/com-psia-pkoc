@@ -147,6 +147,7 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
                         return;
                     }
                     Log.d("PKOC_BluetoothCallbackGatt", "Reader valid");
+                    break;
             }
         }
 

@@ -433,7 +433,7 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
                     }
                     
                     disconnectPeripheral(PKOCperipheral: peripheral)
-                    break
+                    return
                     
                 case .ProtocolVersion:
                     _flowModel?.reader.ProtocolVersion = packet.data
@@ -470,12 +470,7 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
                         disconnectPeripheral(PKOCperipheral: peripheral)
                         return
                     }
-                    
-                    if (_flowModel?.sharedSecret != nil)
-                    {
-                        completeTransaction(peripheral: peripheral)
-                    }
-                    
+                                        
                     break
                                         
                 default:
@@ -523,6 +518,7 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
             
             if (_flowModel?.reader.ReaderIdentifier == nil)
             {
+                _flowModel?.status = ReaderUnlockStatus.Unrecognized
                 disconnectPeripheral(PKOCperipheral: peripheral)
                 return
             }
@@ -553,17 +549,11 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
                 let echdePacket = transientPublicKeyTLV
                 
                 peripheral.writeValue(Data(_: echdePacket), for: self.writeCharacteristic!, type: CBCharacteristicWriteType.withoutResponse)
+                return
             }
-            
-            if ((_flowModel?.readerValid) != nil && _flowModel!.readerValid! && _flowModel?.sharedSecret != nil)
-            {
-                completeTransaction(peripheral: peripheral)
-            }
-            
-            return
         }
         
-        if (_flowModel?.reader.ReaderEphemeralPublicKey != nil)
+        if (_flowModel?.reader.ReaderEphemeralPublicKey != nil || _flowModel?.sharedSecret != nil)
         {
             completeTransaction(peripheral: peripheral)
         }
