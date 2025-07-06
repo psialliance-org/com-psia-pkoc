@@ -10,7 +10,12 @@ struct AboutView : View
             HStack
             {
                 Spacer().padding(1)
-                                
+
+                Image(uiImage: UIImage(named: ProductImages.PSIA_Logo_Typographic)!)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .padding(12)
+
                 Image(uiImage: UIImage(named: ProductImages.PSIA_Logo)!)
                     .resizable()
                     .aspectRatio(contentMode: .fit)

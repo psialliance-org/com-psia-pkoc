@@ -226,7 +226,7 @@ public class SendCredentialFragment extends Fragment
         {
             mBTAdapter.getBluetoothLeScanner().stopScan(mLeScanCallback);
             binding.discover.setText(R.string.discover_new_devices);
-            setButtonColor(binding.discover, 0xFF9CC3C9);
+            setButtonColor(binding.discover, requireContext().getColor(R.color.colorAccent));
         }
     }
 

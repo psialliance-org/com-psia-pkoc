@@ -27,26 +27,5 @@ struct PresentDeviceView : View
             Spacer()
         }
         .padding()
-        .onChange(of: isDoorOpen)
-        {
-            _ in let light = UIImpactFeedbackGenerator(style: .light)
-            let medium = UIImpactFeedbackGenerator(style: .medium)
-            let heavy = UIImpactFeedbackGenerator(style: .heavy)
-            
-            light.prepare()
-            light.impactOccurred()
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2)
-            {
-                medium.prepare()
-                medium.impactOccurred()
-            }
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4)
-            {
-                heavy.prepare()
-                heavy.impactOccurred()
-            }
-        }
     }
 }

@@ -49,7 +49,7 @@ struct UpdatingListView : View
                     }
                 }
                 .padding()
-                .background(_bluetoothScanner.isScanning ? Color.red : Color(hex: 0x9CC3C9))
+                .background(_bluetoothScanner.isScanning ? Color.red : Color(hex: 0xCBCFD3))
                 .foregroundColor(Color.white)
                 .cornerRadius(5.0)
                 Spacer()
@@ -92,6 +92,7 @@ struct UpdatingListView : View
                         {
                             ProgressView(value: discoveredPeripheral.progress, total: 120)
                                 .progressViewStyle(.linear)
+                                .accentColor(discoveredPeripheral.progressTint)
                         }
 
                     }

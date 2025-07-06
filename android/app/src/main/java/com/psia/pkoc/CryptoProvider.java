@@ -44,12 +44,25 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class CryptoProvider
 {
+    final static String AndroidKeyStore = "AndroidKeyStore";
+    /** @noinspection SpellCheckingInspection*/
+    final static String KeyAlgorithm = "ECDSA";
+    /** @noinspection SpellCheckingInspection*/
+    final static String HandshakeAlgorithm = "ECDH";
+    final static String KeyAndHashAlgorithm = "SHA256withECDSA";
+    /** @noinspection SpellCheckingInspection*/
+    final static String NamedCurve = "secp256r1";
+    final static String AesSpec = "AES";
+    final static String CcmCipher = "AES/CCM/NoPadding";
+    final static String HashAlgorithm = "SHA256";
+    final static byte[] IvPrepend = Hex.decode("00000000000001");
+    /** @noinspection SpellCheckingInspection*/
     final static byte[] IvCounter = Hex.decode("AABBCCDD");
 
 
     private static KeyGenParameterSpec.Builder getKeyGenParamaterSpecBuilder()
     {
-        ECGenParameterSpec ecParam = new ECGenParameterSpec("sec256r1");
+        ECGenParameterSpec ecParam = new ECGenParameterSpec(NamedCurve);
 
         return new KeyGenParameterSpec.Builder(PKOC_Preferences.PKOC_CredentialSet,
             KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY)
@@ -67,7 +80,7 @@ public class CryptoProvider
     {
         try
         {
-            KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore");
+            KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, AndroidKeyStore);
             var builder = getKeyGenParamaterSpecBuilder();
             keyGenerator.initialize(builder.build());
             keyGenerator.generateKeyPair();
@@ -107,7 +120,7 @@ public class CryptoProvider
 
         try
         {
-            ks = KeyStore.getInstance("AndroidKeyStore");
+            ks = KeyStore.getInstance(AndroidKeyStore);
             ks.load(null);
             Certificate entry = ks.getCertificate(PKOC_Preferences.PKOC_CredentialSet);
             pk = entry.getPublicKey();
@@ -162,7 +175,7 @@ public class CryptoProvider
     {
         try
         {
-            MessageDigest md = MessageDigest.getInstance("SHA256");
+            MessageDigest md = MessageDigest.getInstance(HashAlgorithm);
             return md.digest(message);
         }
         catch (Exception ignored)
@@ -189,17 +202,16 @@ public class CryptoProvider
             bigIntegerCounter = bigIntegerCounter.add(BigInteger.valueOf(counter));
 
             // 3. Construct IV by concatenating "00000000000001" (hex-decoded) + the BigInteger bytes
-            byte[] iv = Arrays.concatenate(Hex.decode("00000000000001"),
-                    BigIntegers.asUnsignedByteArray(bigIntegerCounter));
+            byte[] iv = Arrays.concatenate(IvPrepend, BigIntegers.asUnsignedByteArray(bigIntegerCounter));
 
             Log.d("CryptoProvider", "Printing the secret key " + Hex.toHexString(secretKey));
 
             Log.d("CryptoProvider", "Printing the IV " + Hex.toHexString(iv));
 
             // 4. Initialize Cipher
-            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey, "AES");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey, AesSpec);
             IvParameterSpec parameterSpec = new IvParameterSpec(iv);
-            Cipher cipher = Cipher.getInstance("AES/CCM/NoPadding");
+            Cipher cipher = Cipher.getInstance(CcmCipher);
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, parameterSpec);
 
             // 5. Encrypt message
@@ -219,11 +231,11 @@ public class CryptoProvider
 
     /**
      * Get domain parameters
-     * @return ECDomainParameters for secp256r1
+     * @return ECDomainParameters for NIST P-256
      */
     public static ECDomainParameters getDomainParameters()
     {
-        X9ECParameters domain = ECNamedCurveTable.getByName("sec256r1");
+        X9ECParameters domain = ECNamedCurveTable.getByName(NamedCurve);
         return new ECDomainParameters(domain.getCurve(), domain.getG(), domain.getN(), domain.getH(), domain.getSeed());
     }
 
@@ -236,9 +248,9 @@ public class CryptoProvider
     {
         try
         {
-            ECNamedCurveParameterSpec spec = org.bouncycastle.jce.ECNamedCurveTable.getParameterSpec("secp256r1");
-            KeyFactory kf = KeyFactory.getInstance("ECDSA", new BouncyCastleProvider());
-            ECNamedCurveSpec params = new ECNamedCurveSpec("prime256v1", spec.getCurve(), spec.getG(), spec.getN());
+            ECNamedCurveParameterSpec spec = org.bouncycastle.jce.ECNamedCurveTable.getParameterSpec(NamedCurve);
+            KeyFactory kf = KeyFactory.getInstance(KeyAlgorithm, new BouncyCastleProvider());
+            ECNamedCurveSpec params = new ECNamedCurveSpec(NamedCurve, spec.getCurve(), spec.getG(), spec.getN());
             java.security.spec.ECPoint point = ECPointUtil.decodePoint(params.getCurve(), pubKey);
             ECPublicKeySpec pubKeySpec = new ECPublicKeySpec(point, params);
             return kf.generatePublic(pubKeySpec);
@@ -306,11 +318,11 @@ public class CryptoProvider
     {
         try
         {
-            KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+            KeyStore ks = KeyStore.getInstance(AndroidKeyStore);
             ks.load(null);
             KeyStore.Entry entry = ks.getEntry(PKOC_Preferences.PKOC_CredentialSet, null);
 
-            Signature s = Signature.getInstance("SHA256withECDSA");
+            Signature s = Signature.getInstance(KeyAndHashAlgorithm);
             s.initSign(((KeyStore.PrivateKeyEntry) entry).getPrivateKey());
             s.update(data);
 
@@ -332,7 +344,7 @@ public class CryptoProvider
     {
         try
         {
-            KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
+            KeyAgreement keyAgreement = KeyAgreement.getInstance(HandshakeAlgorithm);
             keyAgreement.init(privateKey);
             keyAgreement.doPhase(fromCompressedPublicKey(publicKey), true);
             return keyAgreement.generateSecret();
@@ -342,18 +354,23 @@ public class CryptoProvider
             throw new RuntimeException(e);
         }
     }
-    public static byte[] getFromAES256(byte[] secretKey, byte[] message, int counter) {
-        try {
+
+    public static byte[] getFromAES256(byte[] secretKey, byte[] message, int counter)
+    {
+        try
+        {
             BigInteger bigIntegerCounter = new BigInteger(IvCounter);
             bigIntegerCounter = bigIntegerCounter.add(BigInteger.valueOf(counter));
-            byte[] iv = Arrays.concatenate(Hex.decode("00000000000001"), BigIntegers.asUnsignedByteArray(bigIntegerCounter));
+            byte[] iv = Arrays.concatenate(IvPrepend, BigIntegers.asUnsignedByteArray(bigIntegerCounter));
 
-            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey, "AES");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey, AesSpec);
             IvParameterSpec parameterSpec = new IvParameterSpec(iv);
-            Cipher cipher = Cipher.getInstance("AES/CCM/NoPadding");
+            Cipher cipher = Cipher.getInstance(CcmCipher);
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, parameterSpec);
             return cipher.doFinal(message);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             throw new RuntimeException(e);
         }
     }
