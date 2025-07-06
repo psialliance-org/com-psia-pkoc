@@ -1,6 +1,7 @@
 package com.psia.pkoc;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.nfc.cardemulation.HostApduService;
 import android.os.Bundle;
@@ -67,6 +68,10 @@ public class PKOC_HostApduService extends HostApduService
                 byte[] signatureTlv = TLVProvider.GetNfcTLV(NFC_PacketType.DigitalSignature, signature);
 
                 response = Arrays.concatenate(publicKeyTlv, signatureTlv, Hex.decode(SUCCESS_STATUS));
+
+                Intent intent = new Intent("com.psia.pkoc.CREDENTIAL_SENT");
+                intent.setPackage(getPackageName());
+                sendBroadcast(intent);
             }
         }
 

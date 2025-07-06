@@ -46,6 +46,20 @@ public class CryptoProvider
 {
     final static byte[] IvCounter = Hex.decode("AABBCCDD");
 
+
+    private static KeyGenParameterSpec.Builder getKeyGenParamaterSpecBuilder()
+    {
+        ECGenParameterSpec ecParam = new ECGenParameterSpec("sec256r1");
+
+        return new KeyGenParameterSpec.Builder(PKOC_Preferences.PKOC_CredentialSet,
+            KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY)
+            .setUserAuthenticationRequired(false)
+            .setDigests(KeyProperties.DIGEST_SHA256)
+            .setRandomizedEncryptionRequired(false)
+            .setKeySize(256)
+            .setAlgorithmParameterSpec(ecParam);
+    }
+
     /**
      * Create key pair
      */
@@ -54,17 +68,7 @@ public class CryptoProvider
         try
         {
             KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore");
-
-            ECGenParameterSpec ecParam = new ECGenParameterSpec("secp256r1");
-
-            KeyGenParameterSpec.Builder builder = new KeyGenParameterSpec.Builder(PKOC_Preferences.PKOC_CredentialSet,
-                    KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY)
-                    .setUserAuthenticationRequired(false)
-                    .setDigests(KeyProperties.DIGEST_SHA256)
-                    .setRandomizedEncryptionRequired(false)
-                    .setKeySize(256)
-                    .setAlgorithmParameterSpec(ecParam);
-
+            var builder = getKeyGenParamaterSpecBuilder();
             keyGenerator.initialize(builder.build());
             keyGenerator.generateKeyPair();
         }
@@ -173,26 +177,6 @@ public class CryptoProvider
      * @param message Message to encrypt
      * @return Encrypted message
      */
-//    public static byte[] getAES256(byte[] secretKey, byte[] message, int counter)
-//    {
-//        try
-//        {
-//            BigInteger bigIntegerCounter = new BigInteger(IvCounter);
-//            bigIntegerCounter = bigIntegerCounter.add(BigInteger.valueOf(counter));
-//            byte[] iv = Arrays.concatenate(Hex.decode("00000000000001"), BigIntegers.asUnsignedByteArray(bigIntegerCounter));
-//
-//            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey, "AES");
-//            IvParameterSpec parameterSpec = new IvParameterSpec(iv);
-//            Cipher cipher = Cipher.getInstance("AES/CCM/NoPadding");
-//            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, parameterSpec);
-//            return cipher.doFinal(message);
-//        }
-//        catch (Exception e)
-//        {
-//            throw new RuntimeException(e);
-//        }
-//    }
-
     public static byte[] getAES256(byte[] secretKey, byte[] message, int counter)
     {
         try
@@ -208,9 +192,9 @@ public class CryptoProvider
             byte[] iv = Arrays.concatenate(Hex.decode("00000000000001"),
                     BigIntegers.asUnsignedByteArray(bigIntegerCounter));
 
-            Log.d("CryptoProvider", "Printing the secrete key " + bytesToHex2(secretKey));
+            Log.d("CryptoProvider", "Printing the secret key " + Hex.toHexString(secretKey));
 
-            Log.d("CryptoProvider", "Printing the IV " + bytesToHex2(iv));
+            Log.d("CryptoProvider", "Printing the IV " + Hex.toHexString(iv));
 
             // 4. Initialize Cipher
             SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey, "AES");
@@ -223,7 +207,7 @@ public class CryptoProvider
 
             // 6. Log size and hex output of the encrypted data
             Log.d("CryptoProvider", "Encrypted data length: " + encryptedData.length);
-            Log.d("CryptoProvider", "Encrypted data (hex): " + bytesToHex2(encryptedData));
+            Log.d("CryptoProvider", "Encrypted data (hex): " + Hex.toHexString(encryptedData));
 
             return encryptedData;
         }
@@ -234,23 +218,12 @@ public class CryptoProvider
     }
 
     /**
-     * Helper method to convert a byte array into a hexadecimal string.
-     */
-    private static String bytesToHex2(byte[] bytes) {
-        StringBuilder sb = new StringBuilder(bytes.length * 2);
-        for (byte b : bytes) {
-            sb.append(String.format("%02X", b));
-        }
-        return sb.toString();
-    }
-
-    /**
      * Get domain parameters
      * @return ECDomainParameters for secp256r1
      */
     public static ECDomainParameters getDomainParameters()
     {
-        X9ECParameters domain = ECNamedCurveTable.getByName("secp256r1");
+        X9ECParameters domain = ECNamedCurveTable.getByName("sec256r1");
         return new ECDomainParameters(domain.getCurve(), domain.getG(), domain.getN(), domain.getH(), domain.getSeed());
     }
 
