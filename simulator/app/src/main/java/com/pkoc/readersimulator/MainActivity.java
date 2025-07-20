@@ -28,7 +28,6 @@ import android.text.SpannableStringBuilder;
 import android.text.SpannableString;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.ForegroundColorSpan;
-import android.content.res.TypedArray;
 import android.util.TypedValue;
 import android.graphics.Color;
 import android.nfc.NfcAdapter;
@@ -359,12 +358,6 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         // Retrieve the secondary text color from the theme
         TypedValue typedValue = new TypedValue();
         getTheme().resolveAttribute(android.R.attr.textAppearanceSmall, typedValue, true);
-        int[] textSizeAttr = new int[]{android.R.attr.textColorSecondary};
-        try (TypedArray array = obtainStyledAttributes(typedValue.resourceId, textSizeAttr))
-        {
-            int textColorSecondary = array.getColor(0, Color.GRAY); // Fallback to gray if not found
-            array.recycle();
-        }
 
         runOnUiThread(() -> {
             int offset = 0;
