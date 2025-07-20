@@ -94,19 +94,29 @@ public class SendCredentialFragment extends Fragment
         @Override
         public void onReceive(Context context, Intent intent)
         {
-            if (isAdded())
+            if (!isAdded())
             {
-                Drawable originalDrawable = ContextCompat.getDrawable(context, R.drawable.door_closed_64);
-                Drawable newDrawable = ContextCompat.getDrawable(context, R.drawable.door_open_64);
+                return;
+            }
+
+            Drawable originalDrawable = ContextCompat.getDrawable(context, R.drawable.door_closed_64);
+            Drawable newDrawable = ContextCompat.getDrawable(context, R.drawable.door_open_64);
+
+            binding
+                .centerInstruction
+                .setCompoundDrawablesWithIntrinsicBounds(null, newDrawable, null, null);
+
+            binding.centerInstruction.postDelayed(() ->
+            {
+                if (!isAdded())
+                {
+                    return;
+                }
 
                 binding
                     .centerInstruction
-                    .setCompoundDrawablesWithIntrinsicBounds(null, newDrawable, null, null);
-
-                binding.centerInstruction.postDelayed(() -> binding
-                    .centerInstruction
-                    .setCompoundDrawablesWithIntrinsicBounds(null, originalDrawable, null, null), 2000);
-            }
+                    .setCompoundDrawablesWithIntrinsicBounds(null, originalDrawable, null, null);
+            }, 2000);
         }
     };
 
