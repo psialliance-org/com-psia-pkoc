@@ -22,7 +22,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import android.text.SpannableStringBuilder;
@@ -78,7 +77,6 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
 
     private static final String TAG = "MainActivity";
     private Button rdrButton;
-    private NfcAdapter nfcAdapter;
     private TextView textView;
     private TextView readerLocationUUIDView;
     private TextView readerSiteUUIDView;
@@ -92,9 +90,10 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
     private String nfcadvertisingStatusValue;
     private String bleadvertisingStatusValue;
 
+    private NfcAdapter nfcAdapter;
+
     private BluetoothManager mBluetoothManager;
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
-    private BluetoothAdapter mBluetoothAdapter;
     private BluetoothGattServer mBluetoothGattServer;
     private final ArrayList<FlowModel> _connectedDevices = new ArrayList<>();
 
@@ -184,6 +183,13 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
     }
 
     @Override
+    protected void onDestroy()
+    {
+        teardownBluetooth();
+        super.onDestroy();
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -227,6 +233,33 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         Log.d("onCreate", "Starting BLE advertising and server");
         startAdvertising();
         startServer();
+    }
+
+    private void teardownBluetooth()
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        {
+            if (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED)
+                return;
+        }
+        else
+        {
+            if (checkSelfPermission(Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED)
+                return;
+        }
+
+        if (mBluetoothLeAdvertiser != null)
+        {
+            mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
+            mBluetoothLeAdvertiser = null;
+        }
+
+        if (mBluetoothGattServer != null)
+        {
+            mBluetoothGattServer.clearServices();
+            mBluetoothGattServer.close();
+            mBluetoothGattServer = null;
+        }
     }
 
     private void displayValues() {
@@ -708,7 +741,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         return true;
     }
 
-    private AdvertiseCallback mAdvertiseCallback = new AdvertiseCallback() {
+    private final AdvertiseCallback mAdvertiseCallback = new AdvertiseCallback() {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
             Log.i(TAG, "Advertising started successfully");
@@ -1029,9 +1062,9 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                                     Log.d(TAG, "Creation time: " + deviceModel.creationTime);
                                     break;
                                 case ProtocolVersion:
-                                    // Dhruv changed this to support 5 byte protocol veriosn
+                                    // Dhruv changed this to support 5 byte protocol version
                                     deviceModel.protocolVersion = new byte[]{(byte) 0x03, (byte) 0x00, (byte)0x00, (byte) 0x00, (byte)0x01};
-                                    Log.d(TAG, "Protocol Version is:" + deviceModel.protocolVersion);
+                                    Log.d(TAG, "Protocol Version is:" + Arrays.toString(deviceModel.protocolVersion));
                                 default:
                                     break;
                             }
@@ -1415,7 +1448,7 @@ before returning the concatenated byte array for signing
         }
     };
 
-    private Queue<Runnable> gattOperationQueue = new LinkedList<>();
+    private final Queue<Runnable> gattOperationQueue = new LinkedList<>();
     private boolean isGattOperationInProgress = false;
 
     private void enqueueGattOperation(Runnable operation) {
@@ -1435,7 +1468,10 @@ before returning the concatenated byte array for signing
         Log.d(TAG, "Executing next GATT operation");
         isGattOperationInProgress = true;
         Runnable operation = gattOperationQueue.poll();
-        operation.run();
+        if (operation != null)
+        {
+            operation.run();
+        }
     }
 
     private void onGattOperationCompleted() {
@@ -1450,14 +1486,12 @@ before returning the concatenated byte array for signing
         // You can also update the UI or log the error as needed
     }
 
-    private Handler timeoutHandler = new Handler(Looper.getMainLooper());
-    private Runnable timeoutRunnable = new Runnable() {
-        @Override
-        public void run() {
-            Log.e(TAG, "PKOC transaction timed out");
-            // Handle the timeout (e.g., notify higher layers, close connection)
-            handlePkocTimeout();
-        }
+    private final Handler timeoutHandler = new Handler(Looper.getMainLooper());
+    private final Runnable timeoutRunnable = () ->
+    {
+        Log.e(TAG, "PKOC transaction timed out");
+        // Handle the timeout (e.g., notify higher layers, close connection)
+        handlePkocTimeout();
     };
 
 
