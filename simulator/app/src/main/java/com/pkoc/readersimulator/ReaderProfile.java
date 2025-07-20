@@ -3,6 +3,9 @@ package com.pkoc.readersimulator;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
+
+import androidx.annotation.NonNull;
+
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
@@ -47,8 +50,18 @@ public class ReaderProfile {
      *
      * @return Bluetooth Gatt Service for PKOC over BLE
      */
-    public static BluetoothGattService createReaderService() {
-        BluetoothGattService service = new BluetoothGattService(ServiceUUID, BluetoothGattService.SERVICE_TYPE_PRIMARY);
+    public static BluetoothGattService createReaderService()
+    {
+        BluetoothGattService service = getBluetoothGattService(ServiceUUID);
+        getBluetoothGattService(LegacyUUID);
+
+        return service;
+    }
+
+    @NonNull
+    private static BluetoothGattService getBluetoothGattService(UUID serviceUUID)
+    {
+        BluetoothGattService service = new BluetoothGattService(serviceUUID, BluetoothGattService.SERVICE_TYPE_PRIMARY);
 
         BluetoothGattCharacteristic readCharacteristic = new BluetoothGattCharacteristic(ReadUUID,
                 BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
@@ -65,28 +78,9 @@ public class ReaderProfile {
 
         service.addCharacteristic(readCharacteristic);
         service.addCharacteristic(writeCharacteristic);
-
-// Adding second reader service with LegacyUUID
-        BluetoothGattService legacyService = new BluetoothGattService(LegacyUUID, BluetoothGattService.SERVICE_TYPE_PRIMARY);
-
-        BluetoothGattCharacteristic legacyReadCharacteristic = new BluetoothGattCharacteristic(ReadUUID,
-                BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
-                BluetoothGattCharacteristic.PERMISSION_READ);
-
-        BluetoothGattDescriptor legacyConfigDescriptor = new BluetoothGattDescriptor(ConfigUUID,
-                BluetoothGattDescriptor.PERMISSION_READ | BluetoothGattDescriptor.PERMISSION_WRITE);
-
-        legacyReadCharacteristic.addDescriptor(legacyConfigDescriptor);
-
-        BluetoothGattCharacteristic legacyWriteCharacteristic = new BluetoothGattCharacteristic(WriteUUID,
-                BluetoothGattCharacteristic.PROPERTY_WRITE,
-                BluetoothGattCharacteristic.PERMISSION_WRITE);
-
-        legacyService.addCharacteristic(legacyReadCharacteristic);
-        legacyService.addCharacteristic(legacyWriteCharacteristic);
-
         return service;
     }
+
     public static class BLEDataElement {
         public static void main(String[] args) {
             // Protocol Identifiers

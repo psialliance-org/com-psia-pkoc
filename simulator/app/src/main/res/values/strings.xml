@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">PKOC NFC Simulator</string>
+    <string name="show_reader_details">Show Reader Details</string>
+    <string name="hide_reader_details">Hide Reader Details</string>
 </resources>

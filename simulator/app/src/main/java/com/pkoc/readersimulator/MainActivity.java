@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
 
         // Set initial text with bold headers
         String initialText = "<b>Scan a PKOC NFC or BLE Credential</b>";
-        textView.setText(Html.fromHtml(initialText));
+        textView.setText(Html.fromHtml(initialText, Html.FROM_HTML_MODE_LEGACY));
 
         String readerLocationUUIDText = "<b>Reader Location UUID:</b> " + ReaderProfile.ReaderUUID.toString();
         String readerSiteUUIDText = "<b>Reader Site UUID:</b> " + ReaderProfile.SiteUUID.toString();
@@ -142,11 +142,11 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         String bleadvertisingStatusText = "<b>BLE Advertising Status:</b> Pending";
 
 
-        readerLocationUUIDView.setText(Html.fromHtml(readerLocationUUIDText));
-        readerSiteUUIDView.setText(Html.fromHtml(readerSiteUUIDText));
-        sitePublicKeyView.setText(Html.fromHtml(sitePublicKeyText));
-        nfcadvertisingStatusView.setText(Html.fromHtml(nfcadvertisingStatusText));
-        bleadvertisingStatusView.setText(Html.fromHtml(bleadvertisingStatusText));
+        readerLocationUUIDView.setText(Html.fromHtml(readerLocationUUIDText, Html.FROM_HTML_MODE_LEGACY));
+        readerSiteUUIDView.setText(Html.fromHtml(readerSiteUUIDText, Html.FROM_HTML_MODE_LEGACY));
+        sitePublicKeyView.setText(Html.fromHtml(sitePublicKeyText, Html.FROM_HTML_MODE_LEGACY));
+        nfcadvertisingStatusView.setText(Html.fromHtml(nfcadvertisingStatusText, Html.FROM_HTML_MODE_LEGACY));
+        bleadvertisingStatusView.setText(Html.fromHtml(bleadvertisingStatusText, Html.FROM_HTML_MODE_LEGACY));
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (nfcAdapter == null) {
@@ -288,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         if (nfcAdapter != null) {
             Log.d("enableReaderMode", "enableReaderMode called");
             nfcAdapter.enableReaderMode(this, this, NfcAdapter.FLAG_READER_NFC_A | NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK, null);
-            nfcadvertisingStatusView.setText(Html.fromHtml("<b>Advertising Status:</b> Not applicable for NFC"));
+            nfcadvertisingStatusView.setText(Html.fromHtml("<b>Advertising Status:</b> Not applicable for NFC", Html.FROM_HTML_MODE_LEGACY));
         }
     }
 
@@ -298,7 +298,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         if (nfcAdapter != null) {
             Log.d("disableReaderMode", "disableReaderMode called");
             nfcAdapter.disableReaderMode(this);
-            nfcadvertisingStatusView.setText(Html.fromHtml("<b>Advertising Status:</b> Disabled"));
+            nfcadvertisingStatusView.setText(Html.fromHtml("<b>Advertising Status:</b> Disabled", Html.FROM_HTML_MODE_LEGACY));
         }
     }
 
@@ -360,9 +360,11 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         TypedValue typedValue = new TypedValue();
         getTheme().resolveAttribute(android.R.attr.textAppearanceSmall, typedValue, true);
         int[] textSizeAttr = new int[]{android.R.attr.textColorSecondary};
-        TypedArray array = obtainStyledAttributes(typedValue.resourceId, textSizeAttr);
-        int textColorSecondary = array.getColor(0, Color.GRAY); // Fallback to gray if not found
-        array.recycle();
+        try (TypedArray array = obtainStyledAttributes(typedValue.resourceId, textSizeAttr))
+        {
+            int textColorSecondary = array.getColor(0, Color.GRAY); // Fallback to gray if not found
+            array.recycle();
+        }
 
         runOnUiThread(() -> {
             int offset = 0;
@@ -513,22 +515,12 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             // Set up the email button
                             Button emailButton = findViewById(R.id.emailButton);
                             emailButton.setVisibility(View.VISIBLE); // Make the button visible
-                            emailButton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    sendEmail();
-                                }
-                            });
+                            emailButton.setOnClickListener(v -> sendEmail());
 
                             // Set up the scan button
                             Button scanButton = findViewById(R.id.scanButton);
                             scanButton.setVisibility(View.VISIBLE); // Make the button visible
-                            scanButton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    resetToScanScreen();
-                                }
-                            });
+                            scanButton.setOnClickListener(v -> resetToScanScreen());
                         } else {
                             // Set the formatted public key if parsing is not applicable
                             SpannableString formattedText = formatText("Public Key: " + publicKey, 14, Color.BLACK);
@@ -633,7 +625,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
     private void resetToScanScreen() {
         runOnUiThread(() -> {
             String initialText = "<b>Scan a PKOC BLE or NFC Credential</b>";
-            textView.setText(Html.fromHtml(initialText));
+            textView.setText(Html.fromHtml(initialText, Html.FROM_HTML_MODE_LEGACY));
 
             // Hide the email button
             Button emailButton = findViewById(R.id.emailButton);
@@ -671,11 +663,11 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                 String nfcadvertisingStatusText = "<b>Advertising Status:</b> " + getAdvertisingStatus();
                 String bleadvertisingStatusText = "<b>BLE Advertising status:</b> " + bleStatusValue;
 
-                readerLocationUUIDView.setText(Html.fromHtml(readerLocationUUIDText));
-                readerSiteUUIDView.setText(Html.fromHtml(readerSiteUUIDText));
-                sitePublicKeyView.setText(Html.fromHtml(sitePublicKeyText));
-                nfcadvertisingStatusView.setText(Html.fromHtml(nfcadvertisingStatusText));
-                bleadvertisingStatusView.setText(Html.fromHtml(bleadvertisingStatusText));
+                readerLocationUUIDView.setText(Html.fromHtml(readerLocationUUIDText, Html.FROM_HTML_MODE_LEGACY));
+                readerSiteUUIDView.setText(Html.fromHtml(readerSiteUUIDText, Html.FROM_HTML_MODE_LEGACY));
+                sitePublicKeyView.setText(Html.fromHtml(sitePublicKeyText, Html.FROM_HTML_MODE_LEGACY));
+                nfcadvertisingStatusView.setText(Html.fromHtml(nfcadvertisingStatusText, Html.FROM_HTML_MODE_LEGACY));
+                bleadvertisingStatusView.setText(Html.fromHtml(bleadvertisingStatusText, Html.FROM_HTML_MODE_LEGACY));
 
                 // Show other fields
                 readerLocationUUIDView.setVisibility(View.VISIBLE);
@@ -696,7 +688,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         bleadvertisingStatusView.setVisibility(View.GONE);
 
         // Change button text to "Show Reader Details"
-        rdrButton.setText("Show Reader Details");
+        rdrButton.setText(R.string.show_reader_details);
         // Update OnClickListener to show details
         rdrButton.setOnClickListener(v -> showRdrDetails());
     }
@@ -710,7 +702,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         bleadvertisingStatusView.setVisibility(View.VISIBLE);
 
         // Change button text to "Hide Reader Details"
-        rdrButton.setText("Hide Reader Details");
+        rdrButton.setText(R.string.hide_reader_details);
         // Update OnClickListener to hide details
         rdrButton.setOnClickListener(v -> hideRdrDetails());
     }
@@ -791,7 +783,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         }
         mBluetoothLeAdvertiser.startAdvertising(settings, advertiseData, scanResponseData, mAdvertiseCallback);
         Log.i(TAG, "BLE Advertising status: Successful.");
-        bleadvertisingStatusView.setText(Html.fromHtml("<b>BLE Advertising status:</b> Successful"));
+        bleadvertisingStatusView.setText(Html.fromHtml("<b>BLE Advertising status:</b> Successful", Html.FROM_HTML_MODE_LEGACY));
         bleStatusValue = "Successful";
     }
 
@@ -818,7 +810,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         mBluetoothGattServer.addService(ReaderProfile.createReaderService());
     }
 
-    private BluetoothGattServerCallback mGattServerCallback = new BluetoothGattServerCallback() {
+    private final BluetoothGattServerCallback mGattServerCallback = new BluetoothGattServerCallback() {
 
         @Override
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
@@ -970,7 +962,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                     return;
                 }
 
-                byte[] processedValue = value; // Create a new variable to hold the processed value
+                byte[] processedValue = value.clone(); // Create a new variable to hold the processed value
 
                 // Check if the data is encrypted
                 if (deviceModel.connectionType == PKOC_ConnectionType.ECHDE_Full && processedValue.length > 3) {
@@ -1260,22 +1252,12 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                         // Set up the email button
                         Button emailButton = findViewById(R.id.emailButton);
                         emailButton.setVisibility(View.VISIBLE); // Make the button visible
-                        emailButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                sendEmail();
-                            }
-                        });
+                        emailButton.setOnClickListener(v -> sendEmail());
 
                         // Set up the scan button
                         Button scanButton = findViewById(R.id.scanButton);
                         scanButton.setVisibility(View.VISIBLE); // Make the button visible
-                        scanButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                resetToScanScreen();
-                            }
-                        });
+                        scanButton.setOnClickListener(v -> resetToScanScreen());
 
                         // Hide other fields
                         readerLocationUUIDView.setVisibility(View.GONE);

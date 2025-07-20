@@ -1,5 +1,7 @@
 package com.pkoc.readersimulator;
 
+/** @noinspection unused*/
+
 public enum ReaderUnlockStatus
 {
     Unknown,

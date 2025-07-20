@@ -97,7 +97,6 @@ public class CryptoProvider {
 
     public static byte[] getFromAES256(byte[] secretKey, byte[] message, int counter) {
         try {
-            counter = 0;
             BigInteger bigIntegerCounter = new BigInteger(IvCounter);
             bigIntegerCounter = bigIntegerCounter.add(BigInteger.valueOf(counter));
             byte[] iv = Arrays.concatenate(Hex.decode("00000000000001"), BigIntegers.asUnsignedByteArray(bigIntegerCounter));
