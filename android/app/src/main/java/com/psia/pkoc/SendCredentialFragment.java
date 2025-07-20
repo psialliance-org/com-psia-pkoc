@@ -130,6 +130,24 @@ public class SendCredentialFragment extends Fragment
     }
 
     /**
+     * Get device from address
+     *
+     * @param address MAC address of the BLE device
+     * @return Matched device from address
+     */
+    private ListModel getModelFromAddress(String address)
+    {
+        for (int a = 0; a < mBTArrayAdapter.getCount(); a++)
+        {
+            if (((ListModel) mBTArrayAdapter.getItem(a)).getAddress().equals(address))
+            {
+                return (ListModel) mBTArrayAdapter.getItem(a);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Helper function to set button background color
      * @param btn Button
      * @param color New color as integer
@@ -256,14 +274,14 @@ public class SendCredentialFragment extends Fragment
         if (!nfcAdapter.isEnabled())
         {
             new AlertDialog.Builder(requireContext())
-                .setTitle("Enable NFC")
-                .setMessage("NFC is disabled. Please enable it if you intend to use NFC to transmit credentials.")
-                .setPositiveButton("Go to Settings", (dialog, which) ->
+                .setTitle(R.string.enable_nfc)
+                .setMessage(R.string.nfc_is_disabled_please_enable_it_if_you_intend_to_use_nfc_to_transmit_credentials)
+                .setPositiveButton(R.string.go_to_settings, (dialog, which) ->
                 {
                     Intent intent = new Intent(Settings.ACTION_NFC_SETTINGS);
                     startActivity(intent);
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(R.string.cancel, null)
                 .show();
         }
     }
@@ -358,16 +376,15 @@ public class SendCredentialFragment extends Fragment
 
                 IsConnecting = false;
 
-                for (int a = 0; a < mBTArrayAdapter.getCount(); a++)
-                    if (((ListModel) mBTArrayAdapter.getItem(a)).getAddress().equals(chosenDevice.getAddress()))
-                        chosenDevice = (ListModel) mBTArrayAdapter.getItem(a);
+                String deviceAddress = chosenDevice.getAddress();
+                chosenDevice = getModelFromAddress(deviceAddress);
 
-                chosenDevice.setIsBusy(false);
-
-                if (!isAdded())
+                if (chosenDevice == null || !isAdded())
                 {
                     return;
                 }
+
+                chosenDevice.setIsBusy(false);
 
                 if (msg.what == ReaderUnlockStatus.AccessGranted.ordinal())
                 {
@@ -384,7 +401,11 @@ public class SendCredentialFragment extends Fragment
                     new Handler(getMainLooper()).postDelayed(() ->
                     {
                         Log.i("SendCredentialFragment", "Resetting icon");
-                        chosenDevice.setIcon(R.drawable.baseline_lock_24);
+                        var model = getModelFromAddress(deviceAddress);
+                        if (model != null)
+                        {
+                            model.setIcon(R.drawable.baseline_lock_24);
+                        }
                         mBTArrayAdapter.notifyDataSetChanged();
                     }, 4000); // 4 second
                 }
@@ -403,19 +424,25 @@ public class SendCredentialFragment extends Fragment
                     new Handler(getMainLooper()).postDelayed(() ->
                     {
                         Log.i("SendCredentialFragment", "Resetting icon");
-                        chosenDevice.setIcon(R.drawable.baseline_lock_24);
+                        var model = getModelFromAddress(deviceAddress);
+                        if (model != null)
+                        {
+                            model.setIcon(R.drawable.baseline_lock_24);
+                        }
                         mBTArrayAdapter.notifyDataSetChanged();
                     }, 4000); // 4 second
                 }
 
                 mBTArrayAdapter.notifyDataSetChanged();
 
-                if (msg.what == ReaderUnlockStatus.Unrecognized.ordinal()) {
+                if (msg.what == ReaderUnlockStatus.Unrecognized.ordinal())
+                {
                     Log.i("SendCredentialFragment", "Reader is not recognized in this mode");
                     Toast.makeText(getContext(), "Reader is not recognized in this mode", Toast.LENGTH_SHORT).show();
                 }
 
-                if (msg.what == ReaderUnlockStatus.Unknown.ordinal()) {
+                if (msg.what == ReaderUnlockStatus.Unknown.ordinal())
+                {
                     Log.i("SendCredentialFragment", "Lost connection with reader");
                     Toast.makeText(getContext(), "Lost connection with reader", Toast.LENGTH_SHORT).show();
                 }
