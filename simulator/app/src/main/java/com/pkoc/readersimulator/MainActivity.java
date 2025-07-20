@@ -80,14 +80,14 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
     private TextView readerLocationUUIDView;
     private TextView readerSiteUUIDView;
     private TextView sitePublicKeyView;
-    private TextView nfcadvertisingStatusView;
-    private TextView bleadvertisingStatusView;
+    private TextView nfcAdvertisingStatusView;
+    private TextView bleAdvertisingStatusView;
     private String bleStatusValue;
     private String scanReaderUUIDValue;
     private String siteUUIDValue;
     private String sitePublicKeyValue;
-    private String nfcadvertisingStatusValue;
-    private String bleadvertisingStatusValue;
+    private String nfcAdvertisingStatusValue;
+    private String bleAdvertisingStatusValue;
 
     private NfcAdapter nfcAdapter;
 
@@ -118,15 +118,15 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         readerLocationUUIDView = findViewById(R.id.readerLocationUUID);
         readerSiteUUIDView = findViewById(R.id.readerSiteUUID);
         sitePublicKeyView = findViewById(R.id.sitePublicKey);
-        nfcadvertisingStatusView = findViewById(R.id.nfcadvertisingStatus);
-        bleadvertisingStatusView = findViewById(R.id.bleadvertisingStatus);
+        nfcAdvertisingStatusView = findViewById(R.id.nfcadvertisingStatus);
+        bleAdvertisingStatusView = findViewById(R.id.bleadvertisingStatus);
 
         // Initialize with some values
         scanReaderUUIDValue = "<b>Reader Location UUID:</b>";
         siteUUIDValue = "<b>Reader Site UUID:</b>";
         sitePublicKeyValue = "<b>Site Public Key:</b>";
-        nfcadvertisingStatusValue = "<b>NFC Advertising Status:</b>";
-        bleadvertisingStatusValue = "<b>BLE Advertising Status:</b>";
+        nfcAdvertisingStatusValue = "<b>NFC Advertising Status:</b>";
+        bleAdvertisingStatusValue = "<b>BLE Advertising Status:</b>";
 
         displayValues();
 
@@ -137,19 +137,19 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         String readerLocationUUIDText = "<b>Reader Location UUID:</b> " + ReaderProfile.ReaderUUID.toString();
         String readerSiteUUIDText = "<b>Reader Site UUID:</b> " + ReaderProfile.SiteUUID.toString();
         String sitePublicKeyText = "<b>Site Public Key:</b> " + getSitePublicKey();
-        String nfcadvertisingStatusText = "<b>NFC Advertising Status:</b> " + getAdvertisingStatus();
-        String bleadvertisingStatusText = "<b>BLE Advertising Status:</b> Pending";
+        String nfcAdvertisingStatusText = "<b>NFC Advertising Status:</b> " + getAdvertisingStatus();
+        String bleAdvertisingStatusText = "<b>BLE Advertising Status:</b> Pending";
 
 
         readerLocationUUIDView.setText(Html.fromHtml(readerLocationUUIDText, Html.FROM_HTML_MODE_LEGACY));
         readerSiteUUIDView.setText(Html.fromHtml(readerSiteUUIDText, Html.FROM_HTML_MODE_LEGACY));
         sitePublicKeyView.setText(Html.fromHtml(sitePublicKeyText, Html.FROM_HTML_MODE_LEGACY));
-        nfcadvertisingStatusView.setText(Html.fromHtml(nfcadvertisingStatusText, Html.FROM_HTML_MODE_LEGACY));
-        bleadvertisingStatusView.setText(Html.fromHtml(bleadvertisingStatusText, Html.FROM_HTML_MODE_LEGACY));
+        nfcAdvertisingStatusView.setText(Html.fromHtml(nfcAdvertisingStatusText, Html.FROM_HTML_MODE_LEGACY));
+        bleAdvertisingStatusView.setText(Html.fromHtml(bleAdvertisingStatusText, Html.FROM_HTML_MODE_LEGACY));
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (nfcAdapter == null) {
-            textView.setText("NFC is not available on this device.");
+            textView.setText(R.string.nfc_is_not_available_on_this_device);
             return;
         }
 
@@ -265,8 +265,8 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         readerLocationUUIDView.setText(scanReaderUUIDValue);
         readerSiteUUIDView.setText(siteUUIDValue);
         sitePublicKeyView.setText(sitePublicKeyValue);
-        nfcadvertisingStatusView.setText(nfcadvertisingStatusValue);
-        bleadvertisingStatusView.setText(bleadvertisingStatusValue);
+        nfcAdvertisingStatusView.setText(nfcAdvertisingStatusValue);
+        bleAdvertisingStatusView.setText(bleAdvertisingStatusValue);
     }
 
     private String getSitePublicKey() {
@@ -287,7 +287,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         if (nfcAdapter != null) {
             Log.d("enableReaderMode", "enableReaderMode called");
             nfcAdapter.enableReaderMode(this, this, NfcAdapter.FLAG_READER_NFC_A | NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK, null);
-            nfcadvertisingStatusView.setText(Html.fromHtml("<b>Advertising Status:</b> Not applicable for NFC", Html.FROM_HTML_MODE_LEGACY));
+            nfcAdvertisingStatusView.setText(Html.fromHtml("<b>Advertising Status:</b> Not applicable for NFC", Html.FROM_HTML_MODE_LEGACY));
         }
     }
 
@@ -297,7 +297,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         if (nfcAdapter != null) {
             Log.d("disableReaderMode", "disableReaderMode called");
             nfcAdapter.disableReaderMode(this);
-            nfcadvertisingStatusView.setText(Html.fromHtml("<b>Advertising Status:</b> Disabled", Html.FROM_HTML_MODE_LEGACY));
+            nfcAdvertisingStatusView.setText(Html.fromHtml("<b>Advertising Status:</b> Disabled", Html.FROM_HTML_MODE_LEGACY));
         }
     }
 
@@ -309,13 +309,13 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
             try {
                 isoDep.connect();
                 byte[] selectResponse = sendSelectCommand(isoDep);
-                Log.d("NFC", "SELECT Response: " + bytesToHex(selectResponse));
+                Log.d("NFC", "SELECT Response: " + Hex.toHexString(selectResponse));
                 byte[] transactionId = new byte[16]; // Generate or obtain a transaction ID
                 new SecureRandom().nextBytes(transactionId); // Ensure it's random
                 byte[] readerIdentifier = new byte[32]; // Obtain the reader identifier
                 new SecureRandom().nextBytes(readerIdentifier); // Ensure it's random
                 byte[] authResponse = sendAuthenticationCommand(isoDep, transactionId, readerIdentifier);
-                Log.d("NFC", "Authentication Response: " + bytesToHex(authResponse));
+                Log.d("NFC", "Authentication Response: " + Hex.toHexString(authResponse));
                 parseAuthenticationResponse(authResponse);
                 isoDep.close();
             } catch (IOException e) {
@@ -372,7 +372,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                         // Public Key
 
 
-                        String publicKey = bytesToHex(value);
+                        String publicKey = Hex.toHexString(value);
                         Log.d("NFC", "Public Key: \n" + publicKey);
 
                         // Parse the public key
@@ -435,11 +435,11 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             formattedText.append(applyColorAndSize(header, 0, header.length(), Color.WHITE, (Color.parseColor("#707173")), 14,false));
 
                             // x-Portion of the public key
-                            SpannableString portionxHeader = new SpannableString("\n\nX Portion 256 Bit HEX: \n");
-                            portionxHeader.setSpan(new StyleSpan(Typeface.BOLD), 0, portionxHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            portionxHeader.setSpan(new ForegroundColorSpan(Color.BLACK), 0, portionxHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            portionxHeader.setSpan(new AbsoluteSizeSpan(14, true), 0, portionxHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            formattedText.append(portionxHeader);
+                            SpannableString xPortionHeader = new SpannableString("\n\nX Portion 256 Bit HEX: \n");
+                            xPortionHeader.setSpan(new StyleSpan(Typeface.BOLD), 0, xPortionHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            xPortionHeader.setSpan(new ForegroundColorSpan(Color.BLACK), 0, xPortionHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            xPortionHeader.setSpan(new AbsoluteSizeSpan(14, true), 0, xPortionHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            formattedText.append(xPortionHeader);
 
                             formattedText.append(applyColorAndSize(xPortion, 0, xPortion.length(), (Color.parseColor("#9CC3C9")), (Color.parseColor("BLACK")), 14, true));
 
@@ -524,42 +524,42 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                         readerLocationUUIDView.setVisibility(View.GONE);
                         readerSiteUUIDView.setVisibility(View.GONE);
                         sitePublicKeyView.setVisibility(View.GONE);
-                        nfcadvertisingStatusView.setVisibility(View.GONE);
-                        bleadvertisingStatusView.setVisibility(View.GONE);
+                        nfcAdvertisingStatusView.setVisibility(View.GONE);
+                        bleAdvertisingStatusView.setVisibility(View.GONE);
                         break;
 
                     case (byte) 0x9E:
                         // Digital Signature
-                        String signature = bytesToHex(value);
+                        String signature = Hex.toHexString(value);
                         Log.d("NFC", "Digital Signature: " + signature);
                         break;
 
                     case (byte) 0x4C:
                         // Reader Location UUID
-                        String readerLocationUUID = bytesToHex(value);
+                        String readerLocationUUID = Hex.toHexString(value);
                         Log.d("NFC", "Reader Location UUID: " + readerLocationUUID);
-                        readerLocationUUIDView.setText("Reader Location UUID: " + readerLocationUUID);
+                        readerLocationUUIDView.setText(String.format("%s%s", getString(R.string.reader_location_uuid), readerLocationUUID));
                         break;
 
                     case (byte) 0x4D:
                         // Reader Site UUID
-                        String readerSiteUUID = bytesToHex(value);
+                        String readerSiteUUID = Hex.toHexString(value);
                         Log.d("NFC", "Reader Site UUID: " + readerSiteUUID);
-                        readerSiteUUIDView.setText("Reader Site UUID: " + readerSiteUUID);
+                        readerSiteUUIDView.setText(String.format("%s%s", getString(R.string.reader_site_uuid), readerSiteUUID));
                         break;
 
                     case (byte) 0x4E:
                         // Site Public Key
-                        String sitePublicKey = bytesToHex(value);
+                        String sitePublicKey = Hex.toHexString(value);
                         Log.d("NFC", "Site Public Key: " + sitePublicKey);
-                        sitePublicKeyView.setText("Site Public Key: " + sitePublicKey);
+                        sitePublicKeyView.setText(String.format("%s%s", getString(R.string.site_public_key), sitePublicKey));
                         break;
 
                     case (byte) 0x4F:
                         // Advertising Status
-                        String advertisingStatus = bytesToHex(value);
+                        String advertisingStatus = Hex.toHexString(value);
                         Log.d("NFC", "<b>Advertising Status:</b> " + advertisingStatus);
-                        nfcadvertisingStatusView.setText("<b>Advertising Status:</b> " + advertisingStatus);
+                        nfcAdvertisingStatusView.setText(String.format("%s%s", getString(R.string.b_advertising_status_b), advertisingStatus));
                         break;
 
                     default:
@@ -584,14 +584,6 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         spannableString.setSpan(new AbsoluteSizeSpan(textSize, true), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         spannableString.setSpan(new ForegroundColorSpan(Color.parseColor(hexColor)), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         return spannableString;
-    }
-
-    private String bytesToHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
-            sb.append(String.format("%02X", b));
-        }
-        return sb.toString();
     }
 
     private static final byte[] SELECT_APDU = {
@@ -638,36 +630,36 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                 readerLocationUUIDView.setVisibility(View.GONE);
                 readerSiteUUIDView.setVisibility(View.GONE);
                 sitePublicKeyView.setVisibility(View.GONE);
-                nfcadvertisingStatusView.setVisibility(View.GONE);
-                bleadvertisingStatusView.setVisibility(View.GONE);
+                nfcAdvertisingStatusView.setVisibility(View.GONE);
+                bleAdvertisingStatusView.setVisibility(View.GONE);
             } else {
                 // Restore initial values
                 scanReaderUUIDValue = "Initial Scan Reader UUID";
                 siteUUIDValue = "Initial Site UUID";
                 sitePublicKeyValue = "Initial Site Public Key";
-                nfcadvertisingStatusValue = "<b>NFC Advertising Status:</b>";
-                bleadvertisingStatusValue = "<b>BLE Advertising status:</b>";
+                nfcAdvertisingStatusValue = "<b>NFC Advertising Status:</b>";
+                bleAdvertisingStatusValue = "<b>BLE Advertising status:</b>";
 
                 displayValues();
 
                 String readerLocationUUIDText = "<b>Reader Location UUID:</b> " + ReaderProfile.ReaderUUID.toString();
                 String readerSiteUUIDText = "<b>Reader Site UUID:</b> " + ReaderProfile.SiteUUID.toString();
                 String sitePublicKeyText = "<b>Site Public Key:</b> " + getSitePublicKey();
-                String nfcadvertisingStatusText = "<b>Advertising Status:</b> " + getAdvertisingStatus();
-                String bleadvertisingStatusText = "<b>BLE Advertising status:</b> " + bleStatusValue;
+                String nfcAdvertisingStatusText = "<b>Advertising Status:</b> " + getAdvertisingStatus();
+                String bleAdvertisingStatusText = "<b>BLE Advertising status:</b> " + bleStatusValue;
 
                 readerLocationUUIDView.setText(Html.fromHtml(readerLocationUUIDText, Html.FROM_HTML_MODE_LEGACY));
                 readerSiteUUIDView.setText(Html.fromHtml(readerSiteUUIDText, Html.FROM_HTML_MODE_LEGACY));
                 sitePublicKeyView.setText(Html.fromHtml(sitePublicKeyText, Html.FROM_HTML_MODE_LEGACY));
-                nfcadvertisingStatusView.setText(Html.fromHtml(nfcadvertisingStatusText, Html.FROM_HTML_MODE_LEGACY));
-                bleadvertisingStatusView.setText(Html.fromHtml(bleadvertisingStatusText, Html.FROM_HTML_MODE_LEGACY));
+                nfcAdvertisingStatusView.setText(Html.fromHtml(nfcAdvertisingStatusText, Html.FROM_HTML_MODE_LEGACY));
+                bleAdvertisingStatusView.setText(Html.fromHtml(bleAdvertisingStatusText, Html.FROM_HTML_MODE_LEGACY));
 
                 // Show other fields
                 readerLocationUUIDView.setVisibility(View.VISIBLE);
                 readerSiteUUIDView.setVisibility(View.VISIBLE);
                 sitePublicKeyView.setVisibility(View.VISIBLE);
-                nfcadvertisingStatusView.setVisibility(View.VISIBLE);
-                bleadvertisingStatusView.setVisibility(View.VISIBLE);
+                nfcAdvertisingStatusView.setVisibility(View.VISIBLE);
+                bleAdvertisingStatusView.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -677,8 +669,8 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         readerLocationUUIDView.setVisibility(View.GONE);
         readerSiteUUIDView.setVisibility(View.GONE);
         sitePublicKeyView.setVisibility(View.GONE);
-        nfcadvertisingStatusView.setVisibility(View.GONE);
-        bleadvertisingStatusView.setVisibility(View.GONE);
+        nfcAdvertisingStatusView.setVisibility(View.GONE);
+        bleAdvertisingStatusView.setVisibility(View.GONE);
 
         // Change button text to "Show Reader Details"
         rdrButton.setText(R.string.show_reader_details);
@@ -691,8 +683,8 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         readerLocationUUIDView.setVisibility(View.VISIBLE);
         readerSiteUUIDView.setVisibility(View.VISIBLE);
         sitePublicKeyView.setVisibility(View.VISIBLE);
-        nfcadvertisingStatusView.setVisibility(View.VISIBLE);
-        bleadvertisingStatusView.setVisibility(View.VISIBLE);
+        nfcAdvertisingStatusView.setVisibility(View.VISIBLE);
+        bleAdvertisingStatusView.setVisibility(View.VISIBLE);
 
         // Change button text to "Hide Reader Details"
         rdrButton.setText(R.string.hide_reader_details);
@@ -776,7 +768,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         }
         mBluetoothLeAdvertiser.startAdvertising(settings, advertiseData, scanResponseData, mAdvertiseCallback);
         Log.i(TAG, "BLE Advertising status: Successful.");
-        bleadvertisingStatusView.setText(Html.fromHtml("<b>BLE Advertising status:</b> Successful", Html.FROM_HTML_MODE_LEGACY));
+        bleAdvertisingStatusView.setText(Html.fromHtml("<b>BLE Advertising status:</b> Successful", Html.FROM_HTML_MODE_LEGACY));
         bleStatusValue = "Successful";
     }
 
@@ -1175,11 +1167,11 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             formattedText.append(applyColorAndSize(header.toUpperCase(), 0, header.length(), Color.WHITE, Color.parseColor("#707173"), 14, false));
 
                             // x-Portion of the public key
-                            SpannableString portionxHeader = new SpannableString("\n\nX Portion 256 Bit HEX: \n".toUpperCase());
-                            portionxHeader.setSpan(new StyleSpan(Typeface.BOLD), 0, portionxHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            portionxHeader.setSpan(new ForegroundColorSpan(Color.BLACK), 0, portionxHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            portionxHeader.setSpan(new AbsoluteSizeSpan(14, true), 0, portionxHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            formattedText.append(portionxHeader);
+                            SpannableString xPortionHeader = new SpannableString("\n\nX Portion 256 Bit HEX: \n".toUpperCase());
+                            xPortionHeader.setSpan(new StyleSpan(Typeface.BOLD), 0, xPortionHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            xPortionHeader.setSpan(new ForegroundColorSpan(Color.BLACK), 0, xPortionHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            xPortionHeader.setSpan(new AbsoluteSizeSpan(14, true), 0, xPortionHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            formattedText.append(xPortionHeader);
 
                             formattedText.append(applyColorAndSize(xPortion.toUpperCase(), 0, xPortion.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLACK"), 14, true));
 
@@ -1256,8 +1248,8 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                         readerLocationUUIDView.setVisibility(View.GONE);
                         readerSiteUUIDView.setVisibility(View.GONE);
                         sitePublicKeyView.setVisibility(View.GONE);
-                        nfcadvertisingStatusView.setVisibility(View.GONE);
-                        bleadvertisingStatusView.setVisibility(View.GONE);
+                        nfcAdvertisingStatusView.setVisibility(View.GONE);
+                        bleAdvertisingStatusView.setVisibility(View.GONE);
                     }
                     });
                     boolean sigValid = false;
