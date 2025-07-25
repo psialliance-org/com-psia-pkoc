@@ -63,6 +63,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import com.psia.pkoc.databinding.FragmentSendCredentialBinding;
 
@@ -236,12 +237,26 @@ public class SendCredentialFragment extends Fragment
             mBTArrayAdapter.clear();
             mBTArrayAdapter.notifyDataSetChanged();
 
+            //List<ScanFilter> filters = new ArrayList<>();
+            //ScanFilter.Builder serviceFilter = new ScanFilter.Builder().setServiceUuid(new ParcelUuid(Constants.ServiceUUID));
+            //ScanFilter.Builder serviceLegacyFilter = new ScanFilter.Builder().setServiceUuid(new ParcelUuid(Constants.ServiceLegacyUUID));
+            //filters.add(serviceFilter.build());
+            //filters.add(serviceLegacyFilter.build());
+
+
+
             List<ScanFilter> filters = new ArrayList<>();
-            ScanFilter.Builder serviceFilter = new ScanFilter.Builder().setServiceUuid(new ParcelUuid(Constants.ServiceUUID));
-            ScanFilter.Builder serviceLegacyFilter = new ScanFilter.Builder().setServiceUuid(new ParcelUuid(Constants.ServiceLegacyUUID));
-            filters.add(serviceFilter.build());
-            filters.add(serviceLegacyFilter.build());
-            ScanSettings settings = new ScanSettings.Builder().build();
+            ScanFilter filter = new ScanFilter.Builder()
+                    .setServiceUuid(new ParcelUuid(UUID.fromString("0000FFF0-0000-1000-8000-00805F9B34FB")))
+                    .build();
+            filters.add(filter);
+
+            ScanSettings settings = new ScanSettings.Builder()
+                    .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY) // Optional: for faster discovery
+                    .build();
+
+
+
 
             mBTAdapter.getBluetoothLeScanner().startScan(filters, settings, mLeScanCallback);
 
@@ -681,12 +696,12 @@ public class SendCredentialFragment extends Fragment
 
     private final ScanCallback mLeScanCallback = new ScanCallback()
     {
+
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
 
-            if (!isAdded())
-            {
+            if (!isAdded()) {
                 return;
             }
 
@@ -697,6 +712,20 @@ public class SendCredentialFragment extends Fragment
                 if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED)
                     return;
             }
+
+            // ✅ Manual UUID filter
+            ScanRecord scanRecord = result.getScanRecord();
+            if (scanRecord == null || scanRecord.getServiceUuids() == null) return;
+
+            List<ParcelUuid> uuids = scanRecord.getServiceUuids();
+            boolean hasTargetUUID = false;
+            for (ParcelUuid uuid : uuids) {
+                if (uuid.getUuid().equals(UUID.fromString("0000FFF0-0000-1000-8000-00805F9B34FB"))) {
+                    hasTargetUUID = true;
+                    break;
+                }
+            }
+            if (!hasTargetUUID) return;
 
             if (IsConnecting)
                 return;
@@ -715,8 +744,6 @@ public class SendCredentialFragment extends Fragment
 
             String Name = result.getDevice().getName();
             if (Name == null || Name.isEmpty()) {
-                // Try to extract the device name from the scan record
-                ScanRecord scanRecord = result.getScanRecord();
                 if (scanRecord != null) {
                     byte[] scanRecordBytes = scanRecord.getBytes();
                     Name = parseDeviceName(scanRecordBytes);
@@ -746,7 +773,6 @@ public class SendCredentialFragment extends Fragment
 
             for (int a = 0; a < mBTArrayAdapter.getCount(); a++) {
                 ListModel thisModel = (ListModel) mBTArrayAdapter.getItem(a);
-
                 if (thisModel.getAddress().equals(Address)) {
                     thisModel.setRssi(ToUpdate.getRssi());
                     thisModel.setLastSeen(new Date());
@@ -758,6 +784,7 @@ public class SendCredentialFragment extends Fragment
             mBTArrayAdapter.add(ToUpdate);
             mBTArrayAdapter.notifyDataSetChanged();
         }
+
 
         @Override
         public void onBatchScanResults (List<ScanResult> results)
