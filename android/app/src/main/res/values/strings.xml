@@ -55,4 +55,12 @@
     <string name="enable_nfc">Enable NFC</string>
     <string name="nfc_is_disabled_please_enable_it_if_you_intend_to_use_nfc_to_transmit_credentials">NFC is disabled. Please enable it if you intend to use NFC to transmit credentials.</string>
     <string name="go_to_settings">Go to Settings</string>
+
+    <string-array name="key_options">
+        <item>Full Public Key</item>
+        <item>64-bit</item>
+        <item>128-bit</item>
+        <item>256-bit</item>
+    </string-array>
+
 </resources>

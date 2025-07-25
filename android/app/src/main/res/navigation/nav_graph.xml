@@ -20,6 +20,9 @@
         <action
             android:id="@+id/action_sendCredentialFragment_to_eulaFragment"
             app:destination="@id/eulaFragment" />
+        <action
+            android:id="@+id/action_sendCredentialFragment_to_DisplayPKFragment"
+            app:destination="@id/DisplayPKFragment" />
     </fragment>
 
     <fragment
@@ -41,6 +44,18 @@
             android:id="@+id/action_aboutFragment_to_sendCredentialFragment"
             app:destination="@id/sendCredentialFragment" />
     </fragment>
+
+
+    <fragment
+        android:id="@+id/DisplayPKFragment"
+        android:name="com.psia.pkoc.DisplayPKFragment"
+        android:label="Display Public Key QR Code"
+        tools:layout="@layout/fragment_send_credential">
+    <action
+        android:id="@+id/action_sendCredentialFragment_to_DisplayPKFragment"
+        app:destination="@id/sendCredentialFragment" />
+    </fragment>
+
     <fragment
         android:id="@+id/eulaFragment"
         android:name="com.psia.pkoc.EulaFragment"

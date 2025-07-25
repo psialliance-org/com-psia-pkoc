@@ -647,6 +647,13 @@ public class SendCredentialFragment extends Fragment
                     return true;
                 }
 
+                if (menuItem.getItemId() == R.id.action_DisplayPK)
+                {
+                    NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_content_main);
+                    navController.navigate(R.id.action_sendCredentialFragment_to_DisplayPKFragment);
+                    return true;
+                }
+
                 return false;
             }
         });
