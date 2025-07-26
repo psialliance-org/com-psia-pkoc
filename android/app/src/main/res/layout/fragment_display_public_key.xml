@@ -2,18 +2,20 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:padding="24dp"
-    android:background="#FFFFFF">
+    tools:context=".DisplayPublicKeyFragment">
 
     <Spinner
         android:id="@+id/keyOptionSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="16dp" />
 
     <ImageView
         android:id="@+id/qrImageView"
+        android:contentDescription="@string/public_key_qr_code"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -24,17 +26,17 @@
         android:id="@+id/publicKeyTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="12sp"
+        android:layout_marginTop="8dp"
         android:paddingTop="16dp"
-        android:textIsSelectable="true"
         android:textColor="#000000"
-        android:layout_marginTop="8dp"/>
+        android:textIsSelectable="true"
+        android:textSize="12sp" />
 
     <Button
         android:id="@+id/copyKeyButton"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Copy Key"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="16dp"
+        android:text="@string/copy_key" />
 
 </LinearLayout>
