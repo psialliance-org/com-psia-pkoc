@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 extension String
 {
@@ -31,6 +32,20 @@ extension String
     }
 }
 
+extension Color
+{
+    init(hex: UInt, alpha: Double = 1)
+    {
+        self.init(
+            .sRGB,
+            red: Double((hex >> 16) & 0xff) / 255,
+            green: Double((hex >> 08) & 0xff) / 255,
+            blue: Double((hex >> 00) & 0xff) / 255,
+            opacity: alpha
+        )
+    }
+}
+
 extension Data
 {
     func hexadecimal() -> String
@@ -52,15 +67,6 @@ extension Data
         
         guard hex.count / bytes.count == 2 else { return nil }
         self.init(bytes)
-    }
-    
-    private static let hexAlphabet = Array("0123456789abcdef".unicodeScalars)
-    func hexStringEncoded() -> String
-    {
-        String(reduce(into: "".unicodeScalars) { result, value in
-            result.append(Self.hexAlphabet[Int(value / 0x10)])
-            result.append(Self.hexAlphabet[Int(value % 0x10)])
-        })
     }
 }
 

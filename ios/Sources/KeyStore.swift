@@ -17,7 +17,7 @@ class KeyStore: Codable
                                     appropriateFor: nil,
                                     create: false)
         
-        .appendingPathComponent("com.laar.pkoc.data.store")
+        .appendingPathComponent("com.elatec.pkoc.data.store")
     }
     
     static func load(completion: @escaping (Result<KeyData, Error>) -> Void)
