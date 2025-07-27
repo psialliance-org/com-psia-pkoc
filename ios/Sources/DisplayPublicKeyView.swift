@@ -25,6 +25,7 @@ struct DisplayPublicKeyView : View
                 Text("128 Bit").tag(DisplayPublicKeyOption.Bit128)
                 Text("256 Bit").tag(DisplayPublicKeyOption.Bit256)
             }
+            .padding(.vertical, 8)
             .onChange(of: selectedOption)
             {
                 newValue in guard let keyData = uncompressedPublicKey,
@@ -73,8 +74,10 @@ struct DisplayPublicKeyView : View
                                 .interpolation(.none)
                                 .resizable()
                                 .scaledToFit()
-                                .frame(maxWidth: geometry.size.width * 0.8)
-                                .background(Color.white)
+                                .frame(maxWidth: geometry.size.width * 0.7)
+                                .background(RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color(.systemBackground))
+                                    .shadow(radius: 5))
                         }
                         else
                         {
@@ -89,13 +92,17 @@ struct DisplayPublicKeyView : View
             .frame(maxHeight: 300)
             .layoutPriority(1)
             
-            TextEditor(text: $publicKey)
+            Text(publicKey)
                 .font(.system(size: 14, design: .monospaced))
-                .frame(height: 100)
-                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.4)))
+                .multilineTextAlignment(.leading)
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(8)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color(.secondarySystemBackground))
+                .cornerRadius(8)
                 .padding(.horizontal)
-                .disabled(true)
-
+            
             Button(action:
             {
                 UIPasteboard.general.string = publicKey
@@ -104,7 +111,7 @@ struct DisplayPublicKeyView : View
             {
                 Label("Copy", systemImage: "doc.on.doc")
                     .padding(.horizontal)
-            }
+            }.padding(.vertical, 8)
 
             Spacer()
         }.onAppear
