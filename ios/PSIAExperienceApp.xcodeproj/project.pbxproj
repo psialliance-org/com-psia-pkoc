@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6F8180012E366B00008A22C5 /* DisplayPublicKeyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8180002E366AF5008A22C5 /* DisplayPublicKeyView.swift */; };
+		6F8180072E366E22008A22C5 /* DisplayPublicKeyOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8180062E366E19008A22C5 /* DisplayPublicKeyOption.swift */; };
 		6FB6CE0B2DF634E400555103 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6FB6CDF42DF634E400555103 /* Assets.xcassets */; };
 		6FB6CE0C2DF634E400555103 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CDF92DF634E400555103 /* ContentView.swift */; };
 		6FB6CE0D2DF634E400555103 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CDFB2DF634E400555103 /* Extensions.swift */; };
@@ -49,6 +51,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		6F8180002E366AF5008A22C5 /* DisplayPublicKeyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayPublicKeyView.swift; sourceTree = "<group>"; };
+		6F8180062E366E19008A22C5 /* DisplayPublicKeyOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayPublicKeyOption.swift; sourceTree = "<group>"; };
 		6FB6CDF32DF634E400555103 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		6FB6CDF42DF634E400555103 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6FB6CDF52DF634E400555103 /* BLE_Packet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLE_Packet.swift; sourceTree = "<group>"; };
@@ -102,6 +106,8 @@
 				6FB6CDF82DF634E400555103 /* Constants.swift */,
 				6FB6CDF92DF634E400555103 /* ContentView.swift */,
 				6FB6CDFA2DF634E400555103 /* CryptoProvider.swift */,
+				6F8180062E366E19008A22C5 /* DisplayPublicKeyOption.swift */,
+				6F8180002E366AF5008A22C5 /* DisplayPublicKeyView.swift */,
 				6FB6CDFB2DF634E400555103 /* Extensions.swift */,
 				6FB6CDFC2DF634E400555103 /* FlowModel.swift */,
 				6FB6CDFD2DF634E400555103 /* KeyStore.swift */,
@@ -241,6 +247,7 @@
 				6FB6CE162DF634E400555103 /* CryptoProvider.swift in Sources */,
 				6FB6CE172DF634E400555103 /* SettingsView.swift in Sources */,
 				6FB6CE182DF634E400555103 /* SiteModel.swift in Sources */,
+				6F8180072E366E22008A22C5 /* DisplayPublicKeyOption.swift in Sources */,
 				6FB6CE192DF634E400555103 /* TLVProvider.swift in Sources */,
 				6FB6CE1A2DF634E400555103 /* PSIAExperienceApp.swift in Sources */,
 				6FB6CE1B2DF634E400555103 /* UIImages.swift in Sources */,
@@ -250,6 +257,7 @@
 				6FB6CE1F2DF634E400555103 /* AboutView.swift in Sources */,
 				6FB6CE202DF634E400555103 /* FlowModel.swift in Sources */,
 				6FB6CE212DF634E400555103 /* BLE_Packet.swift in Sources */,
+				6F8180012E366B00008A22C5 /* DisplayPublicKeyView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -6,6 +6,7 @@ struct ContentView : View
 {
     @State var settingsLinkSelected = false
     @State var aboutLinkSelected = false
+    @State var qrLinkSelected = false
     
     @State var _transmissionType : TransmissionType = TransmissionType.BLE
 
@@ -117,6 +118,13 @@ struct ContentView : View
                         {
                             Label("About", systemImage: "info.circle")
                         }).navigationTitle("About")
+                        Button(action:
+                        {
+                            qrLinkSelected = true
+                        }, label:
+                        {
+                            Label("Display QR Public Key", systemImage: "qrcode")
+                        }).navigationTitle("Display QR Public Key")
                     }
                     label:
                     {
@@ -129,6 +137,10 @@ struct ContentView : View
                 EmptyView()
             }.hidden())
             .background(NavigationLink(destination: AboutView().navigationTitle("About"), isActive: $aboutLinkSelected)
+            {
+                EmptyView()
+            }.hidden())
+            .background(NavigationLink(destination: DisplayPublicKeyView().navigationTitle("Display QR Public Key"), isActive: $qrLinkSelected)
             {
                 EmptyView()
             }.hidden())
