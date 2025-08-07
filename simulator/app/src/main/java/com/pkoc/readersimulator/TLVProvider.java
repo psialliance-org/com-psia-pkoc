@@ -51,7 +51,7 @@ public class TLVProvider
 
         if (length > encodedData.length - 2) {
             Log.e("TLVProvider", "Invalid length: " + length + " for data: " + java.util.Arrays.toString(encodedData));
-            throw new NegativeArraySizeException("Invalid length: " + length);
+            return null;
         }
 
         byte[] decodedData = new byte[length];
