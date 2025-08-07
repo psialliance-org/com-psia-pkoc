@@ -17,10 +17,10 @@ public class Constants
     public static final ArrayList<ReaderModel> KnownReaders = new ArrayList<>(Collections.singletonList
             (
                     new ReaderModel
-                            (
-                                    TLVProvider.getByteArrayFromGuid(UUID.fromString("ad0cbc8f-c353-427a-b479-37b5efcff6be")),
-                                    TLVProvider.getByteArrayFromGuid(UUID.fromString("b9897ed0-5272-4341-979a-b69850112d80"))
-                            )
+                    (
+                            TLVProvider.getByteArrayFromGuid(UUID.fromString("ad0cbc8f-c353-427a-b479-37b5efcff6be")),
+                            TLVProvider.getByteArrayFromGuid(UUID.fromString("b9897ed0-5272-4341-979a-b69850112d80"))
+                    )
             ));
 
     public static final ArrayList<SiteModel> KnownSites = new ArrayList<>(Collections.singletonList

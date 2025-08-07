@@ -947,104 +947,59 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                     return;
                 }
 
-                byte[] processedValue = value.clone(); // Create a new variable to hold the processed value
-
                 // Check if the data is encrypted
-                if (deviceModel.connectionType == PKOC_ConnectionType.ECHDE_Full && processedValue.length > 3) {
-                    ArrayList<BLE_Packet> packetsFromMessage = new ArrayList<>();
-                    int offset2 = 0;
+                ArrayList<BLE_Packet> packetsFromMessage = TLVProvider.GetValues(value);
+                if (deviceModel.connectionType == PKOC_ConnectionType.ECHDE_Full)
+                {
+                    ArrayList<BLE_Packet> packetsFromEncryptedBlock = new ArrayList<>();
 
-                    while (offset2 < processedValue.length) {
-                        byte type = processedValue[offset2];
-                        // Dhruv Added "& 0xFF" To correctly convert hex length to int
-                        int length = (processedValue[offset2 + 1] & 0xFF);
-
-                        if (type == BLE_PacketType.EncryptedDataFollows.getType()) {
-                            byte[] encryptedData = new byte[length];
-                            System.arraycopy(processedValue, offset2 + 2, encryptedData, 0, length);
-                            Log.d(TAG, "Encrypted data: " + Hex.toHexString(encryptedData));
-                            byte[] unencryptedData = CryptoProvider.getFromAES256(deviceModel.sharedSecret, encryptedData, deviceModel.counter);
+                    for (BLE_Packet blePacket : packetsFromMessage)
+                    {
+                        if (blePacket.PacketType.getType() == BLE_PacketType.EncryptedDataFollows.getType())
+                        {
+                            Log.d(TAG, "Encrypted data: " + Hex.toHexString(blePacket.Data));
+                            byte[] unencryptedData = CryptoProvider.getFromAES256(deviceModel.sharedSecret, blePacket.Data, deviceModel.counter);
                             deviceModel.counter++;
                             Log.d(TAG, "Decrypted data: " + Hex.toHexString(unencryptedData));
-                            packetsFromMessage.addAll(TLVProvider.GetValues(unencryptedData));
-                            offset2 += length + 2;
-                        } else {
-                            byte[] data = new byte[length];
-                            System.arraycopy(processedValue, offset2 + 2, data, 0, length);
-                            packetsFromMessage.add(new BLE_Packet(BLE_PacketType.decode(type), data));
-                            offset2 += length + 2;
+                            packetsFromEncryptedBlock.addAll(TLVProvider.GetValues(unencryptedData));
                         }
                     }
 
-                    for (BLE_Packet packet : packetsFromMessage) {
-                        if (packet != null) {
-                            switch (packet.PacketType) {
-                                case PublicKey:
-                                    deviceModel.connectionType = PKOC_ConnectionType.Uncompressed;
-                                    deviceModel.publicKey = packet.Data;
-                                    Log.d(TAG, "Determined PKOC flow: Normal flow");
-                                    Log.d(TAG, "THIS IS THE ONE Public key: " + Hex.toHexString(packet.Data));
-                                    break;
-                                case DigitalSignature:
-                                    deviceModel.signature = packet.Data;
-                                    Log.d(TAG, "Signature: " + Hex.toHexString(packet.Data)); //signed by the private key of the device
-                                    break;
-                                case UncompressedTransientPublicKey:
-                                    Log.d(TAG, "Uncompressed transient public key: " + Hex.toHexString(packet.Data));
-                                    deviceModel.receivedTransientPublicKey = packet.Data;
-                                    break;
-                                case EncryptedDataFollows:
-                                    // This case should not be reached because we already decrypted the data above
-                                    Log.w(TAG, "Unexpected EncryptedDataFollows packet");
-                                    break;
-                                case LastUpdateTime:
-                                    deviceModel.creationTime = new BigInteger(packet.Data).intValue();
-                                    Log.d(TAG, "Creation time: " + deviceModel.creationTime);
-                                    break;
-                                case ProtocolVersion:
-                                    // Dhruv Changed to 5 byte protocol version
-                                    deviceModel.protocolVersion = new byte[]{(byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01};
-                                    Log.d(TAG, "Protocol Version: " + Arrays.toString(deviceModel.protocolVersion));
-                                default:
-                                    break;
-                            }
-                        }
-                    }
-                } else {
-                    // Use processedValue for TLVProvider.GetValues
-                    ArrayList<BLE_Packet> packetsFromMessage = TLVProvider.GetValues(processedValue);
-                    for (BLE_Packet packet : packetsFromMessage) {
-                        if (packet != null) {
-                            switch (packet.PacketType) {
-                                case PublicKey:
-                                    deviceModel.connectionType = PKOC_ConnectionType.Uncompressed;
-                                    deviceModel.publicKey = packet.Data;
-                                    Log.d(TAG, "Determined PKOC flow: Normal flow");
-                                    Log.d(TAG, "THIS IS THE ONE Public key: " + Hex.toHexString(packet.Data));
-                                    break;
-                                case DigitalSignature:
-                                    deviceModel.signature = packet.Data;
-                                    Log.d(TAG, "Signature: " + Hex.toHexString(packet.Data)); //signed by the private key of the device
-                                    break;
-                                case UncompressedTransientPublicKey:
-                                    Log.d(TAG, "Uncompressed transient public key: " + Hex.toHexString(packet.Data));
-                                    deviceModel.receivedTransientPublicKey = packet.Data;
-                                    break;
-                                case EncryptedDataFollows:
-                                    // This case should not be reached because we already decrypted the data above
-                                    Log.w(TAG, "Unexpected EncryptedDataFollows packet");
-                                    break;
-                                case LastUpdateTime:
-                                    deviceModel.creationTime = new BigInteger(packet.Data).intValue();
-                                    Log.d(TAG, "Creation time: " + deviceModel.creationTime);
-                                    break;
-                                case ProtocolVersion:
-                                    // Dhruv changed this to support 5 byte protocol version
-                                    deviceModel.protocolVersion = new byte[]{(byte) 0x03, (byte) 0x00, (byte)0x00, (byte) 0x00, (byte)0x01};
-                                    Log.d(TAG, "Protocol Version is:" + Arrays.toString(deviceModel.protocolVersion));
-                                default:
-                                    break;
-                            }
+                    packetsFromMessage.addAll(packetsFromEncryptedBlock);
+                }
+
+                // Use processedValue for TLVProvider.GetValues
+                for (BLE_Packet packet : packetsFromMessage) {
+                    if (packet != null) {
+                        switch (packet.PacketType) {
+                            case PublicKey:
+                                deviceModel.connectionType = PKOC_ConnectionType.Uncompressed;
+                                deviceModel.publicKey = packet.Data;
+                                Log.d(TAG, "Determined PKOC flow: Normal flow");
+                                Log.d(TAG, "THIS IS THE ONE Public key: " + Hex.toHexString(packet.Data));
+                                break;
+                            case DigitalSignature:
+                                deviceModel.signature = packet.Data;
+                                Log.d(TAG, "Signature: " + Hex.toHexString(packet.Data)); //signed by the private key of the device
+                                break;
+                            case UncompressedTransientPublicKey:
+                                Log.d(TAG, "Uncompressed transient public key: " + Hex.toHexString(packet.Data));
+                                deviceModel.receivedTransientPublicKey = packet.Data;
+                                break;
+                            case EncryptedDataFollows:
+                                // This case should not be reached because we already decrypted the data above
+                                Log.w(TAG, "Unexpected EncryptedDataFollows packet");
+                                break;
+                            case LastUpdateTime:
+                                deviceModel.creationTime = new BigInteger(packet.Data).intValue();
+                                Log.d(TAG, "Creation time: " + deviceModel.creationTime);
+                                break;
+                            case ProtocolVersion:
+                                // Dhruv changed this to support 5 byte protocol version
+                                deviceModel.protocolVersion = new byte[]{(byte) 0x03, (byte) 0x00, (byte)0x00, (byte) 0x00, (byte)0x01};
+                                Log.d(TAG, "Protocol Version is:" + Arrays.toString(deviceModel.protocolVersion));
+                            default:
+                                break;
                         }
                     }
                 }

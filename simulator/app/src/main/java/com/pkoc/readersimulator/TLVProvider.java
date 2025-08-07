@@ -39,7 +39,7 @@ public class TLVProvider
         // Extract the Protocol Version (first byte)
         byte protocolVersion = encodedData[0];
         BLE_PacketType packetType = BLE_PacketType.decode(encodedData[0]);
-        int length = encodedData[1];
+        int length = encodedData[1] & 0xFF;
 
         // Debugging: Log the Protocol Version, length, and the data being processed
         Log.d("TLVProvider", "Processing TLV: ProtocolVersion=" + protocolVersion + ", Type=" + packetType + ", Length=" + length);
@@ -49,7 +49,7 @@ public class TLVProvider
             return null;
         }
 
-        if (length < 0 || length > encodedData.length - 2) {
+        if (length > encodedData.length - 2) {
             Log.e("TLVProvider", "Invalid length: " + length + " for data: " + java.util.Arrays.toString(encodedData));
             throw new NegativeArraySizeException("Invalid length: " + length);
         }
