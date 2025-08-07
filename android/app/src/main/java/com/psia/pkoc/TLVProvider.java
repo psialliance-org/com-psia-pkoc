@@ -49,6 +49,11 @@ public class TLVProvider
      */
     public static BLE_Packet GetBleValue(byte[] encodedData)
     {
+        if (encodedData.length < 3) // not long enough to be a TLV
+        {
+            return null;
+        }
+
         BLE_PacketType packetType = BLE_PacketType.decode(encodedData[0]);
         int length = encodedData[1] & 0xFF;
 
@@ -81,6 +86,11 @@ public class TLVProvider
      */
     public static NFC_Packet GetNfcValue(byte[] encodedData)
     {
+        if (encodedData.length < 3) // not long enough to be a TLV
+        {
+            return null;
+        }
+
         NFC_PacketType packetType = NFC_PacketType.decode(encodedData[0]);
 
         int length = encodedData[1] & 0xFF;
