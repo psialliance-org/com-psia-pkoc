@@ -55,6 +55,9 @@
     <string name="enable_nfc">Enable NFC</string>
     <string name="nfc_is_disabled_please_enable_it_if_you_intend_to_use_nfc_to_transmit_credentials">NFC is disabled. Please enable it if you intend to use NFC to transmit credentials.</string>
     <string name="go_to_settings">Go to Settings</string>
+    <string name="copy_key">Copy Key</string>
+    <string name="public_key_qr_code">Public Key QR Code</string>
+    <string name="display_qr_public_key">Display QR Public Key</string>
 
     <string-array name="key_options">
         <item>Full Public Key</item>

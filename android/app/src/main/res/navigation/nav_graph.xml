@@ -48,7 +48,7 @@
 
     <fragment
         android:id="@+id/DisplayPKFragment"
-        android:name="com.psia.pkoc.DisplayPKFragment"
+        android:name="com.psia.pkoc.DisplayPublicKeyFragment"
         android:label="Display Public Key QR Code"
         tools:layout="@layout/fragment_send_credential">
     <action
