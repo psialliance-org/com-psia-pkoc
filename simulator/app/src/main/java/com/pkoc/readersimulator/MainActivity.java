@@ -62,6 +62,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.UUID;
 
@@ -834,7 +835,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
 
             if (deviceModel.transientKeyPair == null && deviceModel.receivedTransientPublicKey == null && deviceModel.signature == null) {
                 deviceModel.transientKeyPair = CryptoProvider.CreateTransientKeyPair();
-                byte[] encodedPublicKey = deviceModel.transientKeyPair.getPublic().getEncoded();
+                byte[] encodedPublicKey = Objects.requireNonNull(deviceModel.transientKeyPair).getPublic().getEncoded();
                 byte[] uncompressedTransientPublicKey = CryptoProvider.getUncompressedPublicKeyBytes(encodedPublicKey);
                 Log.i(TAG, "Uncompressed Transient Public Key: " + Arrays.toString(uncompressedTransientPublicKey));
 
@@ -959,6 +960,13 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                         {
                             Log.d(TAG, "Encrypted data: " + Hex.toHexString(blePacket.Data));
                             byte[] unencryptedData = CryptoProvider.getFromAES256(deviceModel.sharedSecret, blePacket.Data, deviceModel.counter);
+                            if (unencryptedData == null)
+                            {
+                                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Error: Failed to decrypt message.", Toast.LENGTH_LONG).show());
+                                mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null);
+                                onGattOperationCompleted();
+                                return;
+                            }
                             deviceModel.counter++;
                             Log.d(TAG, "Decrypted data: " + Hex.toHexString(unencryptedData));
                             packetsFromEncryptedBlock.addAll(TLVProvider.GetValues(unencryptedData));
@@ -1011,6 +1019,14 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                                 deviceModel.transientKeyPair.getPrivate(),
                                 deviceModel.receivedTransientPublicKey);
 
+                        if (deviceModel.sharedSecret == null)
+                        {
+                            runOnUiThread(() -> Toast.makeText(MainActivity.this, "Error: Failed to establish secure channel.", Toast.LENGTH_LONG).show());
+                            mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null);
+                            onGattOperationCompleted();
+                            return;
+                        }
+
                         deviceModel.connectionType = PKOC_ConnectionType.ECHDE_Full;
                         Log.d(TAG, "Determined PKOC flow: ECDHE Perfect Secrecy");
                         Log.d(TAG, "Shared Secret: " + Hex.toHexString(deviceModel.sharedSecret));
@@ -1020,6 +1036,14 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                         byte[] toSign = generateSignaturePackage(deviceModel);
 
                         byte[] signatureASN = CryptoProvider.GetSignedMessage(toSign);
+                        if (signatureASN == null)
+                        {
+                            runOnUiThread(() -> Toast.makeText(MainActivity.this, "Error: Failed to sign message.", Toast.LENGTH_LONG).show());
+                            mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null);
+                            onGattOperationCompleted();
+                            return;
+                        }
+
                         Log.d(TAG, "Signature with ASN header: " + Hex.toHexString(signatureASN));
 
                         byte[] signature = TLVProvider.RemoveASNHeaderFromSignature(signatureASN);
@@ -1232,8 +1256,13 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
 
                         byte[] signatureMessage = generateSignaturePackage(deviceModel);
                         final byte[] hash = CryptoProvider.getSHA256(signatureMessage);
-                        sigValid = ecSign.verifySignature(hash, ri, si);
+                        if (hash == null) {
+                            runOnUiThread(() -> Toast.makeText(MainActivity.this, "Error: Failed to prepare data for verification.", Toast.LENGTH_LONG).show());
+                        } else {
+                            sigValid = ecSign.verifySignature(hash, ri, si);
+                        }
                     } catch (Exception e) {
+                        runOnUiThread(() -> Toast.makeText(MainActivity.this, "Error: Signature verification failed.", Toast.LENGTH_LONG).show());
                         Log.d(TAG, e.toString());
                     }
 

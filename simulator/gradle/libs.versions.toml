@@ -1,5 +1,5 @@
 [versions]
-agp = "8.11.1"
+agp = "8.12.0"
 bcpkixJdk15to18 = "1.81"
 junit = "4.13.2"
 junitVersion = "1.2.1"

@@ -28,7 +28,6 @@ import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Objects;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
@@ -36,6 +35,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class CryptoProvider {
+    private static final String TAG = "CryptoProvider";
     final static byte[] IvCounter = Hex.decode("AABBCCDD");
 
     public static byte[] getPublicKeyComponentX(byte[] publicKey) {
@@ -69,7 +69,8 @@ public class CryptoProvider {
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
             return keyFactory.generatePrivate(encodedKeySpec);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            Log.e(TAG, "Error generating private key from uncompressed bytes", e);
+            return null;
         }
     }
 
@@ -82,7 +83,8 @@ public class CryptoProvider {
             ECPublicKeySpec pubKeySpec = new ECPublicKeySpec(point, params);
             return kf.generatePublic(pubKeySpec);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            Log.e(TAG, "Error generating public key from uncompressed bytes", e);
+            return null;
         }
     }
 
@@ -90,8 +92,9 @@ public class CryptoProvider {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA256");
             return md.digest(message);
-        } catch (Exception ignored) {
-            throw new RuntimeException();
+        } catch (Exception e) {
+            Log.e(TAG, "Error generating SHA256 hash", e);
+            return null;
         }
     }
 
@@ -101,7 +104,7 @@ public class CryptoProvider {
             bigIntegerCounter = bigIntegerCounter.add(BigInteger.valueOf(counter));
             byte[] iv = Arrays.concatenate(Hex.decode("00000000000001"), BigIntegers.asUnsignedByteArray(bigIntegerCounter));
 
-            Log.d("CryptoProvider", "Printing the IV: " + bytesToHex2(iv));
+            Log.d(TAG, "Printing the IV: " + Hex.toHexString(iv));
 
             SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey, "AES");
             IvParameterSpec parameterSpec = new IvParameterSpec(iv);
@@ -109,21 +112,9 @@ public class CryptoProvider {
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, parameterSpec);
             return cipher.doFinal(message);
         } catch (Exception e) {
-            Log.d("MainActivity", Objects.requireNonNull(e.getMessage()));
+            Log.e(TAG, "Error decrypting AES256 message", e);
+            return null;
         }
-
-        return new byte[0];
-    }
-
-    /**
-     * Helper method to convert a byte array into a hexadecimal string.
-     */
-    private static String bytesToHex2(byte[] bytes) {
-        StringBuilder sb = new StringBuilder(bytes.length * 2);
-        for (byte b : bytes) {
-            sb.append(String.format("%02X", b));
-        }
-        return sb.toString();
     }
 
     public static ECDomainParameters getDomainParameters() {
@@ -138,7 +129,8 @@ public class CryptoProvider {
             s.update(data);
             return s.sign();
         } catch (Exception e) {
-            return new byte[64];
+            Log.e(TAG, "Error signing message", e);
+            return null;
         }
     }
 
@@ -147,8 +139,9 @@ public class CryptoProvider {
             KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC);
             keyGenerator.initialize(256);
             return keyGenerator.generateKeyPair();
-        } catch (Exception ignored) {
-            throw new RuntimeException();
+        } catch (Exception e) {
+            Log.e(TAG, "Error creating transient key pair", e);
+            return null;
         }
     }
 
@@ -159,7 +152,8 @@ public class CryptoProvider {
             keyAgreement.doPhase(fromUncompressedPublicKey(publicKey), true);
             return keyAgreement.generateSecret();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            Log.e(TAG, "Error generating shared secret", e);
+            return null;
         }
     }
 }
