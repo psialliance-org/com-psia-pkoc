@@ -13,10 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,57 +22,56 @@ import androidx.fragment.app.Fragment;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
+import com.psia.pkoc.databinding.FragmentDisplayPublicKeyBinding;
+
+import org.bouncycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.security.PublicKey;
 
-public class DisplayPKFragment extends Fragment {
-
+public class DisplayPublicKeyFragment extends Fragment {
     private String formattedKey = "";
-    private ImageView qrImageView;
-    private TextView publicKeyTextView;
-    private Spinner keyOptionSpinner;
+    private FragmentDisplayPublicKeyBinding binding;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_displaypk, container, false);
-        qrImageView = view.findViewById(R.id.qrImageView);
-        publicKeyTextView = view.findViewById(R.id.publicKeyTextView);
-        Button copyKeyButton = view.findViewById(R.id.copyKeyButton);
-        keyOptionSpinner = view.findViewById(R.id.keyOptionSpinner);
+        binding = FragmentDisplayPublicKeyBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated (@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         try {
             PublicKey publicKey = (PublicKey) GetPublicKey();
 
             if (publicKey != null) {
                 byte[] uncompressedKey = CryptoProvider.getUncompressedPublicKeyBytes();
-                StringBuilder hexBuilder = new StringBuilder();
-                for (byte b : uncompressedKey) {
-                    hexBuilder.append(String.format("%02x", b));
-                }
-                formattedKey = hexBuilder.toString();
-                Log.i("FormattedPublicKey", formattedKey);
-                publicKeyTextView.setText(formattedKey);
+                formattedKey = Hex.toHexString(uncompressedKey);
+                Log.i("Formatted Public Key", formattedKey);
+                binding.publicKeyTextView.setText(formattedKey);
                 updateQRCode(getSelectedKeyData());
             }
         } catch (WriterException e) {
-            e.printStackTrace();
+            Log.e("MainActivity", "An exception was hit in DisplayPublicKeyFragment.onViewCreated: " + e.getMessage());
         }
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(requireContext(),
                 R.array.key_options, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        keyOptionSpinner.setAdapter(adapter);
+        binding.keyOptionSpinner.setAdapter(adapter);
 
-        keyOptionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        binding.keyOptionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 try {
+                    binding.publicKeyTextView.setText(getSelectedKeyData());
                     updateQRCode(getSelectedKeyData());
                 } catch (WriterException e) {
-                    e.printStackTrace();
+                    Log.e("MainActivity", "An exception was hit in DisplayPublicKeyFragment.onViewCreated: " + e.getMessage());
                 }
             }
 
@@ -84,33 +79,36 @@ public class DisplayPKFragment extends Fragment {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        copyKeyButton.setOnClickListener(v -> {
+       binding.copyKeyButton.setOnClickListener(v -> {
             String textToCopy = getSelectedKeyData();
             ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("Public Key", textToCopy);
             clipboard.setPrimaryClip(clip);
             Toast.makeText(requireContext(), "Copied to clipboard", Toast.LENGTH_SHORT).show();
         });
-
-        return view;
     }
 
     private String getSelectedKeyData() {
-
-        Object selectedItem = keyOptionSpinner.getSelectedItem();
+        Object selectedItem = binding.keyOptionSpinner.getSelectedItem();
         String selectedOption = selectedItem != null ? selectedItem.toString() : "Full Public Key";
 
         if (!selectedOption.equals("Full Public Key") && formattedKey.length() >= 66) {
             String keySegment = formattedKey.substring(2, 66); // skip first 2 chars, take next 64
             int length = 0;
-            if (selectedOption.equals("64-bit")) {
-                length = 16;
-            } else if (selectedOption.equals("128-bit")) {
-                length = 32;
-            } else if (selectedOption.equals("256-bit")) {
-                length = 64;
+            switch (selectedOption)
+            {
+                case "64-bit":
+                    length = 16;
+                    break;
+                case "128-bit":
+                    length = 32;
+                    break;
+                case "256-bit":
+                    length = 64;
+                    break;
             }
-            if (length > 0 && keySegment.length() >= length) {
+            if (length > 0)
+            {
                 String hexPart = keySegment.substring(keySegment.length() - length);
                 BigInteger decimalValue = new BigInteger(hexPart, 16);
                 return decimalValue.toString();
@@ -122,6 +120,6 @@ public class DisplayPKFragment extends Fragment {
     private void updateQRCode(String data) throws WriterException {
         BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
         Bitmap bitmap = barcodeEncoder.encodeBitmap(data, BarcodeFormat.QR_CODE, 600, 600);
-        qrImageView.setImageBitmap(bitmap);
+        binding.qrImageView.setImageBitmap(bitmap);
     }
 }
