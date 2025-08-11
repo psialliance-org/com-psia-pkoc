@@ -6,11 +6,11 @@ import CommonCrypto
 import BigInt
 import CryptoSwift
 
-class CryptoProvider: ObservableObject
-{    
+public class CryptoProvider: ObservableObject
+{
     static private var publicKey : P256.Signing.PublicKey? = nil
     static private var privateKey : P256.Signing.PrivateKey? = nil
-    static private var IvCounter : [UInt8] = Array(Data(hex: "00000001"))
+    static private let IvPrepend = Data([0, 0, 0, 0, 0, 0, 0, 1])
     
     static func exportPublicKey() -> P256.Signing.PublicKey
     {
@@ -123,12 +123,20 @@ class CryptoProvider: ObservableObject
         return SecKeyCreateRandomKey(attributes as CFDictionary, &error)!
     }
     
-    static func getAES256(secretKey : [UInt8], data : [UInt8], counter : Int) -> [UInt8]?
+    static func getCcmIv(counter: UInt32) -> [UInt8]
     {
-        var bigIntegerCounter = BigUInt(Data(IvCounter));
-        bigIntegerCounter = bigIntegerCounter + BigUInt(counter)
-        let iv = Array(Data(hex: "00000000000001")) + Array(bigIntegerCounter.serialize())
-
+        var counterBigEndian = counter.bigEndian
+        let counterBytes = withUnsafeBytes(of: &counterBigEndian)
+        {
+            Array($0)
+        }
+        return IvPrepend + counterBytes
+    }
+    
+    static func getAES256(secretKey : [UInt8], data : [UInt8], counter : UInt32) -> [UInt8]?
+    {
+        let iv = getCcmIv(counter: counter)
+        
         let aes = try? AES(key: secretKey, blockMode: CCM(iv: iv, tagLength: 8, messageLength: data.count), padding: .noPadding)
         
         return try? (aes?.encrypt(data))

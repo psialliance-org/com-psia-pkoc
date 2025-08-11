@@ -16,11 +16,11 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.math.ec.ECPoint;
-import org.bouncycastle.util.BigIntegers;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.Arrays;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -55,10 +55,7 @@ public class CryptoProvider
     final static String AesSpec = "AES";
     final static String CcmCipher = "AES/CCM/NoPadding";
     final static String HashAlgorithm = "SHA256";
-    final static byte[] IvPrepend = Hex.decode("00000000000001");
-    final static byte[] IvCounter = Hex.decode("00000001");
-
-
+    final static byte[] IvPrepend = new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 };
     private static KeyGenParameterSpec.Builder getKeyGenParamaterSpecBuilder()
     {
         ECGenParameterSpec ecParam = new ECGenParameterSpec(NamedCurve);
@@ -183,6 +180,14 @@ public class CryptoProvider
         }
     }
 
+    public static byte[] getCcmIv(int counter)
+    {
+        ByteBuffer buf = ByteBuffer.allocate(12).order(ByteOrder.BIG_ENDIAN);
+        buf.put(IvPrepend);
+        buf.putInt(counter);
+        return buf.array();
+    }
+
     /**
      * Get AES256 encrypted data
      * @param secretKey Secret key for AES encryption
@@ -193,30 +198,23 @@ public class CryptoProvider
     {
         try
         {
-            // 1. Convert IvCounter into a BigInteger (assuming IvCounter is a String).
-            BigInteger bigIntegerCounter = new BigInteger(IvCounter);
-            Log.d("CryptoProvider", "Printing the bigIntegerIV in hex: " + bigIntegerCounter.toString(16));
-
-            // 2. Add the 'counter' value to the BigInteger
-            bigIntegerCounter = bigIntegerCounter.add(BigInteger.valueOf(counter));
-
-            // 3. Construct IV by concatenating "00000000000001" (hex-decoded) + the BigInteger bytes
-            byte[] iv = Arrays.concatenate(IvPrepend, BigIntegers.asUnsignedByteArray(bigIntegerCounter));
+            // 1. Construct IV by concatenating "00000000000001" (hex-decoded) + the BigInteger bytes
+            byte[] iv = getCcmIv(counter);
 
             Log.d("CryptoProvider", "Printing the secret key " + Hex.toHexString(secretKey));
 
             Log.d("CryptoProvider", "Printing the IV " + Hex.toHexString(iv));
 
-            // 4. Initialize Cipher
+            // 2. Initialize Cipher
             SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey, AesSpec);
             IvParameterSpec parameterSpec = new IvParameterSpec(iv);
             Cipher cipher = Cipher.getInstance(CcmCipher);
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, parameterSpec);
 
-            // 5. Encrypt message
+            // 3. Encrypt message
             byte[] encryptedData = cipher.doFinal(message);
 
-            // 6. Log size and hex output of the encrypted data
+            // 4. Log size and hex output of the encrypted data
             Log.d("CryptoProvider", "Encrypted data length: " + encryptedData.length);
             Log.d("CryptoProvider", "Encrypted data (hex): " + Hex.toHexString(encryptedData));
 
@@ -358,9 +356,7 @@ public class CryptoProvider
     {
         try
         {
-            BigInteger bigIntegerCounter = new BigInteger(IvCounter);
-            bigIntegerCounter = bigIntegerCounter.add(BigInteger.valueOf(counter));
-            byte[] iv = Arrays.concatenate(IvPrepend, BigIntegers.asUnsignedByteArray(bigIntegerCounter));
+            byte[] iv = getCcmIv(counter);
 
             SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey, AesSpec);
             IvParameterSpec parameterSpec = new IvParameterSpec(iv);

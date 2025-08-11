@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -37,6 +37,16 @@
 		84F6CFA12C6E3EC20005890C /* Toast in Frameworks */ = {isa = PBXBuildFile; productRef = 84F6CFA02C6E3EC20005890C /* Toast */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		6F6853962E4A2A2A00F5D52A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 96F759FB2962D9EF00D36D9F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 96F75A022962D9EF00D36D9F;
+			remoteInfo = PSIAExperienceApp;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		849016B32C66490100169C23 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -51,6 +61,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		6F347D792E4A279D00AC2045 /* PSIAExperienceAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PSIAExperienceAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F8180002E366AF5008A22C5 /* DisplayPublicKeyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayPublicKeyView.swift; sourceTree = "<group>"; };
 		6F8180062E366E19008A22C5 /* DisplayPublicKeyOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayPublicKeyOption.swift; sourceTree = "<group>"; };
 		6FB6CDF32DF634E400555103 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
@@ -81,7 +92,18 @@
 		96F75A032962D9EF00D36D9F /* PSIAExperienceApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PSIAExperienceApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		6F347D7A2E4A279D00AC2045 /* PSIAExperienceAppTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = PSIAExperienceAppTests; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
+		6F347D762E4A279D00AC2045 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		96F75A002962D9EF00D36D9F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -140,6 +162,7 @@
 			children = (
 				849016CF2C666BC200169C23 /* Sources */,
 				849016B72C66652800169C23 /* Package.swift */,
+				6F347D7A2E4A279D00AC2045 /* PSIAExperienceAppTests */,
 				96F75A042962D9EF00D36D9F /* Products */,
 				84C0C1C72C6554AA003C74CD /* Frameworks */,
 			);
@@ -149,6 +172,7 @@
 			isa = PBXGroup;
 			children = (
 				96F75A032962D9EF00D36D9F /* PSIAExperienceApp.app */,
+				6F347D792E4A279D00AC2045 /* PSIAExperienceAppTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -156,6 +180,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		6F347D782E4A279D00AC2045 /* PSIAExperienceAppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6F347D7F2E4A279D00AC2045 /* Build configuration list for PBXNativeTarget "PSIAExperienceAppTests" */;
+			buildPhases = (
+				6F347D752E4A279D00AC2045 /* Sources */,
+				6F347D762E4A279D00AC2045 /* Frameworks */,
+				6F347D772E4A279D00AC2045 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6F6853972E4A2A2A00F5D52A /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				6F347D7A2E4A279D00AC2045 /* PSIAExperienceAppTests */,
+			);
+			name = PSIAExperienceAppTests;
+			packageProductDependencies = (
+			);
+			productName = PSIAExperienceAppTests;
+			productReference = 6F347D792E4A279D00AC2045 /* PSIAExperienceAppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		96F75A022962D9EF00D36D9F /* PSIAExperienceApp */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 96F75A122962D9F100D36D9F /* Build configuration list for PBXNativeTarget "PSIAExperienceApp" */;
@@ -186,9 +233,13 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1420;
+				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1640;
 				TargetAttributes = {
+					6F347D782E4A279D00AC2045 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 96F75A022962D9EF00D36D9F;
+					};
 					96F75A022962D9EF00D36D9F = {
 						CreatedOnToolsVersion = 14.2;
 						LastSwiftMigration = 1630;
@@ -214,11 +265,19 @@
 			projectRoot = "";
 			targets = (
 				96F75A022962D9EF00D36D9F /* PSIAExperienceApp */,
+				6F347D782E4A279D00AC2045 /* PSIAExperienceAppTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		6F347D772E4A279D00AC2045 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		96F75A012962D9EF00D36D9F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -230,6 +289,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		6F347D752E4A279D00AC2045 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		96F759FF2962D9EF00D36D9F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -263,7 +329,68 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		6F6853972E4A2A2A00F5D52A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 96F75A022962D9EF00D36D9F /* PSIAExperienceApp */;
+			targetProxy = 6F6853962E4A2A2A00F5D52A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		6F347D7D2E4A279D00AC2045 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = NO;
+				DEVELOPMENT_TEAM = LJ99BF5CNX;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.elatec.PSIAExperienceAppTests;
+				PRODUCT_MODULE_NAME = PSIAExperienceAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PSIAExperienceApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PSIAExperienceApp";
+			};
+			name = Debug;
+		};
+		6F347D7E2E4A279D00AC2045 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = NO;
+				DEVELOPMENT_TEAM = LJ99BF5CNX;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.elatec.PSIAExperienceAppTests;
+				PRODUCT_MODULE_NAME = PSIAExperienceAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PSIAExperienceApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PSIAExperienceApp";
+			};
+			name = Release;
+		};
 		96F75A102962D9F100D36D9F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -300,6 +427,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = GZ95WVG3PC;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -323,6 +451,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_MODULE_NAME = PSIAExperienceApp;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_ENFORCE_EXCLUSIVE_ACCESS = off;
@@ -366,6 +495,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = GZ95WVG3PC;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -382,6 +512,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 12.4;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				PRODUCT_MODULE_NAME = PSIAExperienceApp;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_ENFORCE_EXCLUSIVE_ACCESS = off;
@@ -501,6 +632,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		6F347D7F2E4A279D00AC2045 /* Build configuration list for PBXNativeTarget "PSIAExperienceAppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6F347D7D2E4A279D00AC2045 /* Debug */,
+				6F347D7E2E4A279D00AC2045 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		96F759FE2962D9EF00D36D9F /* Build configuration list for PBXProject "PSIAExperienceApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

@@ -12,11 +12,12 @@ import org.bouncycastle.jce.ECPointUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
-import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.BigIntegers;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -36,7 +37,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class CryptoProvider {
     private static final String TAG = "CryptoProvider";
-    final static byte[] IvCounter = Hex.decode("00000001");
+    final static byte[] IvPrepend = new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 };
 
     public static byte[] getPublicKeyComponentX(byte[] publicKey) {
         byte[] x = new byte[32];
@@ -98,11 +99,17 @@ public class CryptoProvider {
         }
     }
 
+    public static byte[] getCcmIv(int counter)
+    {
+        ByteBuffer buf = ByteBuffer.allocate(12).order(ByteOrder.BIG_ENDIAN);
+        buf.put(IvPrepend);
+        buf.putInt(counter);
+        return buf.array();
+    }
+
     public static byte[] getFromAES256(byte[] secretKey, byte[] message, int counter) {
         try {
-            BigInteger bigIntegerCounter = new BigInteger(IvCounter);
-            bigIntegerCounter = bigIntegerCounter.add(BigInteger.valueOf(counter));
-            byte[] iv = Arrays.concatenate(Hex.decode("00000000000001"), BigIntegers.asUnsignedByteArray(bigIntegerCounter));
+            byte[] iv = getCcmIv(counter);
 
             Log.d(TAG, "Printing the IV: " + Hex.toHexString(iv));
 
