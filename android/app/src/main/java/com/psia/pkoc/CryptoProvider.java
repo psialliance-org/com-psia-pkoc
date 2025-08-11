@@ -21,6 +21,7 @@ import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.Arrays;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -55,9 +56,11 @@ public class CryptoProvider
     final static String AesSpec = "AES";
     final static String CcmCipher = "AES/CCM/NoPadding";
     final static String HashAlgorithm = "SHA256";
-    final static byte[] IvPrepend = Hex.decode("00000000000001");
-    /** @noinspection SpellCheckingInspection*/
-    final static byte[] IvCounter = Hex.decode("AABBCCDD");
+
+
+    private static final byte[] IvPrepend = Hex.decode("0000000000000001");
+    private static final byte[] IvCounter = Hex.decode("00000001");
+
 
 
     private static KeyGenParameterSpec.Builder getKeyGenParamaterSpecBuilder()
@@ -202,7 +205,9 @@ public class CryptoProvider
             bigIntegerCounter = bigIntegerCounter.add(BigInteger.valueOf(counter));
 
             // 3. Construct IV by concatenating "00000000000001" (hex-decoded) + the BigInteger bytes
-            byte[] iv = Arrays.concatenate(IvPrepend, BigIntegers.asUnsignedByteArray(bigIntegerCounter));
+            byte[] fixedPrefix = Hex.decode("0000000000000001");
+            byte[] counterBytes = ByteBuffer.allocate(4).putInt(counter + 1).array();
+            byte[] iv = Arrays.concatenate(fixedPrefix, counterBytes);
 
             Log.d("CryptoProvider", "Printing the secret key " + Hex.toHexString(secretKey));
 
@@ -361,7 +366,9 @@ public class CryptoProvider
         {
             BigInteger bigIntegerCounter = new BigInteger(IvCounter);
             bigIntegerCounter = bigIntegerCounter.add(BigInteger.valueOf(counter));
-            byte[] iv = Arrays.concatenate(IvPrepend, BigIntegers.asUnsignedByteArray(bigIntegerCounter));
+            byte[] fixedPrefix = Hex.decode("0000000000000001");
+            byte[] counterBytes = ByteBuffer.allocate(4).putInt(counter + 1).array();
+            byte[] iv = Arrays.concatenate(fixedPrefix, counterBytes);
 
             SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey, AesSpec);
             IvParameterSpec parameterSpec = new IvParameterSpec(iv);

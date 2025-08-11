@@ -17,6 +17,7 @@ import org.bouncycastle.util.BigIntegers;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -98,11 +99,12 @@ public class CryptoProvider {
         }
     }
 
+
     public static byte[] getFromAES256(byte[] secretKey, byte[] message, int counter) {
         try {
-            BigInteger bigIntegerCounter = new BigInteger(IvCounter);
-            bigIntegerCounter = bigIntegerCounter.add(BigInteger.valueOf(counter));
-            byte[] iv = Arrays.concatenate(Hex.decode("00000000000001"), BigIntegers.asUnsignedByteArray(bigIntegerCounter));
+            byte[] fixedPrefix = Hex.decode("0000000000000001");
+            byte[] counterBytes = ByteBuffer.allocate(4).putInt(counter + 1).array(); // Big Endian
+            byte[] iv = Arrays.concatenate(fixedPrefix, counterBytes);
 
             Log.d(TAG, "Printing the IV: " + Hex.toHexString(iv));
 
@@ -116,6 +118,7 @@ public class CryptoProvider {
             return null;
         }
     }
+
 
     public static ECDomainParameters getDomainParameters() {
         X9ECParameters domain = ECNamedCurveTable.getByName("secp256r1");
