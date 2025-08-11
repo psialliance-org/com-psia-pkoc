@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import android.text.SpannableStringBuilder;
@@ -302,6 +303,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         }
     }
 
+
     @Override
     public void onTagDiscovered(Tag tag) {
         Log.d("NFC", "Tag discovered");
@@ -317,6 +319,29 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                 new SecureRandom().nextBytes(readerIdentifier); // Ensure it's random
                 byte[] authResponse = sendAuthenticationCommand(isoDep, transactionId, readerIdentifier);
                 Log.d("NFC", "Authentication Response: " + Hex.toHexString(authResponse));
+
+                byte[] publicKey = extractPublicKey(authResponse);
+                if (publicKey == null) {
+                    Log.e(TAG, "Invalid public key extracted");
+                    showInvalidKeyDialog();
+                    isoDep.close();
+                    return;
+                }
+                byte[] signature = extractSignature(authResponse);
+                if (signature == null) {
+                    Log.e(TAG, "Invalid signature extracted");
+                    showInvalidKeyDialog();
+                    isoDep.close();
+                    return;
+                }
+                // Validate the public key using the transaction ID and signature
+                if (!isValidPublicKey(publicKey, transactionId, signature)) {
+                    Log.e(TAG, "Invalid public key");
+                    showInvalidKeyDialog();
+                    isoDep.close();
+                    return;
+                }
+
                 parseAuthenticationResponse(authResponse);
                 isoDep.close();
             } catch (IOException e) {
@@ -1445,5 +1470,58 @@ before returning the concatenated byte array for signing
         handlePkocTimeout();
     };
 
+    private boolean isValidPublicKey(byte[] publicKey, byte[] transactionId, byte[] signature) {
+        try {
+            ECDomainParameters ecParams = CryptoProvider.getDomainParameters();
+            ECPoint ecPoint = ecParams.getCurve().decodePoint(publicKey);
+            ECPublicKeyParameters pubKeyParams = new ECPublicKeyParameters(ecPoint, ecParams);
+            ECDSASigner signer = new ECDSASigner();
+            signer.init(false, pubKeyParams);
+            BigInteger r = new BigInteger(1, Arrays.copyOfRange(signature, 0, 32));
+            BigInteger s = new BigInteger(1, Arrays.copyOfRange(signature, 32, 64));
+            byte[] hash = CryptoProvider.getSHA256(transactionId);
+            return signer.verifySignature(hash, r, s);
+        } catch (Exception e) {
+            Log.e(TAG, "Invalid public key", e);
+            return false;
+        }
+    }
+    private void showInvalidKeyDialog() {
+        runOnUiThread(() -> {
+            new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Invalid Key Validation")
+                    .setMessage("The public key is invalid. Please try again.")
+                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                        // Dismiss the dialog
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        });
+    }
+    private byte[] extractPublicKey(byte[] authResponse) {
+        int index = 0;
+        while (index < authResponse.length) {
+            byte tag = authResponse[index];
+            int length = authResponse[index + 1];
+            if (tag == (byte) 0x5A) { // Public Key tag
+                return Arrays.copyOfRange(authResponse, index + 2, index + 2 + length);
+            }
+            index += 2 + length;
+        }
+        return null;
+    }
+
+    private byte[] extractSignature(byte[] authResponse) {
+        int index = 0;
+        while (index < authResponse.length) {
+            byte tag = authResponse[index];
+            int length = authResponse[index + 1];
+            if (tag == (byte) 0x9E) { // Signature tag
+                return Arrays.copyOfRange(authResponse, index + 2, index + 2 + length);
+            }
+            index += 2 + length;
+        }
+        return null;
+    }
 
 }
