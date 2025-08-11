@@ -10,7 +10,7 @@ class CryptoProvider: ObservableObject
 {    
     static private var publicKey : P256.Signing.PublicKey? = nil
     static private var privateKey : P256.Signing.PrivateKey? = nil
-    static private var IvCounter : [UInt8] = Array(Data(hex: "AABBCCDD"))
+    static private var IvCounter : [UInt8] = Array(Data(hex: "00000001"))
     
     static func exportPublicKey() -> P256.Signing.PublicKey
     {

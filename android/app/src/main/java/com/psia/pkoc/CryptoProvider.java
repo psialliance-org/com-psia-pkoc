@@ -56,8 +56,7 @@ public class CryptoProvider
     final static String CcmCipher = "AES/CCM/NoPadding";
     final static String HashAlgorithm = "SHA256";
     final static byte[] IvPrepend = Hex.decode("00000000000001");
-    /** @noinspection SpellCheckingInspection*/
-    final static byte[] IvCounter = Hex.decode("AABBCCDD");
+    final static byte[] IvCounter = Hex.decode("00000001");
 
 
     private static KeyGenParameterSpec.Builder getKeyGenParamaterSpecBuilder()

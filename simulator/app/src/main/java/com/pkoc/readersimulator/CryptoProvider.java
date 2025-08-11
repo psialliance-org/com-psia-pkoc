@@ -36,7 +36,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class CryptoProvider {
     private static final String TAG = "CryptoProvider";
-    final static byte[] IvCounter = Hex.decode("AABBCCDD");
+    final static byte[] IvCounter = Hex.decode("00000001");
 
     public static byte[] getPublicKeyComponentX(byte[] publicKey) {
         byte[] x = new byte[32];
