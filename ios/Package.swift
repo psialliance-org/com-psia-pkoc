@@ -32,7 +32,10 @@ let package = Package(
                 .copy("PSIAExperienceApp.entitlements"),
                 .copy("Assets.xcassets")
             ]
-        )
+        ).testTarget(
+            name: "PSIAExperienceTests",
+            dependencies: ["PSIAExperienceApp"]
+        ),
     ],
     swiftLanguageVersions: [.v5]
 )

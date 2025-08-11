@@ -14,6 +14,6 @@ public class FlowModel
     byte[] protocolVersion;
     byte[] sharedSecret;
     byte[] signature;
-    int counter = 0;
+    int counter = 1;
     int creationTime = 0;
 }
