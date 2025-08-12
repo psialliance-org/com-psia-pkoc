@@ -7,7 +7,12 @@ import android.util.Log;
 
 import org.bouncycastle.asn1.x9.ECNamedCurveTable;
 import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.modes.CCMBlockCipher;
+import org.bouncycastle.crypto.modes.CCMModeCipher;
+import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.jce.ECPointUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
@@ -106,23 +111,29 @@ public class CryptoProvider {
         buf.putInt(counter);
         return buf.array();
     }
-
     public static byte[] getFromAES256(byte[] secretKey, byte[] message, int counter) {
         try {
             byte[] iv = getCcmIv(counter);
-
             Log.d(TAG, "Printing the IV: " + Hex.toHexString(iv));
 
-            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey, "AES");
-            IvParameterSpec parameterSpec = new IvParameterSpec(iv);
-            Cipher cipher = Cipher.getInstance("AES/CCM/NoPadding");
-            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, parameterSpec);
-            return cipher.doFinal(message);
+            CCMModeCipher ccm = CCMBlockCipher.newInstance(AESEngine.newInstance());
+            AEADParameters params = new AEADParameters(new KeyParameter(secretKey), 128, iv); // 128-bit tag
+            ccm.init(false, params); // false = decryption
+
+            byte[] output = new byte[ccm.getOutputSize(message.length)];
+            int len = ccm.processBytes(message, 0, message.length, output, 0);
+            ccm.doFinal(output, len);
+
+            return output;
         } catch (Exception e) {
             Log.e(TAG, "Error decrypting AES256 message", e);
             return null;
         }
     }
+
+
+
+
 
     public static ECDomainParameters getDomainParameters() {
         X9ECParameters domain = ECNamedCurveTable.getByName("secp256r1");

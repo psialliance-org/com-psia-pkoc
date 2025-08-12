@@ -97,8 +97,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
     private BluetoothGattServer mBluetoothGattServer;
     private final ArrayList<FlowModel> _connectedDevices = new ArrayList<>();
-
-
+    private FlowModel currentDeviceModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -382,6 +381,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
 
     private void parseAuthenticationResponse(byte[] response) {
         // Retrieve the secondary text color from the theme
+
         TypedValue typedValue = new TypedValue();
         getTheme().resolveAttribute(android.R.attr.textAppearanceSmall, typedValue, true);
 
@@ -418,6 +418,21 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
 
                             // Use SpannableStringBuilder to build the final text
                             SpannableStringBuilder formattedText = new SpannableStringBuilder();
+
+
+
+                            String connectionTypeText = "Connection Type: Unknown";
+                            if (currentDeviceModel.connectionType == PKOC_ConnectionType.ECHDE_Full) {
+                                connectionTypeText = "Connection Type: ECDHE Perfect Secrecy Mode";
+                            } else if (currentDeviceModel.connectionType == PKOC_ConnectionType.Uncompressed) {
+                                connectionTypeText = "Connection Type: Normal Flow";
+                            }
+                            SpannableString connectionTypeSpannable = new SpannableString(connectionTypeText + "\n\n");
+                            connectionTypeSpannable.setSpan(new StyleSpan(Typeface.BOLD), 0, connectionTypeText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            connectionTypeSpannable.setSpan(new ForegroundColorSpan(Color.BLACK), 0, connectionTypeText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            connectionTypeSpannable.setSpan(new AbsoluteSizeSpan(16, true), 0, connectionTypeText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            formattedText.append(connectionTypeSpannable);
+
 
                             // Apply bold style to the "Public Key:" text with black color and size 14
                             SpannableString publicKeyHeader = new SpannableString("Public Key: \n");
@@ -1129,6 +1144,21 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
 
                             // Use SpannableStringBuilder to build the final text
                             SpannableStringBuilder formattedText = new SpannableStringBuilder();
+
+                            currentDeviceModel = deviceModel;
+
+                            String connectionTypeText = "Connection Type: Unknown";
+                            if (deviceModel.connectionType == PKOC_ConnectionType.ECHDE_Full) {
+                                connectionTypeText = "Connection Type: ECDHE Perfect Secrecy Mode";
+                            } else if (deviceModel.connectionType == PKOC_ConnectionType.Uncompressed) {
+                                connectionTypeText = "Connection Type: Normal Flow";
+                            }
+                            SpannableString connectionTypeSpannable = new SpannableString(connectionTypeText + "\n\n");
+                            connectionTypeSpannable.setSpan(new StyleSpan(Typeface.BOLD), 0, connectionTypeText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            connectionTypeSpannable.setSpan(new ForegroundColorSpan(Color.BLACK), 0, connectionTypeText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            connectionTypeSpannable.setSpan(new AbsoluteSizeSpan(16, true), 0, connectionTypeText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            formattedText.append(connectionTypeSpannable);
+
 
                             // Apply bold style to the "Public Key:" text with black color and size 14
                             SpannableString publicKeyHeader = new SpannableString("Public Key: \n");

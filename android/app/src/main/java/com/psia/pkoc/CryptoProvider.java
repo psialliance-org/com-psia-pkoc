@@ -8,6 +8,7 @@ import android.util.Log;
 
 import org.bouncycastle.asn1.x9.ECNamedCurveTable;
 import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.crypto.modes.CCMBlockCipher;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.signers.ECDSASigner;
@@ -17,6 +18,10 @@ import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.crypto.modes.CCMModeCipher;
+import org.bouncycastle.crypto.params.AEADParameters;
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.engines.AESEngine;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -194,37 +199,30 @@ public class CryptoProvider
      * @param message Message to encrypt
      * @return Encrypted message
      */
-    public static byte[] getAES256(byte[] secretKey, byte[] message, int counter)
-    {
-        try
-        {
-            // 1. Construct IV by concatenating "00000000000001" (hex-decoded) + the BigInteger bytes
+
+    public static byte[] getAES256(byte[] secretKey, byte[] message, int counter) {
+        try {
             byte[] iv = getCcmIv(counter);
-
             Log.d("CryptoProvider", "Printing the secret key " + Hex.toHexString(secretKey));
-
             Log.d("CryptoProvider", "Printing the IV " + Hex.toHexString(iv));
 
-            // 2. Initialize Cipher
-            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey, AesSpec);
-            IvParameterSpec parameterSpec = new IvParameterSpec(iv);
-            Cipher cipher = Cipher.getInstance(CcmCipher);
-            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, parameterSpec);
+            CCMModeCipher ccm = CCMBlockCipher.newInstance(AESEngine.newInstance());
+            AEADParameters params = new AEADParameters(new KeyParameter(secretKey), 128, iv); // 128-bit tag
+            ccm.init(true, params); // true = encryption
 
-            // 3. Encrypt message
-            byte[] encryptedData = cipher.doFinal(message);
+            byte[] output = new byte[ccm.getOutputSize(message.length)];
+            int len = ccm.processBytes(message, 0, message.length, output, 0);
+            ccm.doFinal(output, len);
 
-            // 4. Log size and hex output of the encrypted data
-            Log.d("CryptoProvider", "Encrypted data length: " + encryptedData.length);
-            Log.d("CryptoProvider", "Encrypted data (hex): " + Hex.toHexString(encryptedData));
+            Log.d("CryptoProvider", "Encrypted data length: " + output.length);
+            Log.d("CryptoProvider", "Encrypted data (hex): " + Hex.toHexString(output));
 
-            return encryptedData;
-        }
-        catch (Exception e)
-        {
+            return output;
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
 
     /**
      * Get domain parameters
@@ -352,21 +350,21 @@ public class CryptoProvider
         }
     }
 
-    public static byte[] getFromAES256(byte[] secretKey, byte[] message, int counter)
-    {
-        try
-        {
+    public static byte[] getFromAES256(byte[] secretKey, byte[] message, int counter) {
+        try {
             byte[] iv = getCcmIv(counter);
+            CCMModeCipher ccm = CCMBlockCipher.newInstance(AESEngine.newInstance());
+            AEADParameters params = new AEADParameters(new KeyParameter(secretKey), 128, iv);
+            ccm.init(false, params); // false = decryption
 
-            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey, AesSpec);
-            IvParameterSpec parameterSpec = new IvParameterSpec(iv);
-            Cipher cipher = Cipher.getInstance(CcmCipher);
-            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, parameterSpec);
-            return cipher.doFinal(message);
-        }
-        catch (Exception e)
-        {
+            byte[] output = new byte[ccm.getOutputSize(message.length)];
+            int len = ccm.processBytes(message, 0, message.length, output, 0);
+            ccm.doFinal(output, len);
+
+            return output;
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
 }
