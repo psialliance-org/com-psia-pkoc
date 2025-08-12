@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.navigation.ui)
     implementation(libs.bcpkix.jdk15to18)
     implementation(libs.bcprov.jdk15to18)
+    testImplementation(libs.robolectric)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

@@ -1,5 +1,5 @@
 [versions]
-agp = "8.11.1"
+agp = "8.12.0"
 bcpkixJdk15to18 = "1.81"
 core = "3.5.3"
 junit = "4.13.2"
@@ -10,6 +10,7 @@ material = "1.12.0"
 activity = "1.10.1"
 constraintlayout = "2.2.1"
 navigationUi = "2.9.2"
+robolectric = "4.15.1"
 zxingAndroidEmbedded = "4.3.0"
 
 [libraries]
@@ -25,6 +26,7 @@ activity = { group = "androidx.activity", name = "activity", version.ref = "acti
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 navigation-fragment = { module = "androidx.navigation:navigation-fragment", version.ref = "navigationUi" }
 navigation-ui = { module = "androidx.navigation:navigation-ui", version.ref = "navigationUi" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
 
 [plugins]

@@ -35,14 +35,12 @@ import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 
-import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 public class CryptoProvider {
     private static final String TAG = "CryptoProvider";
     final static byte[] IvPrepend = new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 };
+    final static int CcmTagLength = 128;
 
     public static byte[] getPublicKeyComponentX(byte[] publicKey) {
         byte[] x = new byte[32];
@@ -117,7 +115,7 @@ public class CryptoProvider {
             Log.d(TAG, "Printing the IV: " + Hex.toHexString(iv));
 
             CCMModeCipher ccm = CCMBlockCipher.newInstance(AESEngine.newInstance());
-            AEADParameters params = new AEADParameters(new KeyParameter(secretKey), 128, iv); // 128-bit tag
+            AEADParameters params = new AEADParameters(new KeyParameter(secretKey), CcmTagLength, iv); // 128-bit tag
             ccm.init(false, params); // false = decryption
 
             byte[] output = new byte[ccm.getOutputSize(message.length)];
@@ -130,10 +128,6 @@ public class CryptoProvider {
             return null;
         }
     }
-
-
-
-
 
     public static ECDomainParameters getDomainParameters() {
         X9ECParameters domain = ECNamedCurveTable.getByName("secp256r1");

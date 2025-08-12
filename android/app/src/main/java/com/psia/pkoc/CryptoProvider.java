@@ -39,10 +39,7 @@ import java.security.spec.ECGenParameterSpec;
 import java.security.spec.ECPublicKeySpec;
 import java.util.Objects;
 
-import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Helper class for providing cryptographic functionality
@@ -57,10 +54,9 @@ public class CryptoProvider
     final static String KeyAndHashAlgorithm = "SHA256withECDSA";
     /** @noinspection SpellCheckingInspection*/
     final static String NamedCurve = "secp256r1";
-    final static String AesSpec = "AES";
-    final static String CcmCipher = "AES/CCM/NoPadding";
     final static String HashAlgorithm = "SHA256";
     final static byte[] IvPrepend = new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 };
+    final static int CcmTagLength = 128;
     private static KeyGenParameterSpec.Builder getKeyGenParamaterSpecBuilder()
     {
         ECGenParameterSpec ecParam = new ECGenParameterSpec(NamedCurve);
@@ -200,14 +196,14 @@ public class CryptoProvider
      * @return Encrypted message
      */
 
-    public static byte[] getAES256(byte[] secretKey, byte[] message, int counter) {
+    public static byte[] getAES256(byte[] secretKey, byte[] message, int counter){
         try {
             byte[] iv = getCcmIv(counter);
             Log.d("CryptoProvider", "Printing the secret key " + Hex.toHexString(secretKey));
             Log.d("CryptoProvider", "Printing the IV " + Hex.toHexString(iv));
 
             CCMModeCipher ccm = CCMBlockCipher.newInstance(AESEngine.newInstance());
-            AEADParameters params = new AEADParameters(new KeyParameter(secretKey), 128, iv); // 128-bit tag
+            AEADParameters params = new AEADParameters(new KeyParameter(secretKey), CcmTagLength, iv); // 128-bit tag
             ccm.init(true, params); // true = encryption
 
             byte[] output = new byte[ccm.getOutputSize(message.length)];
