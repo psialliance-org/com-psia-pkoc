@@ -10,7 +10,8 @@ public class CryptoProvider: ObservableObject
 {
     static private var publicKey : P256.Signing.PublicKey? = nil
     static private var privateKey : P256.Signing.PrivateKey? = nil
-    static private let IvPrepend = Data([0, 0, 0, 0, 0, 0, 0, 1])
+    static let IvPrepend = Data([0, 0, 0, 0, 0, 0, 0, 1])
+    static let CcmTagLength = 128
     
     static func exportPublicKey() -> P256.Signing.PublicKey
     {
@@ -137,7 +138,7 @@ public class CryptoProvider: ObservableObject
     {
         let iv = getCcmIv(counter: counter)
         
-        let aes = try? AES(key: secretKey, blockMode: CCM(iv: iv, tagLength: 8, messageLength: data.count), padding: .noPadding)
+        let aes = try? AES(key: secretKey, blockMode: CCM(iv: iv, tagLength: CcmTagLength / 8, messageLength: data.count), padding: .noPadding)
         
         return try? (aes?.encrypt(data))
     }
