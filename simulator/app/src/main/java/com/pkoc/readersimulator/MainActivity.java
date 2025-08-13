@@ -306,6 +306,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
     @Override
     public void onTagDiscovered(Tag tag) {
         Log.d("NFC", "Tag discovered");
+        currentDeviceModel = new FlowModel();
         IsoDep isoDep = IsoDep.get(tag);
         if (isoDep != null) {
             try {
@@ -844,6 +845,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                 FlowModel newDevice = new FlowModel();
                 newDevice.connectedDevice = device;
                 _connectedDevices.add(newDevice);
+                currentDeviceModel = newDevice;
 
                 //layoutClear();
                 Log.d(TAG, "Device connected: " + device.getAddress());
