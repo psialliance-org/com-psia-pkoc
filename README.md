@@ -95,47 +95,44 @@ sequenceDiagram
     R->>C: Verification result
     R->>R: Grant / deny decision
 ```
-### Advanced ECDHE PFS Flow for PKOC
+### PKOC ECDHE Perfect Forward Secrecy Flow
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant R as Reader (Verifier)
     participant C as Credential (Phone)
-    participant B as Backend (Policy/Revocation)
+    participant B as Backend (Optional)
 
-    Note over R,C: Perfect Forward Secrecy via ephemeral EC keys and AEAD (e.g., AES-CCM)
+    Note over R,C: Ephemeral ECDHE handshake with mutual authentication
 
-    R->>C: Hello_R { proto_ver, suites, curves, nonce_R }
-    C->>R: Hello_C { proto_ver, suite_sel, curve_sel, nonce_C }
+    R->>R: Generate ephemeral key pair (r_e, R_e)
+    R->>C: Hello_R { proto_ver, suites, nonce_R, R_e }
+    C->>C: Generate ephemeral key pair (c_e, C_e)
+    C->>R: Hello_C { proto_ver, suite_sel, nonce_C, C_e }
 
-    R->>R: Generate ephemeral keypair (r_e, R_e = r_e·G)
-    R->>C: KeyShare_R { R_e }
-    C->>C: Generate ephemeral keypair (c_e, C_e = c_e·G)
-    C->>R: KeyShare_C { C_e }
-
+    Note over R,C: Both sides compute shared secret
     R->>R: Z_R = ECDH(r_e, C_e)
     C->>C: Z_C = ECDH(c_e, R_e)
 
-    R->>R: Derive keys via HKDF(Z_R, transcript, "PKOC-ECDHE")
-    C->>C: Derive keys via HKDF(Z_C, transcript, "PKOC-ECDHE")
+    Note over R,C: Derive keys with HKDF over transcript
+    R->>R: k_enc_R, k_enc_C, iv_base = HKDF(Z_R, transcript)
+    C->>C: k_enc_R, k_enc_C, iv_base = HKDF(Z_C, transcript)
 
-    R->>R: sig_R = Sign_R_LT(hash(transcript || R_e || C_e))
-    R->>C: Auth_R { cert_R, sig_R }
-    C->>C: Verify cert_R, sig_R
-    C->>C: sig_C = Sign_C_LT(hash(transcript || R_e || C_e))
-    C->>R: Auth_C { cert_C, sig_C }
-    R->>R: Verify cert_C, sig_C
+    Note over R,C: Authenticate using long-term keys bound to transcript
+    R->>C: Auth_R { cert_R, sig_R(transcript) }
+    C->>R: Auth_C { cert_C, sig_C(transcript) }
 
     alt Optional revocation check
         R->>B: Validate cert_C
-        B-->>R: OK / Fail
+        B-->>R: Status OK / Revoked
     end
 
-    R->>C: AEAD [ Finished_R ]
-    C->>R: AEAD [ Finished_C ]
+    Note over R,C: Switch to AEAD channel (AES-CCM) with IV counter
+    R->>C: Encrypted Finished_R
+    C->>R: Encrypted Finished_C
 
-    Note over R,C: Application data exchange (encrypted + MAC)
+    Note over R,C: Application data exchange over encrypted channel
 ```
 
 ### NFC/APDU Flow (high level)
