@@ -95,6 +95,48 @@ sequenceDiagram
     R->>C: Verification result
     R->>R: Grant / deny decision
 ```
+### Advanced ECDHE PFS Flow for PKOC
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant R as Reader (Verifier)
+    participant C as Credential (Phone)
+    participant B as Backend (Policy/Revocation)
+
+    Note over R,C: Perfect Forward Secrecy via ephemeral EC keys and AEAD (e.g., AES-CCM)
+
+    R->>C: Hello_R { proto_ver, suites, curves, nonce_R }
+    C->>R: Hello_C { proto_ver, suite_sel, curve_sel, nonce_C }
+
+    R->>R: Generate ephemeral keypair (r_e, R_e = r_e·G)
+    R->>C: KeyShare_R { R_e }
+    C->>C: Generate ephemeral keypair (c_e, C_e = c_e·G)
+    C->>R: KeyShare_C { C_e }
+
+    R->>R: Z_R = ECDH(r_e, C_e)
+    C->>C: Z_C = ECDH(c_e, R_e)
+
+    R->>R: Derive keys via HKDF(Z_R, transcript, "PKOC-ECDHE")
+    C->>C: Derive keys via HKDF(Z_C, transcript, "PKOC-ECDHE")
+
+    R->>R: sig_R = Sign_R_LT(hash(transcript || R_e || C_e))
+    R->>C: Auth_R { cert_R, sig_R }
+    C->>C: Verify cert_R, sig_R
+    C->>C: sig_C = Sign_C_LT(hash(transcript || R_e || C_e))
+    C->>R: Auth_C { cert_C, sig_C }
+    R->>R: Verify cert_C, sig_C
+
+    alt Optional revocation check
+        R->>B: Validate cert_C
+        B-->>R: OK / Fail
+    end
+
+    R->>C: AEAD [ Finished_R ]
+    C->>R: AEAD [ Finished_C ]
+
+    Note over R,C: Application data exchange (encrypted + MAC)
+```
 
 ### NFC/APDU Flow (high level)
 ```mermaid
