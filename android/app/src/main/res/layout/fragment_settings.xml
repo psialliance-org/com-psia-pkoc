@@ -78,6 +78,50 @@
                         android:enabled="true"
                         android:text="@string/echde_perfect_secrecy" />
                 </RadioGroup>
+                <TextView
+                    android:id="@+id/site_identifier_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/site_identifier_16_bytes_uuid"
+                    android:textSize="11sp" />
+
+                <EditText
+                    android:id="@+id/site_identifier_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/enter_site_identifier_uuid"
+                    android:inputType="text"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/reader_identifier_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/reader_identifier_16_bytes_uuid"
+                    android:textSize="11sp" />
+
+                <EditText
+                    android:id="@+id/reader_identifier_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/enter_reader_identifier_uuid"
+                    android:inputType="text"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/site_ephemeral_key_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/site_full_ephemeral_public_key_64_bytes"
+                    android:textSize="11sp" />
+
+                <EditText
+                    android:id="@+id/site_ephemeral_key_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/enter_site_ephemeral_public_key_in_uncompressed_format"
+                    android:inputType="text"
+                    android:textSize="11sp" />
 
                 <View
                     android:layout_width="match_parent"

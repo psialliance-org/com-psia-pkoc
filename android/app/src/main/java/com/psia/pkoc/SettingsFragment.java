@@ -3,6 +3,10 @@ package com.psia.pkoc;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.psia.pkoc.databinding.FragmentSettingsBinding;
+import java.util.UUID;
 
 public class SettingsFragment extends Fragment
 {
@@ -51,6 +56,14 @@ public class SettingsFragment extends Fragment
         {
             if (checkedId == binding.UncompressedButton.getId())
             {
+
+                binding.siteIdentifierLabel.setVisibility(View.GONE);
+                binding.siteIdentifierInput.setVisibility(View.GONE);
+                binding.readerIdentifierLabel.setVisibility(View.GONE);
+                binding.readerIdentifierInput.setVisibility(View.GONE);
+                binding.siteEphemeralKeyLabel.setVisibility(View.GONE);
+                binding.siteEphemeralKeyInput.setVisibility(View.GONE);
+
                 sharedPrefs
                     .edit()
                     .putInt(PKOC_Preferences.PKOC_TransmissionFlow, PKOC_ConnectionType.Uncompressed.ordinal())
@@ -58,6 +71,14 @@ public class SettingsFragment extends Fragment
             }
             else
             {
+
+                binding.siteIdentifierLabel.setVisibility(View.VISIBLE);
+                binding.siteIdentifierInput.setVisibility(View.VISIBLE);
+                binding.readerIdentifierLabel.setVisibility(View.VISIBLE);
+                binding.readerIdentifierInput.setVisibility(View.VISIBLE);
+                binding.siteEphemeralKeyLabel.setVisibility(View.VISIBLE);
+                binding.siteEphemeralKeyInput.setVisibility(View.VISIBLE);
+
                 sharedPrefs
                     .edit()
                     .putInt(PKOC_Preferences.PKOC_TransmissionFlow, PKOC_ConnectionType.ECHDE_Full.ordinal())
@@ -98,7 +119,53 @@ public class SettingsFragment extends Fragment
             }
         });
 
-        binding.rangingSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+
+
+
+
+        binding.siteEphemeralKeyInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+                prefs.edit().putString("PKOC_SiteEphemeralKey", s.toString()).apply();
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
+        binding.siteIdentifierInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+                prefs.edit().putString("PKOC_Site_ID", s.toString()).apply();
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
+        binding.readerIdentifierInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+                prefs.edit().putString("PKOC_Reader_ID", s.toString()).apply();
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
+       binding.rangingSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
         {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
@@ -147,6 +214,17 @@ public class SettingsFragment extends Fragment
         if (toFlow == PKOC_ConnectionType.ECHDE_Full)
             binding.RadioGroup.check(binding.ECHDEComplete.getId());
 
+        // Show/hide ECDHE-specific fields
+        boolean isEcdhe = toFlow == PKOC_ConnectionType.ECHDE_Full;
+        int visibility = isEcdhe ? View.VISIBLE : View.GONE;
+
+        binding.siteIdentifierLabel.setVisibility(visibility);
+        binding.siteIdentifierInput.setVisibility(visibility);
+        binding.readerIdentifierLabel.setVisibility(visibility);
+        binding.readerIdentifierInput.setVisibility(visibility);
+        binding.siteEphemeralKeyLabel.setVisibility(visibility);
+        binding.siteEphemeralKeyInput.setVisibility(visibility);
+
         boolean AutoDiscover = sharedPrefs.getBoolean(PKOC_Preferences.AutoDiscoverDevices, false);
         binding.autoDiscoverSwitch.setChecked(AutoDiscover);
 
@@ -173,7 +251,45 @@ public class SettingsFragment extends Fragment
             binding.rangingSliderLabelNear.setVisibility(View.GONE);
             binding.rangingSliderLabelFar.setVisibility(View.GONE);
         }
+
+        if (toFlow == PKOC_ConnectionType.ECHDE_Full) {
+            //String siteId = binding.siteIdentifierInput.getText().toString().trim();
+            //String readerId = binding.readerIdentifierInput.getText().toString().trim();
+            //String siteEphemeralKey = binding.siteEphemeralKeyInput.getText().toString().trim();
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+            String savedEphemeralKey = prefs.getString("PKOC_SiteEphemeralKey", "");
+            String savedSiteId = prefs.getString("PKOC_Site_ID", "");
+            String savedReaderId = prefs.getString("PKOC_Reader_ID", "");
+            binding.siteEphemeralKeyInput.setText(savedEphemeralKey);
+            binding.siteIdentifierInput.setText(savedSiteId);
+            binding.readerIdentifierInput.setText(savedReaderId);
+
+            sharedPrefs.edit()
+                    .putString("PKOC_SiteEphemeralKey", savedEphemeralKey)
+                    .putString("PKOC_Site_ID", savedSiteId)
+                    .putString("PKOC_Reader_ID", savedReaderId)
+                    .apply();
+
+/*            try {
+                UUID readerUUID = UUID.fromString(readerId);
+                UUID siteUUID = UUID.fromString(siteId);
+
+                byte[] readerIdentifierBytes = TLVProvider.getByteArrayFromGuid(readerUUID);
+                byte[] siteIdentifierBytes = TLVProvider.getByteArrayFromGuid(siteUUID);
+
+                ReaderModel newReader = new ReaderModel(readerIdentifierBytes, siteIdentifierBytes);
+
+                if (!Constants.KnownReaders.contains(newReader)) {
+                    Constants.KnownReaders.add(newReader);
+                }
+            } catch (IllegalArgumentException e) {
+                Log.e("SettingsFragment", "Invalid UUID format for Site or Reader Identifier", e);
+                // Optionally notify the user via Toast or Snackbar
+            }*/
+        }
     }
+
+
 
     @Override
     public void onViewCreated (@NonNull View view, Bundle savedInstanceState)

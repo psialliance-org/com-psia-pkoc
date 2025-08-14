@@ -14,7 +14,7 @@ public class Constants
     final static UUID ReadUUID = UUID.fromString("e5b1b3b5-3cca-3f76-cd86-a884cc239692");
     final static UUID ConfigUUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
-    public static final ArrayList<ReaderModel> KnownReaders = new ArrayList<>(Collections.singletonList
+    public static ArrayList<ReaderModel> KnownReaders = new ArrayList<>(Collections.singletonList
             (
                     new ReaderModel
                     (
