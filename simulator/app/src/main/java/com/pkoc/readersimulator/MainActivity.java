@@ -1327,6 +1327,9 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
 
                     boolean cardReadSuccess = Math.abs(cardNumber64.longValue()) > 0;
 
+                    Log.i("CardReadSuccess", String.valueOf(cardReadSuccess));
+                    Log.i("SigValid", String.valueOf(sigValid));
+
                     if (cardReadSuccess && sigValid)
                         response = BigInteger.valueOf(ReaderUnlockStatus.AccessGranted.ordinal()).byteValue();
                     else if (cardReadSuccess)

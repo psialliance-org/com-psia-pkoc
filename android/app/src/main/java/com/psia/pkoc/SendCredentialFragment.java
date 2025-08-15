@@ -415,6 +415,34 @@ public class SendCredentialFragment extends Fragment
 
                 chosenDevice.setIsBusy(false);
 
+                //change starts here:
+
+
+                // Check for TLV Success (4, 1, 1) case where access cannot be decided
+                if (msg.what == ReaderUnlockStatus.CompletedTransaction.ordinal())
+                {
+                    Log.i("SendCredentialFragment", "TLV Success - Access decision unknown");
+                    chosenDevice.setIcon(R.drawable.baseline_lock_open_24_yellow); // Use a different icon indicating unknown state
+                    Toast.makeText(getContext(), "Device connected, but access control system is not available", Toast.LENGTH_SHORT).show();
+
+                    // You may reset icon later if needed, similar to access granted/denied
+                    new Handler(getMainLooper()).postDelayed(() ->
+                    {
+                        Log.i("SendCredentialFragment", "Resetting icon");
+                        var model = getModelFromAddress(deviceAddress);
+                        if (model != null)
+                        {
+                            model.setIcon(R.drawable.baseline_lock_24);
+                        }
+                        mBTArrayAdapter.notifyDataSetChanged();
+                    }, 4000);
+
+                    mBTArrayAdapter.notifyDataSetChanged();
+                    return;
+                }
+
+
+                //change ends here
                 if (msg.what == ReaderUnlockStatus.AccessGranted.ordinal())
                 {
                     Log.i("SendCredentialFragment", "Access Granted");
