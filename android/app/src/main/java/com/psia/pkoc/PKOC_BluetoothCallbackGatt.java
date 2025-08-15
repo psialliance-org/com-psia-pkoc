@@ -163,8 +163,11 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
             String readerIdStr = prefs.getString("PKOC_Reader_ID", null);
 
             Log.d("siteEphemeralKeyHex",siteEphemeralKeyHex);
+
             Log.d("PKOC_Site_ID",siteIdStr);
+
             Log.d("PKOC_Reader_ID",readerIdStr);
+
 
             byte[] siteEphemeralKeyBytes = siteEphemeralKeyHex != null ? Hex.decode(siteEphemeralKeyHex) : null;
             UUID siteUUID = siteIdStr != null ? UUID.fromString(siteIdStr) : null;
