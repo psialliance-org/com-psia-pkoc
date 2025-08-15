@@ -250,7 +250,11 @@ public class SendCredentialFragment extends Fragment
                     .setServiceUuid(new ParcelUuid(UUID.fromString("0000FFF0-0000-1000-8000-00805F9B34FB")))
                     .build();
             filters.add(filter);
-
+            // Add legacy UUID filter
+            ScanFilter filter2 = new ScanFilter.Builder()
+                    .setServiceUuid(new ParcelUuid(UUID.fromString("41fb60a1-d4d0-4ae9-8cbb-b62b5ae81810")))
+                    .build();
+            filters.add(filter2);
             ScanSettings settings = new ScanSettings.Builder()
                     .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY) // Optional: for faster discovery
                     .build();
@@ -726,8 +730,11 @@ public class SendCredentialFragment extends Fragment
 
             List<ParcelUuid> uuids = scanRecord.getServiceUuids();
             boolean hasTargetUUID = false;
+
             for (ParcelUuid uuid : uuids) {
-                if (uuid.getUuid().equals(UUID.fromString("0000FFF0-0000-1000-8000-00805F9B34FB"))) {
+                UUID currentUUID = uuid.getUuid();
+                if (currentUUID.equals(UUID.fromString("0000FFF0-0000-1000-8000-00805F9B34FB")) ||
+                        currentUUID.equals(UUID.fromString("41fb60a1-d4d0-4ae9-8cbb-b62b5ae81810"))) {
                     hasTargetUUID = true;
                     break;
                 }

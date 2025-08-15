@@ -109,25 +109,28 @@
                     android:textSize="11sp" />
 
                 <TextView
-                    android:id="@+id/site_ephemeral_key_label"
+                    android:id="@+id/site_public_key_label"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/site_full_ephemeral_public_key_64_bytes"
+                    android:text="@string/site_full_full_public_key_65_bytes"
                     android:textSize="11sp" />
 
                 <EditText
-                    android:id="@+id/site_ephemeral_key_input"
+                    android:id="@+id/site_public_key_input"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/enter_site_ephemeral_public_key_in_uncompressed_format"
-                    android:inputType="text"
-                    android:textSize="11sp" />
+                    android:hint="@string/enter_site_full_public_key_in_uncompressed_format"
+                    android:inputType="textMultiLine"
+                    android:textSize="11sp"
+                    android:singleLine="false"
+                    android:maxLines="3"
+                    android:scrollHorizontally="false" />
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_marginTop="12dp"
                     android:layout_marginBottom="12dp"
-                    android:layout_height="1dp"
+                    android:layout_height="wrap_content"
                     android:background="@android:color/darker_gray"/>
 
                 <TextView

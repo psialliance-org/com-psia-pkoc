@@ -61,8 +61,8 @@ public class SettingsFragment extends Fragment
                 binding.siteIdentifierInput.setVisibility(View.GONE);
                 binding.readerIdentifierLabel.setVisibility(View.GONE);
                 binding.readerIdentifierInput.setVisibility(View.GONE);
-                binding.siteEphemeralKeyLabel.setVisibility(View.GONE);
-                binding.siteEphemeralKeyInput.setVisibility(View.GONE);
+                binding.sitePublicKeyLabel.setVisibility(View.GONE);
+                binding.sitePublicKeyInput.setVisibility(View.GONE);
 
                 sharedPrefs
                     .edit()
@@ -76,8 +76,8 @@ public class SettingsFragment extends Fragment
                 binding.siteIdentifierInput.setVisibility(View.VISIBLE);
                 binding.readerIdentifierLabel.setVisibility(View.VISIBLE);
                 binding.readerIdentifierInput.setVisibility(View.VISIBLE);
-                binding.siteEphemeralKeyLabel.setVisibility(View.VISIBLE);
-                binding.siteEphemeralKeyInput.setVisibility(View.VISIBLE);
+                binding.sitePublicKeyLabel.setVisibility(View.VISIBLE);
+                binding.sitePublicKeyInput.setVisibility(View.VISIBLE);
 
                 sharedPrefs
                     .edit()
@@ -119,7 +119,11 @@ public class SettingsFragment extends Fragment
             }
         });
 
-        binding.siteEphemeralKeyInput.addTextChangedListener(new TextWatcher() {
+
+
+
+
+        binding.sitePublicKeyInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
@@ -218,8 +222,8 @@ public class SettingsFragment extends Fragment
         binding.siteIdentifierInput.setVisibility(visibility);
         binding.readerIdentifierLabel.setVisibility(visibility);
         binding.readerIdentifierInput.setVisibility(visibility);
-        binding.siteEphemeralKeyLabel.setVisibility(visibility);
-        binding.siteEphemeralKeyInput.setVisibility(visibility);
+        binding.sitePublicKeyLabel.setVisibility(visibility);
+        binding.sitePublicKeyInput.setVisibility(visibility);
 
         boolean AutoDiscover = sharedPrefs.getBoolean(PKOC_Preferences.AutoDiscoverDevices, false);
         binding.autoDiscoverSwitch.setChecked(AutoDiscover);
@@ -256,7 +260,7 @@ public class SettingsFragment extends Fragment
             String savedEphemeralKey = prefs.getString("PKOC_SiteEphemeralKey", "");
             String savedSiteId = prefs.getString("PKOC_Site_ID", "");
             String savedReaderId = prefs.getString("PKOC_Reader_ID", "");
-            binding.siteEphemeralKeyInput.setText(savedEphemeralKey);
+            binding.sitePublicKeyInput.setText(savedEphemeralKey);
             binding.siteIdentifierInput.setText(savedSiteId);
             binding.readerIdentifierInput.setText(savedReaderId);
 
