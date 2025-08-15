@@ -237,30 +237,15 @@ public class SendCredentialFragment extends Fragment
             mBTArrayAdapter.clear();
             mBTArrayAdapter.notifyDataSetChanged();
 
-            //List<ScanFilter> filters = new ArrayList<>();
-            //ScanFilter.Builder serviceFilter = new ScanFilter.Builder().setServiceUuid(new ParcelUuid(Constants.ServiceUUID));
-            //ScanFilter.Builder serviceLegacyFilter = new ScanFilter.Builder().setServiceUuid(new ParcelUuid(Constants.ServiceLegacyUUID));
-            //filters.add(serviceFilter.build());
-            //filters.add(serviceLegacyFilter.build());
-
-
-
             List<ScanFilter> filters = new ArrayList<>();
-            ScanFilter filter = new ScanFilter.Builder()
-                    .setServiceUuid(new ParcelUuid(UUID.fromString("0000FFF0-0000-1000-8000-00805F9B34FB")))
-                    .build();
-            filters.add(filter);
-            // Add legacy UUID filter
-            ScanFilter filter2 = new ScanFilter.Builder()
-                    .setServiceUuid(new ParcelUuid(UUID.fromString("41fb60a1-d4d0-4ae9-8cbb-b62b5ae81810")))
-                    .build();
-            filters.add(filter2);
+            ScanFilter.Builder serviceFilter = new ScanFilter.Builder().setServiceUuid(new ParcelUuid(Constants.ServiceUUID));
+            ScanFilter.Builder serviceLegacyFilter = new ScanFilter.Builder().setServiceUuid(new ParcelUuid(Constants.ServiceLegacyUUID));
+            filters.add(serviceFilter.build());
+            filters.add(serviceLegacyFilter.build());
+
             ScanSettings settings = new ScanSettings.Builder()
-                    .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY) // Optional: for faster discovery
+                    .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                     .build();
-
-
-
 
             mBTAdapter.getBluetoothLeScanner().startScan(filters, settings, mLeScanCallback);
 
@@ -785,13 +770,13 @@ public class SendCredentialFragment extends Fragment
             ToUpdate.setLastSeen(new Date());
 
             String Name = result.getDevice().getName();
-            if (Name == null || Name.isEmpty()) {
-                if (scanRecord != null) {
-                    byte[] scanRecordBytes = scanRecord.getBytes();
-                    Name = parseDeviceName(scanRecordBytes);
-                }
+            if (Name == null || Name.isEmpty())
+            {
+                byte[] scanRecordBytes = scanRecord.getBytes();
+                Name = parseDeviceName(scanRecordBytes);
             }
-            if (Name == null || Name.isEmpty()) {
+            if (Name == null || Name.isEmpty())
+            {
                 Name = "Unknown Reader";
             }
             ToUpdate.setName(Name);
