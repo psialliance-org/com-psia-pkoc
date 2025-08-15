@@ -58,8 +58,8 @@
     <string name="copy_key">Copy Key</string>
     <string name="public_key_qr_code">Public Key QR Code</string>
     <string name="display_qr_public_key">Display QR Public Key</string>
-    <string name="enter_site_ephemeral_public_key_in_uncompressed_format">Enter Site Ephemeral Public Key In Uncompressed Format</string>
-    <string name="site_full_ephemeral_public_key_64_bytes">Site Full Ephemeral Public Key (64 bytes)</string>
+    <string name="enter_site_full_public_key_in_uncompressed_format">Enter Site Public Key In Uncompressed Format</string>
+    <string name="site_full_full_public_key_65_bytes">Site Full Public Key (65 bytes)</string>
     <string name="enter_reader_identifier_uuid">Enter Reader Identifier UUID</string>
     <string name="reader_identifier_16_bytes_uuid">Reader Identifier (16 bytes UUID)</string>
     <string name="enter_site_identifier_uuid">Enter Site Identifier UUID</string>
