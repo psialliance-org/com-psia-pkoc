@@ -23,6 +23,9 @@
         <action
             android:id="@+id/action_sendCredentialFragment_to_DisplayPKFragment"
             app:destination="@id/DisplayPKFragment" />
+        <action
+            android:id="@+id/action_sendCredentialFragment_to_dataManagementFragment"
+            app:destination="@id/dataManagementFragment" />
     </fragment>
 
     <fragment
@@ -64,4 +67,15 @@
             android:id="@+id/action_eulaFragment_to_sendCredentialFragment"
             app:destination="@id/sendCredentialFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/dataManagementFragment"
+        android:name="com.psia.pkoc.DataManagementFragment"
+        android:label="Manage Sites and Readers"
+        tools:layout="@layout/fragment_data_management" >
+        <action
+            android:id="@+id/action_dataManagementFragment_to_sendCredentialFragment"
+            app:destination="@id/sendCredentialFragment" />
+    </fragment>
+
 </navigation>

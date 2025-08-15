@@ -112,19 +112,17 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
 
                     SiteModel siteToFind = null;
 
-                    for (int j = 0; j < Constants.KnownReaders.size(); j++)
+                    ReaderModel readerFromDb = PKOC_Application
+                        .getDb()
+                        .readerDao()
+                        .findByIds(_flowModel.reader.getReaderIdentifier(), _flowModel.reader.getSiteIdentifier());
+
+                    if (readerFromDb != null)
                     {
-                        if (Arrays.equals(Constants.KnownReaders.get(j).getReaderIdentifier(), _flowModel.reader.getReaderIdentifier())
-                                && Arrays.equals(Constants.KnownReaders.get(j).getSiteIdentifier(), _flowModel.reader.getSiteIdentifier()))
-                        {
-                            for (int k = 0; k < Constants.KnownSites.size(); k++)
-                            {
-                                if (Arrays.equals(TLVProvider.getByteArrayFromGuid(Constants.KnownSites.get(k).SiteUUID), _flowModel.reader.getSiteIdentifier()))
-                                {
-                                    siteToFind = Constants.KnownSites.get(k);
-                                }
-                            }
-                        }
+                        siteToFind = PKOC_Application
+                            .getDb()
+                            .siteDao()
+                            .findById(readerFromDb.getSiteIdentifier());
                     }
 
                     if (siteToFind == null)
@@ -162,7 +160,7 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
                 return;
             }
             Log.d("PKOC_BluetoothCallbackGatt", "Reader found in prefect security flow");
-            if (_flowModel.reader.getReaderIdentifier() == null)
+            if (_flowModel.reader.getReaderIdentifier().length == 0)
             {
                 _flowModel.status = ReaderUnlockStatus.Unrecognized;
                 gatt.disconnect();
@@ -215,7 +213,10 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
 
             byte[] readerPk = _flowModel.reader.getReaderTransientPublicKey();
             byte[] readerX = new byte[32];
-            arraycopy(readerPk, 1, readerX, 0, 32);
+            if (readerPk != null)
+            {
+                arraycopy(readerPk, 1, readerX, 0, 32);
+            }
 
             return org.bouncycastle.util.Arrays.concatenate(siteIdentifier, readerIdentifier, deviceX, readerX);
         }
@@ -233,7 +234,7 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
 
         byte[] toSign = generateSignatureMessage();
         byte[] SignedMessage = GetSignedMessage(toSign);
-        byte[] SignatureWithoutASM = TLVProvider.RemoveASNHeaderFromSignature(SignedMessage);
+        byte[] SignatureWithoutASM = CryptoProvider.RemoveASNHeaderFromSignature(SignedMessage);
         byte[] SignatureTLV = TLVProvider.GetBleTLV(BLE_PacketType.DigitalSignature, SignatureWithoutASM);
 
         SharedPreferences sharedPref = mainActivity.getPreferences(Context.MODE_PRIVATE);
@@ -287,7 +288,7 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
         mainActivity = parent;
 
         _flowModel = new FlowModel();
-        _flowModel.reader = new ReaderModel();
+        _flowModel.reader = new ReaderModel(new byte[0], new byte[0]);
         _flowModel.connectionType = toUse;
 
         uiHandler = updateUIHandler;
@@ -445,7 +446,7 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
         super.onCharacteristicChanged(gatt, characteristic);
         // This is being called because the server has a change it has notified this client of and will send the data in the characteristic.
 
-        uiHandler.post(() ->
+        bHandler.post(() ->
         {
             byte[] charData = characteristic.getValue();
             Log.d("CharacteristicChanged", "Characteristic data: " + Arrays.toString(charData));

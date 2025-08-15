@@ -1,57 +1,57 @@
 package com.psia.pkoc;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Index;
+
+@Entity(
+    tableName = "readers",
+    primaryKeys = { "siteIdentifier", "readerIdentifier" },
+    indices = {
+        @Index(value = { "siteIdentifier" })
+    }
+)
 public class ReaderModel
 {
+    @ColumnInfo(name = "protocolVersion", typeAffinity = ColumnInfo.BLOB)
+    @Nullable
     private byte[] _protocolVersion;
+
+    @ColumnInfo(name = "readerTransientPublicKey", typeAffinity = ColumnInfo.BLOB)
+    @Nullable
     private byte[] _readerTransientPublicKey;
+
+    @ColumnInfo(name = "readerIdentifier", typeAffinity = ColumnInfo.BLOB)
+    @NonNull
     private byte[] _readerIdentifier;
+
+    @ColumnInfo(name = "siteIdentifier", typeAffinity = ColumnInfo.BLOB)
+    @NonNull
     private byte[] _siteIdentifier;
 
-    public ReaderModel() {}
+    public ReaderModel()
+    {
+        _readerIdentifier = new byte[16];
+        _siteIdentifier = new byte[16];
+    }
 
-    public ReaderModel(byte[] readerId, byte[] siteId)
+    public ReaderModel(@NonNull byte[] readerId, @NonNull byte[] siteId)
     {
         _readerIdentifier = readerId;
         _siteIdentifier = siteId;
     }
 
-    public byte[] getProtocolVersion()
-    {
-        return _protocolVersion;
-    }
+    @Nullable public byte[] getProtocolVersion() { return _protocolVersion; }
+    public void setProtocolVersion(@Nullable byte[] v) { _protocolVersion = v; }
 
-    public void setProtocolVersion(byte[] protocolVersion)
-    {
-        _protocolVersion = protocolVersion;
-    }
+    @Nullable public byte[] getReaderTransientPublicKey() { return _readerTransientPublicKey; }
+    public void setReaderTransientPublicKey(@Nullable byte[] v) { _readerTransientPublicKey = v; }
 
-    public byte[] getReaderTransientPublicKey()
-    {
-        return _readerTransientPublicKey;
-    }
+    @NonNull public byte[] getReaderIdentifier() { return _readerIdentifier; }
+    public void setReaderIdentifier(@NonNull byte[] v) { _readerIdentifier = v; }
 
-    public void setReaderTransientPublicKey(byte[] readerTransientPublicKey)
-    {
-        _readerTransientPublicKey = readerTransientPublicKey;
-    }
-
-    public byte[] getReaderIdentifier()
-    {
-        return _readerIdentifier;
-    }
-
-    public void setReaderIdentifier(byte[] readerIdentifier)
-    {
-        _readerIdentifier = readerIdentifier;
-    }
-
-    public byte[] getSiteIdentifier()
-    {
-        return _siteIdentifier;
-    }
-
-    public void setSiteIdentifier(byte[] siteIdentifier)
-    {
-        _siteIdentifier = siteIdentifier;
-    }
+    @NonNull public byte[] getSiteIdentifier() { return _siteIdentifier; }
+    public void setSiteIdentifier(@NonNull byte[] v) { _siteIdentifier = v; }
 }

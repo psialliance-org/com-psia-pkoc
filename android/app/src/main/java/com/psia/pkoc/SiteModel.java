@@ -1,22 +1,32 @@
 package com.psia.pkoc;
 
-import java.util.UUID;
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
-public class SiteModel {
-    public final UUID SiteUUID;
-    public final byte[] PublicKey;
-    private byte[] EphemeralPublicKey;
+@Entity(tableName = "sites")
+public class SiteModel
+{
+    @PrimaryKey
+    @NonNull
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
+    public byte[] SiteUUID;
 
-    public SiteModel(UUID siteUUID, byte[] publicKey) {
+    @NonNull
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
+    public byte[] PublicKey;
+
+    public SiteModel()
+    {
+        this.SiteUUID = new byte[16];
+        this.PublicKey = new byte[65];
+    }
+
+    public SiteModel(@NonNull byte[] siteUUID,
+                     @NonNull byte[] publicKey)
+    {
         this.SiteUUID = siteUUID;
         this.PublicKey = publicKey;
-    }
-
-    public void setEphemeralPublicKey(byte[] key) {
-        this.EphemeralPublicKey = key;
-    }
-
-    public byte[] getEphemeralPublicKey() {
-        return this.EphemeralPublicKey;
     }
 }

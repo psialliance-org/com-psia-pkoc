@@ -23,4 +23,9 @@
         android:title="@string/display_qr_public_key"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_data_management"
+        android:orderInCategory="103"
+        android:title="@string/data_management"
+        app:showAsAction="never" />
 </menu>

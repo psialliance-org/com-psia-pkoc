@@ -119,10 +119,6 @@ public class SettingsFragment extends Fragment
             }
         });
 
-
-
-
-
         binding.siteEphemeralKeyInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {

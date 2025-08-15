@@ -65,7 +65,7 @@ public class PKOC_HostApduService extends HostApduService
                 byte[] publicKeyTlv = TLVProvider.GetNfcTLV(NFC_PacketType.UncompressedPublicKey, publicKey);
 
                 byte[] signature = CryptoProvider.GetSignedMessage(transactionId);
-                byte[] SignatureWithoutAsn = TLVProvider.RemoveASNHeaderFromSignature(signature);
+                byte[] SignatureWithoutAsn = CryptoProvider.RemoveASNHeaderFromSignature(signature);
 
                 byte[] signatureTlv = TLVProvider.GetNfcTLV(NFC_PacketType.DigitalSignature, SignatureWithoutAsn);
 

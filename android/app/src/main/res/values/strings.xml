@@ -64,6 +64,7 @@
     <string name="reader_identifier_16_bytes_uuid">Reader Identifier (16 bytes UUID)</string>
     <string name="enter_site_identifier_uuid">Enter Site Identifier UUID</string>
     <string name="site_identifier_16_bytes_uuid">Site Identifier (16 bytes UUID)</string>
+    <string name="data_management">Manage Data</string>
 
     <string-array name="key_options">
         <item>Full Public Key</item>

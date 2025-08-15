@@ -36,7 +36,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
@@ -51,4 +50,6 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     implementation(libs.core)
     implementation(libs.zxing.android.embedded)
+    implementation(libs.room.runtime)
+    annotationProcessor(libs.room.compiler)
 }

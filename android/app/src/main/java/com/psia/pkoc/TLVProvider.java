@@ -1,17 +1,9 @@
 package com.psia.pkoc;
 
 import static java.lang.System.arraycopy;
-
 import android.util.Log;
-
-import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.util.Arrays;
-import org.bouncycastle.util.BigIntegers;
-
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.UUID;
 
 /**
  * Type Length Value Provider
@@ -197,36 +189,5 @@ public class TLVProvider
         while (processedDataLength < data.length);
 
         return gattTypeDataArrayList;
-    }
-
-    /**
-     * Remove ASN header from signature
-     * @param signature ASN1/DER encoded signature
-     * @return 64 byte byte arraying containing r|s
-     */
-    public static byte[] RemoveASNHeaderFromSignature(byte[] signature)
-    {
-        ASN1Sequence seq = ASN1Sequence.getInstance(signature);
-        byte[] r = BigIntegers.asUnsignedByteArray(ASN1Integer.getInstance(seq.getObjectAt(0)).getPositiveValue());
-        byte[] s = BigIntegers.asUnsignedByteArray(ASN1Integer.getInstance(seq.getObjectAt(1)).getPositiveValue());
-
-        byte[] r32 = new byte[32], s32 = new byte[32];
-        arraycopy(r, 0, r32, 32 - r.length, r.length);
-        arraycopy(s, 0, s32, 32 - s.length, s.length);
-
-        return Arrays.concatenate(r32, s32);
-    }
-
-    /**
-     * Get byte array from GUID
-     * @param uuid GUID
-     * @return Byte array containing GUID
-     */
-    public static byte[] getByteArrayFromGuid(UUID uuid)
-    {
-        ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-        bb.putLong(uuid.getMostSignificantBits());
-        bb.putLong(uuid.getLeastSignificantBits());
-        return bb.array();
     }
 }
