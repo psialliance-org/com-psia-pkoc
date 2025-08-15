@@ -173,8 +173,8 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
 
             Log.d("siteEphemeralKeyBytes", Arrays.toString(siteEphemeralKeyBytes));
 
-            byte[] siteIdentifierBytes = siteUUID != null ? TLVProvider.getByteArrayFromGuid(siteUUID) : null;
-            byte[] readerIdentifierBytes = readerUUID != null ? TLVProvider.getByteArrayFromGuid(readerUUID) : null;
+            byte[] siteIdentifierBytes = siteUUID != null ? UuidConverters.fromUuid(siteUUID) : null;
+            byte[] readerIdentifierBytes = readerUUID != null ? UuidConverters.fromUuid(readerUUID) : null;
 
             Log.d("siteIdentifierBytes", Arrays.toString(siteIdentifierBytes));
             Log.d("readerIdentifierBytes", Arrays.toString(readerIdentifierBytes));
@@ -188,7 +188,7 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
             }
 
             if (siteUUID != null && siteEphemeralKeyBytes != null) {
-                SiteModel newSite = new SiteModel(siteUUID, siteEphemeralKeyBytes);
+                SiteModel newSite = new SiteModel(UuidConverters.fromUuid(siteUUID), siteEphemeralKeyBytes);
                 boolean exists = false;
                 for (SiteModel site : Constants.KnownSites) {
                     if (site.SiteUUID.equals(siteUUID)) {
