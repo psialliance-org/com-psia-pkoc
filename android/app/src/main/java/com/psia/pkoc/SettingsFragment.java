@@ -3,10 +3,8 @@ package com.psia.pkoc;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.psia.pkoc.databinding.FragmentSettingsBinding;
-import java.util.UUID;
 
 public class SettingsFragment extends Fragment
 {
@@ -126,8 +123,7 @@ public class SettingsFragment extends Fragment
         binding.sitePublicKeyInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
-                prefs.edit().putString("PKOC_SiteEphemeralKey", s.toString()).apply();
+                sharedPrefs.edit().putString("PKOC_SiteEphemeralKey", s.toString()).apply();
             }
 
             @Override
@@ -140,8 +136,7 @@ public class SettingsFragment extends Fragment
         binding.siteIdentifierInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
-                prefs.edit().putString("PKOC_Site_ID", s.toString()).apply();
+                sharedPrefs.edit().putString("PKOC_Site_ID", s.toString()).apply();
             }
 
             @Override
@@ -154,8 +149,7 @@ public class SettingsFragment extends Fragment
         binding.readerIdentifierInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
-                prefs.edit().putString("PKOC_Reader_ID", s.toString()).apply();
+                sharedPrefs.edit().putString("PKOC_Reader_ID", s.toString()).apply();
             }
 
             @Override
@@ -252,14 +246,11 @@ public class SettingsFragment extends Fragment
             binding.rangingSliderLabelFar.setVisibility(View.GONE);
         }
 
-        if (toFlow == PKOC_ConnectionType.ECHDE_Full) {
-            //String siteId = binding.siteIdentifierInput.getText().toString().trim();
-            //String readerId = binding.readerIdentifierInput.getText().toString().trim();
-            //String siteEphemeralKey = binding.siteEphemeralKeyInput.getText().toString().trim();
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
-            String savedEphemeralKey = prefs.getString("PKOC_SiteEphemeralKey", "");
-            String savedSiteId = prefs.getString("PKOC_Site_ID", "");
-            String savedReaderId = prefs.getString("PKOC_Reader_ID", "");
+        if (toFlow == PKOC_ConnectionType.ECHDE_Full)
+        {
+            String savedEphemeralKey = sharedPrefs.getString("PKOC_SiteEphemeralKey", "");
+            String savedSiteId = sharedPrefs.getString("PKOC_Site_ID", "");
+            String savedReaderId = sharedPrefs.getString("PKOC_Reader_ID", "");
             binding.sitePublicKeyInput.setText(savedEphemeralKey);
             binding.siteIdentifierInput.setText(savedSiteId);
             binding.readerIdentifierInput.setText(savedReaderId);
@@ -269,23 +260,6 @@ public class SettingsFragment extends Fragment
                     .putString("PKOC_Site_ID", savedSiteId)
                     .putString("PKOC_Reader_ID", savedReaderId)
                     .apply();
-
-/*            try {
-                UUID readerUUID = UUID.fromString(readerId);
-                UUID siteUUID = UUID.fromString(siteId);
-
-                byte[] readerIdentifierBytes = TLVProvider.getByteArrayFromGuid(readerUUID);
-                byte[] siteIdentifierBytes = TLVProvider.getByteArrayFromGuid(siteUUID);
-
-                ReaderModel newReader = new ReaderModel(readerIdentifierBytes, siteIdentifierBytes);
-
-                if (!Constants.KnownReaders.contains(newReader)) {
-                    Constants.KnownReaders.add(newReader);
-                }
-            } catch (IllegalArgumentException e) {
-                Log.e("SettingsFragment", "Invalid UUID format for Site or Reader Identifier", e);
-                // Optionally notify the user via Toast or Snackbar
-            }*/
         }
     }
 
