@@ -18,7 +18,6 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -29,7 +28,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Arrays;
-import java.util.UUID;
 
 /**
  * Bluetooth Gatt Callback for PKOC
@@ -153,55 +151,6 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
 
         if (_flowModel.connectionType == PKOC_ConnectionType.ECHDE_Full)
         {
-            // Inject user-defined Site Ephemeral Key, Site ID UUID, and Reader UUID from SharedPreferences
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mainActivity);
-
-            String siteEphemeralKeyHex = prefs.getString("PKOC_SiteEphemeralKey", null);
-            String siteIdStr = prefs.getString("PKOC_Site_ID", null);
-            String readerIdStr = prefs.getString("PKOC_Reader_ID", null);
-
-            Log.d("siteEphemeralKeyHex",siteEphemeralKeyHex);
-
-            Log.d("PKOC_Site_ID",siteIdStr);
-
-            Log.d("PKOC_Reader_ID",readerIdStr);
-
-
-            byte[] siteEphemeralKeyBytes = siteEphemeralKeyHex != null ? Hex.decode(siteEphemeralKeyHex) : null;
-            UUID siteUUID = siteIdStr != null ? UUID.fromString(siteIdStr) : null;
-            UUID readerUUID = readerIdStr != null ? UUID.fromString(readerIdStr) : null;
-
-            Log.d("siteEphemeralKeyBytes", Arrays.toString(siteEphemeralKeyBytes));
-
-            byte[] siteIdentifierBytes = siteUUID != null ? UuidConverters.fromUuid(siteUUID) : null;
-            byte[] readerIdentifierBytes = readerUUID != null ? UuidConverters.fromUuid(readerUUID) : null;
-
-            Log.d("siteIdentifierBytes", Arrays.toString(siteIdentifierBytes));
-            Log.d("readerIdentifierBytes", Arrays.toString(readerIdentifierBytes));
-
-            if (readerIdentifierBytes != null && siteIdentifierBytes != null) {
-                ReaderModel newReader = new ReaderModel(readerIdentifierBytes, siteIdentifierBytes);
-                if (!Constants.KnownReaders.contains(newReader)) {
-                    Log.d("adding new reader", "adding new reader to KnownReader Array from Settings");
-                    Constants.KnownReaders.add(newReader);
-                }
-            }
-
-            if (siteUUID != null && siteEphemeralKeyBytes != null) {
-                SiteModel newSite = new SiteModel(UuidConverters.fromUuid(siteUUID), siteEphemeralKeyBytes);
-                boolean exists = false;
-                for (SiteModel site : Constants.KnownSites) {
-                    if (site.SiteUUID.equals(siteUUID)) {
-                        exists = true;
-                        break;
-                    }
-                }
-                if (!exists) {
-                    Log.d("adding new site", "adding new site to KnownSite Array from Settings");
-                    Constants.KnownSites.add(newSite);
-                }
-            }
-
             Log.d("FlowType", "Executing ECDHE Perfect Security Flow");
             if (_flowModel.reader == null)
             {

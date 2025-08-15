@@ -14,14 +14,14 @@ public class Constants
     final static UUID ReadUUID = UUID.fromString("e5b1b3b5-3cca-3f76-cd86-a884cc239692");
     final static UUID ConfigUUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
-    public static ArrayList<ReaderModel> KnownReaders = new ArrayList<>(Collections.singletonList
+    public static final ArrayList<ReaderModel> KnownReaders = new ArrayList<>(Collections.singletonList
+    (
+            new ReaderModel
             (
-                    new ReaderModel
-                    (
-                            UuidConverters.fromUuid(UUID.fromString("ad0cbc8f-c353-427a-b479-37b5efcff6be")),
-                            UuidConverters.fromUuid(UUID.fromString("b9897ed0-5272-4341-979a-b69850112d80"))
-                    )
-            ));
+                    UuidConverters.fromUuid(UUID.fromString("ad0cbc8f-c353-427a-b479-37b5efcff6be")),
+                    UuidConverters.fromUuid(UUID.fromString("b9897ed0-5272-4341-979a-b69850112d80"))
+            )
+    ));
 
     public static final ArrayList<SiteModel> KnownSites = new ArrayList<>(Collections.singletonList
     (

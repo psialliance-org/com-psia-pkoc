@@ -3,8 +3,6 @@ package com.psia.pkoc;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +17,110 @@ public class SettingsFragment extends Fragment
 {
     private FragmentSettingsBinding binding;
     private SharedPreferences sharedPrefs;
+
+    private void persistSiteIfValid()
+    {
+        String siteUuidStr = safeText(binding.siteIdentifierInput);
+        String pubKeyHex   = safeText(binding.sitePublicKeyInput);
+
+        boolean ok = true;
+
+        if (Validators.isValidUuid(siteUuidStr))
+        {
+            setError(binding.siteIdentifierInput, "Invalid Site UUID");
+            ok = false;
+        }
+        else
+        {
+            clearError(binding.siteIdentifierInput);
+        }
+
+        if (!Validators.isValidHex(pubKeyHex, 65))
+        {
+            setError(binding.sitePublicKeyInput, "Must be 65-byte hex (130 chars)");
+            ok = false;
+        }
+        else
+        {
+            clearError(binding.sitePublicKeyInput);
+        }
+
+        if (!ok) return;
+
+        java.util.UUID siteUuid = java.util.UUID.fromString(siteUuidStr);
+        byte[] sid = UuidConverters.fromUuid(siteUuid);
+        byte[] pk  = org.bouncycastle.util.encoders.Hex.decode(pubKeyHex);
+
+        PKOC_Application.getDb().getQueryExecutor().execute(() ->
+            PKOC_Application.getDb().siteDao().upsert(new SiteModel(sid, pk)));
+    }
+
+    private void persistReaderIfValid()
+    {
+        String readerUuidStr = safeText(binding.readerIdentifierInput);
+        String siteUuidStr   = safeText(binding.siteIdentifierInput);
+
+        boolean ok = true;
+
+        if (Validators.isValidUuid(readerUuidStr))
+        {
+            setError(binding.readerIdentifierInput, "Invalid Reader UUID");
+            ok = false;
+        }
+        else
+        {
+            clearError(binding.readerIdentifierInput);
+        }
+
+        if (Validators.isValidUuid(siteUuidStr))
+        {
+            setError(binding.siteIdentifierInput, "Invalid Site UUID");
+            ok = false;
+        }
+        else
+        {
+            clearError(binding.siteIdentifierInput);
+        }
+
+        if (!ok) return;
+
+        byte[] rid = UuidConverters.fromUuid(java.util.UUID.fromString(readerUuidStr));
+        byte[] sid = UuidConverters.fromUuid(java.util.UUID.fromString(siteUuidStr));
+
+        PKOC_Application.getDb().getQueryExecutor().execute(() ->
+            PKOC_Application.getDb().readerDao().upsert(new ReaderModel(rid, sid)));
+    }
+
+    // ---- tiny UI helpers ----
+    private static String safeText(@NonNull android.widget.TextView tv)
+    {
+        CharSequence cs = tv.getText();
+        return cs == null ? "" : cs.toString().trim();
+    }
+
+    private static void setError(@NonNull android.widget.TextView tv, @NonNull String msg)
+    {
+        if (tv.getParent() instanceof com.google.android.material.textfield.TextInputLayout)
+        {
+            ((com.google.android.material.textfield.TextInputLayout) tv.getParent()).setError(msg);
+        }
+        else
+        {
+            tv.setError(msg);
+        }
+    }
+
+    private static void clearError(@NonNull android.widget.TextView tv)
+    {
+        if (tv.getParent() instanceof com.google.android.material.textfield.TextInputLayout)
+        {
+            ((com.google.android.material.textfield.TextInputLayout) tv.getParent()).setError(null);
+        }
+        else
+        {
+            tv.setError(null);
+        }
+    }
 
     @Override
     public View onCreateView (@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -116,46 +218,11 @@ public class SettingsFragment extends Fragment
             }
         });
 
-        binding.sitePublicKeyInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {
-                sharedPrefs.edit().putString("PKOC_SiteEphemeralKey", s.toString()).apply();
-            }
+        DebouncedTextWatcher.attach(binding.siteIdentifierInput, 300, t -> persistSiteIfValid());
+        DebouncedTextWatcher.attach(binding.sitePublicKeyInput,  300, t -> persistSiteIfValid());
+        DebouncedTextWatcher.attach(binding.readerIdentifierInput, 300, t -> persistReaderIfValid());
 
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-        });
-
-        binding.siteIdentifierInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {
-                sharedPrefs.edit().putString("PKOC_Site_ID", s.toString()).apply();
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-        });
-
-        binding.readerIdentifierInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {
-                sharedPrefs.edit().putString("PKOC_Reader_ID", s.toString()).apply();
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-        });
-
-       binding.rangingSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+        binding.rangingSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
         {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
