@@ -408,7 +408,7 @@ public class SendCredentialFragment extends Fragment
                 {
                     Log.i("SendCredentialFragment", "TLV Success - Access decision unknown");
                     chosenDevice.setIcon(R.drawable.baseline_lock_open_24_yellow); // Use a different icon indicating unknown state
-                    Toast.makeText(getContext(), "Device connected, but access control system is not available", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "TLV Success - Access decision unknown", Toast.LENGTH_SHORT).show();
 
                     // You may reset icon later if needed, similar to access granted/denied
                     new Handler(getMainLooper()).postDelayed(() ->
