@@ -28,16 +28,12 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
-      - name: Install iOS 18 simulator runtime
-        run: |
-            sudo xcodebuild -downloadPlatform iOS
-
       - name: Build & Test PSIAExperienceApp
         run: |
           xcodebuild \
             -project PSIAExperienceApp.xcodeproj \
             -scheme PSIAExperienceAppTests \
-            -destination 'platform=iOS Simulator,OS=latest' \
+            -destination 'generic/platform=iOS Simulator' \
             clean test \
             -resultBundlePath TestResults.xcresult
 
