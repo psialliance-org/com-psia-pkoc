@@ -1,0 +1,51 @@
+name: Simulator - Build & Test
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "simulator/**"
+      - ".github/workflows/simulator-build-test.yml"
+  pull_request:
+    paths:
+      - "simulator/**"
+      - ".github/workflows/simulator-build-test.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  lint-test:
+    name: Simulator - Build & Test
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: simulator
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v3
+
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+
+      - name: Android Lint (Debug)
+        run: ./gradlew lintDebug
+
+      - name: Unit tests (Debug)
+        run: ./gradlew testDebugUnitTest --info --stacktrace
