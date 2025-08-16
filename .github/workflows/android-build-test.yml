@@ -3,13 +3,12 @@ name: Android - Build & Test
 on:
   push:
     branches: [ main ]
-    paths:
-      - "android/**"
-      - ".github/workflows/android-build-test.yml"
   pull_request:
-    paths:
-      - "android/**"
-      - ".github/workflows/android-build-test.yml"
+    branches: [ main ]
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -27,8 +26,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changes in android/
+        id: changes
+        run: |
+          if git diff --quiet origin/${{ github.base_ref || 'main' }} HEAD -- android/; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: No-op if no android changes
+        if: steps.changes.outputs.changed == 'false'
+        run: echo "No android changes — passing without build."
 
       - name: Set up JDK 17
+        if: steps.changes.outputs.changed == 'true'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -36,16 +51,21 @@ jobs:
           cache: gradle
 
       - name: Set up Android SDK
+        if: steps.changes.outputs.changed == 'true'
         uses: android-actions/setup-android@v3
 
       - name: Validate Gradle Wrapper
+        if: steps.changes.outputs.changed == 'true'
         uses: gradle/actions/wrapper-validation@v3
 
       - name: Make Gradle executable
+        if: steps.changes.outputs.changed == 'true'
         run: chmod +x ./gradlew
 
       - name: Android Lint (Debug)
+        if: steps.changes.outputs.changed == 'true'
         run: ./gradlew lintDebug
 
       - name: Unit tests (Debug)
+        if: steps.changes.outputs.changed == 'true'
         run: ./gradlew testDebugUnitTest --console=plain

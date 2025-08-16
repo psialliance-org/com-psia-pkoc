@@ -2,19 +2,18 @@ name: iOS — Build & Test
 
 on:
   pull_request:
-    paths:
-      - "ios/**"
-      - ".github/workflows/ios-build-test.yml"
+    branches: [ main ]
   push:
     branches: [ main ]
-    paths:
-      - "ios/**"
-      - ".github/workflows/ios-build-test.yml"
   workflow_dispatch:
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-test-ios:
-    name: iOS — Build & Test  
+    name: iOS — Build & Test
     runs-on: macos-15
 
     defaults:
@@ -23,14 +22,32 @@ jobs:
         working-directory: ios
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changes in ios/
+        id: changes
+        run: |
+          if git diff --quiet origin/${{ github.base_ref || 'main' }} HEAD -- ios/; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: No-op if no iOS changes
+        if: steps.changes.outputs.changed == 'false'
+        run: echo "No iOS changes — passing without build."
 
       - name: Setup Xcode 16.4
+        if: steps.changes.outputs.changed == 'true'
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: '16.4'
 
       - name: Show Xcode & tools
+        if: steps.changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
           xcode-select -p
@@ -38,6 +55,7 @@ jobs:
           clang --version
 
       - name: Show available destinations
+        if: steps.changes.outputs.changed == 'true'
         run: |
           xcodebuild \
             -project PSIAExperienceApp.xcodeproj \
@@ -45,6 +63,7 @@ jobs:
             -showdestinations
 
       - name: Build & Test PSIAExperienceApp
+        if: steps.changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
           xcodebuild \

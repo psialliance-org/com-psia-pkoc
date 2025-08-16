@@ -1,15 +1,14 @@
-name: Simulator - Build & Test
+﻿name: Simulator - Build & Test
 
 on:
   push:
     branches: [ main ]
-    paths:
-      - "simulator/**"
-      - ".github/workflows/simulator-build-test.yml"
   pull_request:
-    paths:
-      - "simulator/**"
-      - ".github/workflows/simulator-build-test.yml"
+    branches: [ main ]
+
+concurrency:
+  group: simulator-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -22,13 +21,29 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: android
+        working-directory: simulator
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changes in simulator/
+        id: changes
+        run: |
+          if git diff --quiet origin/${{ github.base_ref || 'main' }} HEAD -- simulator/; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: No-op if no simulator changes
+        if: steps.changes.outputs.changed == 'false'
+        run: echo "No simulator changes — passing without build."
 
       - name: Set up JDK 17
+        if: steps.changes.outputs.changed == 'true'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -36,16 +51,21 @@ jobs:
           cache: gradle
 
       - name: Set up Android SDK
+        if: steps.changes.outputs.changed == 'true'
         uses: android-actions/setup-android@v3
 
       - name: Validate Gradle Wrapper
+        if: steps.changes.outputs.changed == 'true'
         uses: gradle/actions/wrapper-validation@v3
 
       - name: Make Gradle executable
+        if: steps.changes.outputs.changed == 'true'
         run: chmod +x ./gradlew
 
       - name: Android Lint (Debug)
+        if: steps.changes.outputs.changed == 'true'
         run: ./gradlew lintDebug
 
       - name: Unit tests (Debug)
+        if: steps.changes.outputs.changed == 'true'
         run: ./gradlew testDebugUnitTest --console=plain
