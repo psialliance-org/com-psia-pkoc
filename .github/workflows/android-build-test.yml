@@ -5,11 +5,11 @@ on:
     branches: [ main ]
     paths:
       - "android/**"
-      - ".github/workflows/android-ci.yml"
+      - ".github/workflows/android-build-test.yml"
   pull_request:
     paths:
       - "android/**"
-      - ".github/workflows/android-ci.yml"
+      - ".github/workflows/android-build-test.yml"
 
 permissions:
   contents: read
