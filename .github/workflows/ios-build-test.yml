@@ -14,7 +14,7 @@ on:
 
 jobs:
   build-test-ios:
-    runs-on: macos-15
+    runs-on: [macos, amd64]
 
     defaults:
       run:
