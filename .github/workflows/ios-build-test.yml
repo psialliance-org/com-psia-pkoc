@@ -33,7 +33,7 @@ jobs:
           xcodebuild \
             -project PSIAExperienceApp.xcodeproj \
             -scheme PSIAExperienceAppTests \
-            -destination 'generic/platform=iOS Simulator' \
+            -destination 'platform=iOS Simulator,OS=17.5,name=iPhone 15'
             clean test \
             -resultBundlePath TestResults.xcresult
 
