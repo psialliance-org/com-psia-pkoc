@@ -22,7 +22,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: simulator
+        working-directory: android
 
     steps:
       - name: Checkout
@@ -48,4 +48,4 @@ jobs:
         run: ./gradlew lintDebug
 
       - name: Unit tests (Debug)
-        run: ./gradlew testDebugUnitTest --info --stacktrace
+        run: ./gradlew testDebugUnitTest --console=plain --quiet
