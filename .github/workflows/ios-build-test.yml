@@ -52,12 +52,4 @@ jobs:
             -scheme PSIAExperienceAppTests \
             -sdk iphonesimulator \
             -destination 'platform=iOS Simulator,OS=18.5,name=iPhone 16' \
-            clean test \
-            -resultBundlePath "TestResults.xcresult"
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-test-results
-          path: ios/TestResults.xcresult
+            clean test
