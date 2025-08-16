@@ -28,6 +28,10 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
+      - name: Install iOS 18 simulator runtime
+        run: |
+            sudo xcodebuild -downloadPlatform iOS
+
       - name: Build & Test PSIAExperienceApp
         run: |
           xcodebuild \
