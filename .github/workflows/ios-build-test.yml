@@ -22,20 +22,43 @@ jobs:
         working-directory: ios
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Show Xcode version
-        run: xcodebuild -version
+      - name: Setup Xcode 16.4
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '16.4'
+
+      - name: Show Xcode & tools
+        run: |
+          xcode-select -p
+          xcodebuild -version
+          clang --version
+
+      - name: Ensure iPhone 16 (iOS 18) simulator
+        run: |
+          set -euo pipefail
+          if ! xcrun simctl list devices available | grep -q "iPhone 16 (.*) (Booted|Shutdown)"; then
+            RUNTIME=$(xcrun simctl list runtimes | awk -F'[()]' '/iOS 18\.0/ {print $2; exit}')
+            if [ -z "${RUNTIME:-}" ]; then
+              echo "iOS 18.0 runtime not found. Available runtimes:" >&2
+              xcrun simctl list runtimes
+              exit 1
+            fi
+            xcrun simctl create "iPhone 16" "iPhone 16" "$RUNTIME"
+          fi
+          xcrun simctl list devices available
 
       - name: Build & Test PSIAExperienceApp
         run: |
+          set -euo pipefail
           xcodebuild \
             -project PSIAExperienceApp.xcodeproj \
             -scheme PSIAExperienceAppTests \
-            -destination 'platform=iOS Simulator,OS=18.0,name=iPhone 16'
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,OS=18.0,name=iPhone 16' \
             clean test \
-            -resultBundlePath TestResults.xcresult
+            -resultBundlePath "TestResults.xcresult"
 
       - name: Upload test results
         if: always()
