@@ -1,0 +1,46 @@
+name: iOS — Build & Test
+
+on:
+  pull_request:
+    paths:
+      - "ios/**"
+      - ".github/workflows/ios-build-test.yml"
+  push:
+    branches: [ main ]
+    paths:
+      - "ios/**"
+      - ".github/workflows/ios-build-test.yml"
+  workflow_dispatch:
+
+jobs:
+  build-test-ios:
+    runs-on: macos-14
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ios
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Build & Test PSIAExperienceApp
+        run: |
+          DEST="platform=iOS Simulator,name=iPhone 15"
+          xcodebuild \
+            -project PSIAExperienceApp.xcodeproj \
+            -scheme PSIAExperienceApp \
+            -destination "$DEST" \
+            clean test \
+            -resultBundlePath TestResults.xcresult
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-test-results
+          path: ios/TestResults.xcresult
