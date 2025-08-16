@@ -1,0 +1,83 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "4b4e987abf731f1599cbbc7dc1790f2b",
+    "entities": [
+      {
+        "tableName": "sites",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`SiteUUID` BLOB NOT NULL, `PublicKey` BLOB NOT NULL, PRIMARY KEY(`SiteUUID`))",
+        "fields": [
+          {
+            "fieldPath": "SiteUUID",
+            "columnName": "SiteUUID",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "PublicKey",
+            "columnName": "PublicKey",
+            "affinity": "BLOB",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "SiteUUID"
+          ]
+        }
+      },
+      {
+        "tableName": "readers",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`protocolVersion` BLOB, `readerTransientPublicKey` BLOB, `readerIdentifier` BLOB NOT NULL, `siteIdentifier` BLOB NOT NULL, PRIMARY KEY(`siteIdentifier`, `readerIdentifier`))",
+        "fields": [
+          {
+            "fieldPath": "_protocolVersion",
+            "columnName": "protocolVersion",
+            "affinity": "BLOB"
+          },
+          {
+            "fieldPath": "_readerTransientPublicKey",
+            "columnName": "readerTransientPublicKey",
+            "affinity": "BLOB"
+          },
+          {
+            "fieldPath": "_readerIdentifier",
+            "columnName": "readerIdentifier",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "_siteIdentifier",
+            "columnName": "siteIdentifier",
+            "affinity": "BLOB",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "siteIdentifier",
+            "readerIdentifier"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_readers_siteIdentifier",
+            "unique": false,
+            "columnNames": [
+              "siteIdentifier"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_readers_siteIdentifier` ON `${TABLE_NAME}` (`siteIdentifier`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4b4e987abf731f1599cbbc7dc1790f2b')"
+    ]
+  }
+}
