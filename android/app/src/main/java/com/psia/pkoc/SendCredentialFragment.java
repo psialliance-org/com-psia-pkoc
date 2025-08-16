@@ -400,9 +400,6 @@ public class SendCredentialFragment extends Fragment
 
                 chosenDevice.setIsBusy(false);
 
-                //change starts here:
-
-
                 // Check for TLV Success (4, 1, 1) case where access cannot be decided
                 if (msg.what == ReaderUnlockStatus.CompletedTransaction.ordinal())
                 {
@@ -410,7 +407,6 @@ public class SendCredentialFragment extends Fragment
                     chosenDevice.setIcon(R.drawable.baseline_lock_open_24_yellow); // Use a different icon indicating unknown state
                     Toast.makeText(getContext(), "TLV Success - Access decision unknown", Toast.LENGTH_SHORT).show();
 
-                    // You may reset icon later if needed, similar to access granted/denied
                     new Handler(getMainLooper()).postDelayed(() ->
                     {
                         Log.i("SendCredentialFragment", "Resetting icon");
@@ -426,8 +422,6 @@ public class SendCredentialFragment extends Fragment
                     return;
                 }
 
-
-                //change ends here
                 if (msg.what == ReaderUnlockStatus.AccessGranted.ordinal())
                 {
                     Log.i("SendCredentialFragment", "Access Granted");
