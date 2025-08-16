@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   lint-test:
-    name: Lint and Unit Tests
+    name: Android - Build & Test
     runs-on: ubuntu-latest
 
     defaults:
@@ -45,7 +45,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Android Lint (Debug)
-        run: ./gradlew -p android lintDebug
+        run: ./gradlew lintDebug
 
       - name: Unit tests (Debug)
-        run: ./gradlew -p android testDebugUnitTest
+        run: ./gradlew testDebugUnitTest
