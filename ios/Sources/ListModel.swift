@@ -1,5 +1,6 @@
 import SwiftUI
 import CoreBluetooth
+import SwiftData
 
 struct ListModel
 {
