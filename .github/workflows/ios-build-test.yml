@@ -31,23 +31,17 @@ jobs:
 
       - name: Show Xcode & tools
         run: |
+          set -euo pipefail
           xcode-select -p
           xcodebuild -version
           clang --version
 
-      - name: Ensure iPhone 16 (iOS 18) simulator
+      - name: Show available destinations
         run: |
-          set -euo pipefail
-          if ! xcrun simctl list devices available | grep -q "iPhone 16 (.*) (Booted|Shutdown)"; then
-            RUNTIME=$(xcrun simctl list runtimes | awk -F'[()]' '/iOS 18\.0/ {print $2; exit}')
-            if [ -z "${RUNTIME:-}" ]; then
-              echo "iOS 18.0 runtime not found. Available runtimes:" >&2
-              xcrun simctl list runtimes
-              exit 1
-            fi
-            xcrun simctl create "iPhone 16" "iPhone 16" "$RUNTIME"
-          fi
-          xcrun simctl list devices available
+          xcodebuild \
+            -project PSIAExperienceApp.xcodeproj \
+            -scheme PSIAExperienceAppTests \
+            -showdestinations
 
       - name: Build & Test PSIAExperienceApp
         run: |
@@ -56,7 +50,7 @@ jobs:
             -project PSIAExperienceApp.xcodeproj \
             -scheme PSIAExperienceAppTests \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,OS=18.0,name=iPhone 16' \
+            -destination 'platform=iOS Simulator,OS=18.5,name=iPhone 16' \
             clean test \
             -resultBundlePath "TestResults.xcresult"
 
