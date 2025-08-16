@@ -448,6 +448,13 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
                         iconName = "lock.open.fill"
                         iconTint = Color(hex: 0x9CC3C9)
                     }
+                
+                    if (packet.data[0] == ReaderUnlockStatus.CompletedTransaction.rawValue)
+                    {
+                        iconName = "lock.open.fill"
+                        iconTint = Color.yellow
+                        Toast.text("TLV Success - Access decision unknown", config: .init(direction: .bottom)).show()
+                    }
                     
                     if let index = discoveredPeripherals.firstIndex(where: { $0.peripheral == peripheral })
                     {
