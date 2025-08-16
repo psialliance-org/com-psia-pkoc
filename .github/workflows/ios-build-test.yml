@@ -14,7 +14,7 @@ on:
 
 jobs:
   build-test-ios:
-    runs-on: macos-15-large
+    runs-on: macos-15
 
     defaults:
       run:
@@ -33,7 +33,7 @@ jobs:
           xcodebuild \
             -project PSIAExperienceApp.xcodeproj \
             -scheme PSIAExperienceAppTests \
-            -destination 'platform=macOS'
+            -destination 'platform=iOS Simulator,OS=18.0,name=iPhone 16'
             clean test \
             -resultBundlePath TestResults.xcresult
 
