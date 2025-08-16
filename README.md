@@ -5,6 +5,7 @@ This repo hosts three apps that enable secure, interoperable identity exchange o
 
 [![iOS — Build & Test](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/ios-build-test.yml/badge.svg)](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/ios-build-test.yml)
 [![Android - Build & Test](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/android-build-test.yml/badge.svg)](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/android-build-test.yml)
+[![Simulator - Build & Test](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/simulator-build-test.yml/badge.svg)](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/simulator-build-test.yml)
 ## Repository Layout
 
 ```
