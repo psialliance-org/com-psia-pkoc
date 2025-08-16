@@ -1,0 +1,62 @@
+name: Android - Build, Lint & Test
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "android/**"
+      - ".github/workflows/android-ci.yml"
+  pull_request:
+    paths:
+      - "android/**"
+      - ".github/workflows/android-ci.yml"
+  workflow_dispatch:
+
+jobs:
+  build-test-android:
+    name: Build & Test (Android)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Install Android SDK (commandline tools)
+        uses: android-actions/setup-android@v3
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v3
+
+      - name: Make Gradle executable
+        run: chmod +x ./android/gradlew
+
+      - name: Gradle clean
+        run: ./gradlew -p android clean
+
+      - name: Android Lint (Debug)
+        run: ./gradlew -p android lintDebug
+
+      - name: Unit tests (Debug)
+        run: ./gradlew -p android testDebugUnitTest
+
+      - name: Assemble Debug APK
+        run: ./gradlew -p android assembleDebug
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: |
+            android/**/build/outputs/apk/debug/*.apk
+          if-no-files-found: warn
