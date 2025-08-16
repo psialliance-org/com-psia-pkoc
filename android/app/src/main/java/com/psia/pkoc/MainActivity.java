@@ -1,7 +1,5 @@
 package com.psia.pkoc;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,15 +27,6 @@ public class MainActivity extends AppCompatActivity
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-
-        boolean eulaAccepted = sharedPref.getBoolean(PKOC_Preferences.EulaAccepted, false);
-
-        if(!eulaAccepted)
-        {
-            navController.navigate(R.id.eulaFragment);
-        }
     }
 
     @Override

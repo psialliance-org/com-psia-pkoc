@@ -10,5 +10,4 @@ public class PKOC_Preferences
     static final String EnableRanging = "EnableRanging";
     static final String RangeValue = "RangeValue";
     static final String DisplayMAC = "DisplayMAC";
-    static final String EulaAccepted = "EulaAccepted";
 }

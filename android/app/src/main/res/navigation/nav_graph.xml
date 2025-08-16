@@ -18,9 +18,6 @@
             android:id="@+id/action_sendCredentialFragment_to_aboutFragment"
             app:destination="@id/aboutFragment" />
         <action
-            android:id="@+id/action_sendCredentialFragment_to_eulaFragment"
-            app:destination="@id/eulaFragment" />
-        <action
             android:id="@+id/action_sendCredentialFragment_to_DisplayPKFragment"
             app:destination="@id/DisplayPKFragment" />
         <action
@@ -57,15 +54,6 @@
     <action
         android:id="@+id/action_sendCredentialFragment_to_DisplayPKFragment"
         app:destination="@id/sendCredentialFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/eulaFragment"
-        android:name="com.psia.pkoc.EulaFragment"
-        android:label="End User License Agreement" >
-        <action
-            android:id="@+id/action_eulaFragment_to_sendCredentialFragment"
-            app:destination="@id/sendCredentialFragment" />
     </fragment>
 
     <fragment
