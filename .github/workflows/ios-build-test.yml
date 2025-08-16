@@ -30,10 +30,10 @@ jobs:
 
       - name: Build & Test PSIAExperienceApp
         run: |
-          DEST="platform=iOS Simulator,name=iPhone 15"
+          DEST="platform=iOS Simulator,name=iPhone 16"
           xcodebuild \
             -project PSIAExperienceApp.xcodeproj \
-            -scheme PSIAExperienceApp \
+            -scheme PSIAExperienceAppTests \
             -destination "$DEST" \
             clean test \
             -resultBundlePath TestResults.xcresult
