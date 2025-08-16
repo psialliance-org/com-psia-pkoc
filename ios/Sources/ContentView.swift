@@ -7,6 +7,7 @@ struct ContentView : View
     @State var settingsLinkSelected = false
     @State var aboutLinkSelected = false
     @State var qrLinkSelected = false
+    @State var sitesLinkSelected = false
     
     @State var _transmissionType : TransmissionType = TransmissionType.BLE
 
@@ -84,7 +85,7 @@ struct ContentView : View
                 {
                     PresentDeviceView()
                 }
-                                
+
                 Image(uiImage: UIImage(named: ProductImages.PSIA_Logo_Typographic)!)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -99,7 +100,7 @@ struct ContentView : View
             .toolbar
             {
                 let placement = ToolbarItemPlacement.topBarTrailing
-            
+
                 ToolbarItemGroup(placement: placement)
                 {
                     Menu
@@ -111,6 +112,7 @@ struct ContentView : View
                         {
                             Label("Settings", systemImage: "gearshape")
                         }).navigationTitle("Settings")
+
                         Button(action:
                         {
                             aboutLinkSelected = true
@@ -118,6 +120,7 @@ struct ContentView : View
                         {
                             Label("About", systemImage: "info.circle")
                         }).navigationTitle("About")
+
                         Button(action:
                         {
                             qrLinkSelected = true
@@ -125,25 +128,45 @@ struct ContentView : View
                         {
                             Label("Display QR Public Key", systemImage: "qrcode")
                         }).navigationTitle("Display QR Public Key")
+                        Button(action:
+                        {
+                            sitesLinkSelected = true
+                        }, label:
+                        {
+                            Label("Sites & Readers", systemImage: "list.bullet.rectangle")
+                        }).navigationTitle("Sites & Readers")
+
                     }
                     label:
                     {
-                        Label("Add", systemImage: "ellipsis.circle")
+                        Label("Menu", systemImage: "ellipsis.circle")
                     }
                 }
             }
-            .background(NavigationLink(destination: SettingsView().navigationTitle("Settings"), isActive: $settingsLinkSelected)
-            {
-                EmptyView()
-            }.hidden())
-            .background(NavigationLink(destination: AboutView().navigationTitle("About"), isActive: $aboutLinkSelected)
-            {
-                EmptyView()
-            }.hidden())
-            .background(NavigationLink(destination: DisplayPublicKeyView().navigationTitle("Display QR Public Key"), isActive: $qrLinkSelected)
-            {
-                EmptyView()
-            }.hidden())
+            .background(
+                NavigationLink(
+                    destination: SitesView().navigationTitle("Sites & Readers"),
+                    isActive: $sitesLinkSelected
+                ) { EmptyView() }.hidden()
+            )
+            .background(
+                NavigationLink(
+                    destination: SettingsView().navigationTitle("Settings"),
+                    isActive: $settingsLinkSelected
+                ) { EmptyView() }.hidden()
+            )
+            .background(
+                NavigationLink(
+                    destination: AboutView().navigationTitle("About"),
+                    isActive: $aboutLinkSelected
+                ) { EmptyView() }.hidden()
+            )
+            .background(
+                NavigationLink(
+                    destination: DisplayPublicKeyView().navigationTitle("Display QR Public Key"),
+                    isActive: $qrLinkSelected
+                ) { EmptyView() }.hidden()
+            )
         }
         .navigationViewStyle(navigationViewStyleForView)
     }

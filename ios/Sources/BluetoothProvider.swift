@@ -386,6 +386,42 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
         print("Subscribed to notifications on \(characteristic.uuid)")
     }
     
+    func loadSiteForVerification(from flowModel: FlowModel?) -> SiteModel?
+    {
+        guard
+            let ctx = flowModel?.reader,
+            let readerIdBytes: [UInt8] = ctx.ReaderIdentifier,
+            let siteIdBytes:  [UInt8]  = ctx.SiteIdentifier,
+            ctx.ReaderEphemeralPublicKey != nil,
+            let readerId = UUID(bytes: readerIdBytes),
+            let siteId   = UUID(bytes: siteIdBytes)
+        else
+        {
+            return nil
+        }
+
+        var result: SiteModel?
+        let sem = DispatchSemaphore(value: 0)
+
+        Task.detached(priority: .userInitiated)
+        {
+            let repos = AppComposition.repos
+            let readerOK = (try? await repos.readerRepo.get(readerId: readerId, siteId: siteId)) != nil
+            if readerOK,
+               let site = try? await repos.siteRepo.get(siteId),
+               let pubKeyBytes: [UInt8] = site.publicKeyHex.hexStringToBytes()
+            {
+                result = SiteModel(SiteIdentifier: siteIdBytes, PublicKey: pubKeyBytes)
+            }
+            sem.signal()
+        }
+
+        sem.wait()
+        return result
+    }
+
+
+    
     func handleNotifications(peripheral: CBPeripheral, notificationData: Data)
     {
         print("Notification Data: \(notificationData)")
@@ -482,21 +518,7 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
         let toVerify = _flowModel?.reader
         if (toVerify?.ReaderIdentifier != nil && toVerify?.SiteIdentifier != nil && toVerify?.ReaderEphemeralPublicKey != nil)
         {
-            var siteToFind : SiteModel? = nil;
-            
-            for reader in KnownReaders
-            {
-                if (reader.ReaderIdentifier == _flowModel?.reader.ReaderIdentifier && reader.SiteIdentifier == _flowModel?.reader.SiteIdentifier)
-                {
-                    for site in KnownSites
-                    {
-                        if (site.SiteIdentifier == _flowModel?.reader.SiteIdentifier)
-                        {
-                            siteToFind = site
-                        }
-                    }
-                }
-            }
+            let siteToFind : SiteModel? = loadSiteForVerification(from: _flowModel)
             
             if (siteToFind == nil)
             {
