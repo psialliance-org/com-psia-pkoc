@@ -1,9 +1,9 @@
-name: iOS — Build & Test
+name: iOS â€” Build & Test
 
 on:
-  pull_request:
-    branches: [ main ]
   push:
+    branches: [ main ]
+  pull_request:
     branches: [ main ]
   workflow_dispatch:
 
@@ -12,42 +12,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-test-ios:
-    name: iOS — Build & Test
-    runs-on: macos-15
+  detect:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      ios: ${{ steps.filter.outputs.ios }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            ios:
+              - 'ios/**'
+              - '.github/workflows/ios-build-test.yml'
 
+  build-test-ios:
+    name: iOS â€” Build & Test
+    runs-on: macos-15
+    needs: detect
+    if: needs.detect.outputs.ios == 'true'
     defaults:
       run:
         shell: bash
         working-directory: ios
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Detect changes in ios/
-        id: changes
-        run: |
-          if git diff --quiet origin/${{ github.base_ref || 'main' }} HEAD -- ios/; then
-            echo "changed=false" >> $GITHUB_OUTPUT
-          else
-            echo "changed=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: No-op if no iOS changes
-        if: steps.changes.outputs.changed == 'false'
-        run: echo "No iOS changes — passing without build."
+      - uses: actions/checkout@v4
 
       - name: Setup Xcode 16.4
-        if: steps.changes.outputs.changed == 'true'
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: '16.4'
 
       - name: Show Xcode & tools
-        if: steps.changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
           xcode-select -p
@@ -55,7 +54,6 @@ jobs:
           clang --version
 
       - name: Show available destinations
-        if: steps.changes.outputs.changed == 'true'
         run: |
           xcodebuild \
             -project PSIAExperienceApp.xcodeproj \
@@ -63,7 +61,6 @@ jobs:
             -showdestinations
 
       - name: Build & Test PSIAExperienceApp
-        if: steps.changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
           xcodebuild \
@@ -72,3 +69,23 @@ jobs:
             -sdk iphonesimulator \
             -destination 'platform=iOS Simulator,OS=18.5,name=iPhone 16' \
             clean test
+
+  ci:
+    name: CI â€” iOS
+    runs-on: ubuntu-latest
+    needs: [build-test-ios, detect]
+    if: ${{ always() }}
+    steps:
+      - name: Aggregate result
+        run: |
+          if [ "${{ needs.detect.outputs.ios }}" != "true" ]; then
+            echo "No iOS changes â€” passing CI."
+            exit 0
+          fi
+          if [ "${{ needs.build-test-ios.result }}" = "success" ]; then
+            echo "iOS build passed."
+            exit 0
+          else
+            echo "iOS build failed: ${{ needs.build-test-ios.result }}"
+            exit 1
+          fi
