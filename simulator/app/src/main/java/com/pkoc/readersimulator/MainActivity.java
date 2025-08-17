@@ -1023,10 +1023,6 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                                 Log.d(TAG, "Uncompressed transient public key: " + Hex.toHexString(packet.Data));
                                 deviceModel.receivedTransientPublicKey = packet.Data;
                                 break;
-                            case EncryptedDataFollows:
-                                // This case should not be reached because we already decrypted the data above
-                                Log.w(TAG, "Unexpected EncryptedDataFollows packet");
-                                break;
                             case LastUpdateTime:
                                 deviceModel.creationTime = new BigInteger(packet.Data).intValue();
                                 Log.d(TAG, "Creation time: " + deviceModel.creationTime);
