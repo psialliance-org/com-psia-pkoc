@@ -13,15 +13,10 @@ struct ContentView : View
 
     func loadValues()
     {
-        if let transmissionType : Int = UserDefaults.standard.integer(forKey: TransmissionTypeSelected) as Int?
-        {
-            let transmissionTypeSelected = TransmissionType(rawValue: transmissionType)
-            if (transmissionTypeSelected != nil)
-            {
-                _transmissionType = transmissionTypeSelected!
-            }
-        }
+        let rawValue = UserDefaults.standard.object(forKey: TransmissionTypeSelected) as? Int
+        _transmissionType = TransmissionType(rawValue: rawValue ?? TransmissionType.BLE.rawValue) ?? .BLE
     }
+
 
     func loadSecureKeysData()
     {
