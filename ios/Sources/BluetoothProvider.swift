@@ -564,9 +564,13 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
                     return
                 }
                 
-                _flowModel?.sharedSecret = [UInt8] (CryptoProvider.createSharedSecret(
+                // Get the raw ECDH shared secret
+                let rawSharedSecret = [UInt8] (CryptoProvider.createSharedSecret(
                     privateKey: _flowModel!.transientKeyPair!,
                     publicKey: publicKeySecKey!)!)
+                
+                // Derive the AES-CCM key by hashing the shared secret with SHA-256
+                _flowModel?.sharedSecret = CryptoProvider.deriveAesKeyFromSharedSecretSimple(rawSharedSecret)
                 
                 let transientPublicKey = SecKeyCopyPublicKey(_flowModel!.transientKeyPair!)
                 
