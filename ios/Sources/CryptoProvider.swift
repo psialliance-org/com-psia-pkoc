@@ -160,4 +160,10 @@ public class CryptoProvider: ObservableObject
         let shared = SecKeyCopyKeyExchangeResult(privateKey, algorithm, publicKey, keyPairAttr as CFDictionary, &error) as Data?
         return shared
     }
+    
+    static func deriveAesKeyFromSharedSecretSimple(_ sharedSecret: [UInt8]) -> [UInt8]
+    {
+        let digest = SHA256.hash(data: Data(sharedSecret))
+        return Array(digest)
+    }
 }
