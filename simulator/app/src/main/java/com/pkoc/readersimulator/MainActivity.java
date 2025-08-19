@@ -1040,9 +1040,14 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                 //check to validate if we can do the normal flow or need the more secure.  This will happen if the credential is sent in ECDHE Flow (Perfect Security)
                 if (deviceModel.publicKey == null && deviceModel.signature == null) {
                     if (deviceModel.receivedTransientPublicKey != null) {
-                        deviceModel.sharedSecret = CryptoProvider.getSharedSecret(
+                        // Get the raw ECDH shared secret
+                        byte[] rawSharedSecret = CryptoProvider.getSharedSecret(
                                 deviceModel.transientKeyPair.getPrivate(),
                                 deviceModel.receivedTransientPublicKey);
+                                Log.i("ECDHE rawSharedSecrent", Arrays.toString(rawSharedSecret));
+
+                        // Derive the AES-CCM key by hashing the shared secret with SHA-256
+                        deviceModel.sharedSecret = CryptoProvider.deriveAesKeyFromSharedSecretSimple(rawSharedSecret);
 
                         if (deviceModel.sharedSecret == null)
                         {
@@ -1420,13 +1425,13 @@ before returning the concatenated byte array for signing
                 Log.d("NFC", "Reader ephemeral public key x component: " + Hex.toHexString(readerX));
 
                 byte[] toSign = org.bouncycastle.util.Arrays.concatenate(siteIdentifier, readerIdentifier, deviceX, readerX);
-                Log.d("NFC", "Message to sign: " + Hex.toHexString(toSign));
+                Log.d("NFC", "ECDHE Flow Message to sign: " + Hex.toHexString(toSign));
 
                 return toSign;
             }
 
             byte[] toSignNormalFlow = CryptoProvider.getCompressedPublicKeyBytes(deviceModel.transientKeyPair.getPublic().getEncoded());
-            Log.d("NFC", "Message to sign: " + Hex.toHexString(toSignNormalFlow));
+            Log.d("NFC", "Normal Flow Message to sign: " + Hex.toHexString(toSignNormalFlow));
             //layoutPost("Message to sign", Hex.toHexString(toSignNormalFlow));
 
             return toSignNormalFlow;

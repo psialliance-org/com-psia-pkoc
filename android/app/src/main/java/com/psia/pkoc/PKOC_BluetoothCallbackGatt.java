@@ -170,9 +170,12 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
             if (_flowModel.transientKeyPair == null)
             {
                 _flowModel.transientKeyPair = CreateTransientKeyPair();
-                _flowModel.sharedSecret = CryptoProvider.getSharedSecret(
+                byte[] rawSharedSecret = CryptoProvider.getSharedSecret(
                         _flowModel.transientKeyPair.getPrivate(),
                         _flowModel.reader.getReaderTransientPublicKey());
+
+                // Hash the raw shared secret to derive AES-CCM key per PKOC spec
+                _flowModel.sharedSecret = CryptoProvider.deriveAesKeyFromSharedSecretSimple(rawSharedSecret);
                 Log.d("handleDatagrams", "transientKeyPair was null, creating new one");
                 byte[] transientPublicKeyEncoded = _flowModel.transientKeyPair.getPublic().getEncoded();
                 byte[] transientPublicKey = getUncompressedPublicKeyBytes(transientPublicKeyEncoded);

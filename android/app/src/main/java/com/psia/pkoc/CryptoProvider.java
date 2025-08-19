@@ -384,5 +384,13 @@ public class CryptoProvider
             throw new RuntimeException(e);
         }
     }
-
+    public static byte[] deriveAesKeyFromSharedSecretSimple(byte[] sharedSecret) {
+        try {
+            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+            return sha256.digest(sharedSecret);
+        } catch (Exception e) {
+            Log.e("TAG", "Error hashing shared secret for AES key derivation", e);
+            return null;
+        }
+    }
 }
