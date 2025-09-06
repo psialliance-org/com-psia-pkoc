@@ -101,7 +101,7 @@ jobs:
             <key>provisioningProfiles</key>
                 <dict>
                   <key>com.elatec.pkoc</key>
-                  <string>com.elatec.psia</string>
+                  <string>com.elatec.pkoc</string>
                 </dict>
           </dict>
           </plist>
