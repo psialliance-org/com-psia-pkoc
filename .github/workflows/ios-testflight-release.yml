@@ -79,24 +79,25 @@ jobs:
 
       - name: Create ExportOptions.plist
         run: |
-          mkdir -p build
-          cat > build/ExportOptions.plist <<'PLIST'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>method</key><string>app-store-connect</string>
-            <key>uploadSymbols</key><true/>
-            <key>teamID</key><string>__TEAM_ID__</string>
-            <key>provisioningProfiles</key>
-                <dict>
-                  <key>com.elatec.pkoc</key>
-                  <string>com.elatec.pkoc</string>
-                </dict>
-          </dict>
-          </plist>
-          PLIST
-          /usr/bin/sed -i '' "s/__TEAM_ID__/$TEAM_ID/g" build/ExportOptions.plist
+            mkdir -p build
+            cat > build/ExportOptions.plist <<PLIST
+            <?xml version="1.0" encoding="UTF-8"?>
+            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+            <plist version="1.0">
+            <dict>
+              <key>method</key><string>app-store-connect</string>
+              <key>teamID</key><string>$TEAM_ID</string>
+              <key>uploadSymbols</key><true/>
+              <key>compileBitcode</key><false/>
+              <key>provisioningProfiles</key>
+              <dict>
+                <key>$BUNDLE_ID</key>
+                <string>$BUNDLE_ID</string>
+              </dict>
+            </dict>
+            </plist>
+            PLIST
+
 
       - name: Export .ipa
         id: export
