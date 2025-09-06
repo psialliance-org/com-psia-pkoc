@@ -75,7 +75,7 @@ jobs:
           set -euo pipefail
           SETTINGS=$(xcodebuild -showBuildSettings -project "$PROJECT" -scheme "$SCHEME" 2>/dev/null)
           PLIST_PATH=$(printf "%s\n" "$SETTINGS" | awk '/INFOPLIST_FILE/ {print $3; exit}')
-          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $GITHUB_RUN_NUMBER" "$PLIST_PATH"
+          /usr/libexec/PlistBuddy -c "Add :CFBundleVersion $GITHUB_RUN_NUMBER" "$PLIST_PATH"
 
       - name: Archive (Release)
         run: |
