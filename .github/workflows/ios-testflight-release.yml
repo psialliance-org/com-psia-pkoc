@@ -81,9 +81,10 @@ jobs:
         run: |
             ls -l ~/Library/MobileDevice/Provisioning\ Profiles || true
             for f in ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision; do
-                echo "---- $f ----"
-                security cms -D -i "$f" | /usr/libexec/PlistBuddy -c 'Print :Name' /dev/stdin
-                security cms -D -i "$f" | /usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' /dev/stdin
+              echo "---- $f ----"
+              security cms -D -i "$f" > decoded.plist
+              /usr/libexec/PlistBuddy -c 'Print :Name' decoded.plist || true
+              /usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' decoded.plist || true
             done
 
       - name: Create ExportOptions.plist
