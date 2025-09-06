@@ -16,6 +16,7 @@ env:
   TEAM_ID: LJ99BF5CNX
   BUNDLE_ID: com.elatec.pkoc
   SCHEME: PSIAExperienceApp
+  PROJECT: PSIAExperienceApp.xcodeproj
 
 jobs:
   build-and-upload:
