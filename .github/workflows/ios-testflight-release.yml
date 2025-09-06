@@ -73,6 +73,8 @@ jobs:
               CODE_SIGN_IDENTITY="Apple Distribution" \
               DEVELOPMENT_TEAM=$TEAM_ID \
               PRODUCT_BUNDLE_IDENTIFIER=$BUNDLE_ID \
+              CODE_SIGNING_ALLOWED=NO \
+              CODE_SIGN_IDENTITY="" \
               clean archive
 
       - name: Create ExportOptions.plist
