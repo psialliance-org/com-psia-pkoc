@@ -1,0 +1,104 @@
+name: iOS — TestFlight
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'ios/**'
+      - '.github/workflows/ios-testflight-release.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ios-testflight-release
+  cancel-in-progress: true
+
+env:
+  TEAM_ID: LJ99BF5CNX
+  BUNDLE_ID: com.elatec.pkoc
+  SCHEME: PSIAExperienceApp
+
+jobs:
+  build-and-upload:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: ios
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Xcode 16.4
+        if: steps.changes.outputs.changed == 'true'
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '16.4'
+
+      - name: Import signing certificate (p12)
+        uses: apple-actions/import-codesign-certs@v3
+        with:
+          p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
+          p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
+
+      - name: Download provisioning profiles (App Store)
+        uses: apple-actions/download-provisioning-profiles@v4
+        with:
+          bundle-id: ${{ env.BUNDLE_ID }}
+          profile-type: IOS_APP_STORE
+          issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+
+      - name: Bump build number
+        run: |
+          set -euo pipefail
+          SETTINGS=$(xcodebuild -showBuildSettings -project "$PROJECT" -scheme "$SCHEME" 2>/dev/null)
+          PLIST_PATH=$(printf "%s\n" "$SETTINGS" | awk '/INFOPLIST_FILE/ {print $3; exit}')
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $GITHUB_RUN_NUMBER" "$PLIST_PATH"
+
+      - name: Archive (Release)
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project "$PROJECT" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -archivePath build/App.xcarchive \
+            -destination 'generic/platform=iOS' \
+            -allowProvisioningUpdates \
+            clean archive
+
+      - name: Create ExportOptions.plist
+        run: |
+          mkdir -p build
+          cat > build/ExportOptions.plist <<'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store</string>
+            <key>uploadSymbols</key><true/>
+            <key>teamID</key><string>__TEAM_ID__</string>
+          </dict>
+          </plist>
+          PLIST
+          /usr/bin/sed -i '' "s/__TEAM_ID__/$TEAM_ID/g" build/ExportOptions.plist
+
+      - name: Export .ipa
+        id: export
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/App.xcarchive \
+            -exportPath build \
+            -exportOptionsPlist build/ExportOptions.plist
+          echo "ipa=$(ls build/*.ipa | head -n1)" >> "$GITHUB_OUTPUT"
+
+      - name: Upload to TestFlight
+        uses: apple-actions/upload-testflight-build@v3
+        with:
+          app-path: ${{ steps.export.outputs.ipa }}
+          issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
