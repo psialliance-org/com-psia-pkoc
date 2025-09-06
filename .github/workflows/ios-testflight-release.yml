@@ -68,11 +68,11 @@ jobs:
               -archivePath build/App.xcarchive \
               -destination 'generic/platform=iOS' \
               -allowProvisioningUpdates \
-              CODE_SIGN_STYLE=Manual \
+              CODE_SIGN_STYLE=Automatic \
               CODE_SIGN_IDENTITY="Apple Distribution" \
-              PROVISIONING_PROFILE_SPECIFIER="com.elatec.pkoc" \
               DEVELOPMENT_TEAM=$TEAM_ID \
               PRODUCT_BUNDLE_IDENTIFIER=$BUNDLE_ID \
+              CODE_SIGN_IDENTITY="" \
               clean archive
 
       - name: Create ExportOptions.plist
