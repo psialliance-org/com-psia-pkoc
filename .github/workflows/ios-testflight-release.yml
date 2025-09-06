@@ -88,6 +88,11 @@ jobs:
             <key>method</key><string>app-store</string>
             <key>uploadSymbols</key><true/>
             <key>teamID</key><string>__TEAM_ID__</string>
+            <key>provisioningProfiles</key>
+                <dict>
+                  <key>com.elatec.pkoc</key>
+                  <string>com.elatec.psia</string>
+                </dict>
           </dict>
           </plist>
           PLIST
