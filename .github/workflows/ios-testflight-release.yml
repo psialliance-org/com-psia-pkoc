@@ -61,15 +61,19 @@ jobs:
 
       - name: Archive (Release)
         run: |
-          set -euo pipefail
-          xcodebuild \
-            -project "$PROJECT" \
-            -scheme "$SCHEME" \
-            -configuration Release \
-            -archivePath build/App.xcarchive \
-            -destination 'generic/platform=iOS' \
-            -allowProvisioningUpdates \
-            clean archive
+            set -euo pipefail
+            xcodebuild \
+                -project "$PROJECT" \
+                -scheme "$SCHEME" \
+                -configuration Release \
+                -archivePath build/App.xcarchive \
+                -destination 'generic/platform=iOS' \
+                -allowProvisioningUpdates \
+                CODE_SIGN_STYLE=Manual \
+                CODE_SIGN_IDENTITY="Apple Distribution" \
+                DEVELOPMENT_TEAM=$TEAM_ID \
+                PRODUCT_BUNDLE_IDENTIFIER=$BUNDLE_ID \
+                clean archive
 
       - name: Create ExportOptions.plist
         run: |
