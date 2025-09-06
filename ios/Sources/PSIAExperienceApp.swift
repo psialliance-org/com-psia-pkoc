@@ -1,13 +1,15 @@
 import SwiftUI
 
 @main
-struct PSIAExperienceApp : App
+struct PSIAExperienceApp: App
 {
-    var body : some Scene
+    init()
     {
-        WindowGroup
-        {
-            ContentView()
-        }
+        AppComposition.bootstrap()
+    }
+
+    var body: some Scene
+    {
+        WindowGroup { ContentView() }
     }
 }

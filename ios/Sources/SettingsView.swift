@@ -12,43 +12,21 @@ struct SettingsView: View
     
     func loadValues()
     {
-        if let transmissionType : Int = UserDefaults.standard.integer(forKey: TransmissionTypeSelected) as Int?
+        let transmissionTypeRaw = UserDefaults.standard.object(forKey: TransmissionTypeSelected) as? Int
+        _transmissionSelected = TransmissionType(rawValue: transmissionTypeRaw ?? TransmissionType.BLE.rawValue) ?? .BLE
+
+        let flowRaw = UserDefaults.standard.object(forKey: PKOC_TransmissionFlow) as? Int
+        _selectedFlow = PKOC_ConnectionType(rawValue: flowRaw ?? _selectedFlow.rawValue) ?? _selectedFlow
+
+        _autoDiscoverDevices = UserDefaults.standard.object(forKey: AutoDiscoverDevices) as? Bool ?? _autoDiscoverDevices
+
+        _enableRanging = UserDefaults.standard.object(forKey: EnableRanging) as? Bool ?? _enableRanging
+        if _enableRanging
         {
-            let transmissionTypeSelected = TransmissionType(rawValue: transmissionType)
-            if (transmissionTypeSelected != nil)
-            {
-                _transmissionSelected = transmissionTypeSelected!
-            }
+            _ranging = UserDefaults.standard.object(forKey: RangeValue) as? Double ?? _ranging
         }
 
-        if let selectedFlow : Int = UserDefaults.standard.integer(forKey: PKOC_TransmissionFlow) as Int?
-        {
-            let isSelectedFlow = PKOC_ConnectionType(rawValue: selectedFlow)
-            if (isSelectedFlow != nil)
-            {
-                _selectedFlow = isSelectedFlow!
-            }
-        }
-
-        if let autoDiscoverDevices : Bool = UserDefaults.standard.bool(forKey: AutoDiscoverDevices) as Bool?
-        {
-            _autoDiscoverDevices = autoDiscoverDevices
-        }
-
-        if let enableRanging : Bool = UserDefaults.standard.bool(forKey: EnableRanging) as Bool?
-        {
-            _enableRanging = enableRanging
-            
-            if let ranging : Double = UserDefaults.standard.double(forKey: RangeValue) as Double?
-            {
-                _ranging = ranging
-            }
-        }
-
-        if let showDeviceIdentifier : Bool = UserDefaults.standard.bool(forKey: DisplayMAC) as Bool?
-        {
-            _showDeviceIdentifier = showDeviceIdentifier
-        }
+        _showDeviceIdentifier = UserDefaults.standard.object(forKey: DisplayMAC) as? Bool ?? _showDeviceIdentifier
     }
     
     var body: some View

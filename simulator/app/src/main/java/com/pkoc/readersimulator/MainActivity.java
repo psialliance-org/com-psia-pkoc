@@ -97,7 +97,6 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
     private BluetoothGattServer mBluetoothGattServer;
     private final ArrayList<FlowModel> _connectedDevices = new ArrayList<>();
-    private FlowModel currentDeviceModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -302,11 +301,9 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         }
     }
 
-
     @Override
     public void onTagDiscovered(Tag tag) {
         Log.d("NFC", "Tag discovered");
-        currentDeviceModel = new FlowModel();
         IsoDep isoDep = IsoDep.get(tag);
         if (isoDep != null) {
             try {
@@ -420,14 +417,9 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             // Use SpannableStringBuilder to build the final text
                             SpannableStringBuilder formattedText = new SpannableStringBuilder();
 
+                            // Connection type will always be normal for NFC connections
+                            String connectionTypeText = "Connection Type: Normal Flow";
 
-
-                            String connectionTypeText = "Connection Type: Unknown";
-                            if (currentDeviceModel.connectionType == PKOC_ConnectionType.ECHDE_Full) {
-                                connectionTypeText = "Connection Type: ECDHE Perfect Secrecy Mode";
-                            } else if (currentDeviceModel.connectionType == PKOC_ConnectionType.Uncompressed) {
-                                connectionTypeText = "Connection Type: Normal Flow";
-                            }
                             SpannableString connectionTypeSpannable = new SpannableString(connectionTypeText + "\n\n");
                             connectionTypeSpannable.setSpan(new StyleSpan(Typeface.BOLD), 0, connectionTypeText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             connectionTypeSpannable.setSpan(new ForegroundColorSpan(Color.BLACK), 0, connectionTypeText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -474,7 +466,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             headerHeader.setSpan(new AbsoluteSizeSpan(14, true), 0, headerHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(headerHeader);
 
-                            formattedText.append(applyColorAndSize(header, 0, header.length(), Color.WHITE, (Color.parseColor("#707173")), 14,false));
+                            formattedText.append(applyColorAndSize(header, header.length(), Color.WHITE, (Color.parseColor("#707173")), false));
 
                             // x-Portion of the public key
                             SpannableString xPortionHeader = new SpannableString("\n\nX Portion 256 Bit HEX: \n");
@@ -483,7 +475,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             xPortionHeader.setSpan(new AbsoluteSizeSpan(14, true), 0, xPortionHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(xPortionHeader);
 
-                            formattedText.append(applyColorAndSize(xPortion, 0, xPortion.length(), (Color.parseColor("#9CC3C9")), (Color.parseColor("BLACK")), 14, true));
+                            formattedText.append(applyColorAndSize(xPortion, xPortion.length(), (Color.parseColor("#9CC3C9")), (Color.parseColor("BLACK")), true));
 
                             // 256 bit decimal of the public key
                             SpannableString decimalTFSb = new SpannableString("\n\n256 Bit Decimal: \n");
@@ -492,7 +484,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             decimalTFSb.setSpan(new AbsoluteSizeSpan(14, true), 0, decimalTFSb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(decimalTFSb);
 
-                            formattedText.append(applyColorAndSize(credential256BitDecimal, 0, credential256BitDecimal.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLACK"), 14, true));
+                            formattedText.append(applyColorAndSize(credential256BitDecimal, credential256BitDecimal.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLACK"), true));
 
                             // 128 bit hex of the public key
                             SpannableString hexOTEb = new SpannableString("\n\n128 Bit HEX: \n");
@@ -501,7 +493,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             hexOTEb.setSpan(new AbsoluteSizeSpan(14, true), 0, hexOTEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(hexOTEb);
 
-                            formattedText.append(applyColorAndSize(credential128Bit, 0, credential128Bit.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLUE"), 14, true));
+                            formattedText.append(applyColorAndSize(credential128Bit, credential128Bit.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLUE"), true));
 
                             // 128 bit decimal of the public key
                             SpannableString decimalOTEb = new SpannableString("\n\n128 Bit Decimal: \n");
@@ -510,7 +502,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             decimalOTEb.setSpan(new AbsoluteSizeSpan(14, true), 0, decimalOTEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(decimalOTEb);
 
-                            formattedText.append(applyColorAndSize(credential128BitDecimal, 0, credential128BitDecimal.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLUE"),14, true)); // Light blue
+                            formattedText.append(applyColorAndSize(credential128BitDecimal, credential128BitDecimal.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLUE"), true)); // Light blue
 
 
                             // 64 bit hex of the public key
@@ -520,7 +512,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             hexSFb.setSpan(new AbsoluteSizeSpan(14, true), 0, hexSFb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(hexSFb);
 
-                            formattedText.append(applyColorAndSize(credential64Bit, 0, credential64Bit.length(), Color.parseColor("#9CC3C9"), Color.parseColor("YELLOW"), 14, true));
+                            formattedText.append(applyColorAndSize(credential64Bit, credential64Bit.length(), Color.parseColor("#9CC3C9"), Color.parseColor("YELLOW"), true));
 
                             // 64 bit decimal of the public key
                             SpannableString decimalSFb = new SpannableString("\n\n64 Bit Decimal: \n");
@@ -529,7 +521,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             decimalSFb.setSpan(new AbsoluteSizeSpan(14, true), 0, decimalSFb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(decimalSFb);
 
-                            formattedText.append(applyColorAndSize(credential64BitDecimal, 0, credential64BitDecimal.length(), Color.parseColor("#9CC3C9"), Color.parseColor("YELLOW"), 14, true));
+                            formattedText.append(applyColorAndSize(credential64BitDecimal, credential64BitDecimal.length(), Color.parseColor("#9CC3C9"), Color.parseColor("YELLOW"), true));
 
                             // Y-Portion of the public key
                             SpannableString portionYKey = new SpannableString("\n\nY Portion HEX (Not Used): \n");
@@ -538,7 +530,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             portionYKey.setSpan(new AbsoluteSizeSpan(14, true), 0, portionYKey.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(portionYKey);
 
-                            formattedText.append(applyColorAndSize(yPortion, 0, yPortion.length(), Color.WHITE, Color.parseColor("#707173"), 14, false));
+                            formattedText.append(applyColorAndSize(yPortion, yPortion.length(), Color.WHITE, Color.parseColor("#707173"), false));
 
                             // Set the formatted text to the TextView
                             textView.setText(formattedText);
@@ -558,7 +550,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             scanButton.setOnClickListener(v -> resetToScanScreen());
                         } else {
                             // Set the formatted public key if parsing is not applicable
-                            SpannableString formattedText = formatText("Public Key: " + publicKey, 14, Color.BLACK);
+                            SpannableString formattedText = formatText("Public Key: " + publicKey);
                             textView.setText(formattedText);
                         }
 
@@ -613,18 +605,10 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
     }
 
     // Define the formatText method
-    private SpannableString formatText(String text, int fontSize, int color) {
+    private SpannableString formatText(String text) {
         SpannableString spannableString = new SpannableString(text);
-        spannableString.setSpan(new AbsoluteSizeSpan(fontSize, true), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannableString.setSpan(new ForegroundColorSpan(color), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        return spannableString;
-    }
-
-    // Define the formatText method with HEX color value option
-    private SpannableString formatTextH(String text, int textSize, String hexColor) {
-        SpannableString spannableString = new SpannableString(text);
-        spannableString.setSpan(new AbsoluteSizeSpan(textSize, true), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannableString.setSpan(new ForegroundColorSpan(Color.parseColor(hexColor)), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableString.setSpan(new AbsoluteSizeSpan(14, true), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         return spannableString;
     }
 
@@ -735,14 +719,14 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
     }
 
     // Helper method to apply background, text color, font size, and bold attribute to a specific range of text
-    private SpannableStringBuilder applyColorAndSize(String text, int start, int end, int bgColor, int textColor, int fontSize, boolean isBold) {
+    private SpannableStringBuilder applyColorAndSize(String text, int end, int bgColor, int textColor, boolean isBold) {
         SpannableStringBuilder spannable = new SpannableStringBuilder(text);
-        spannable.setSpan(new BackgroundColorSpan(bgColor), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannable.setSpan(new ForegroundColorSpan(textColor), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannable.setSpan(new AbsoluteSizeSpan(fontSize, true), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannable.setSpan(new BackgroundColorSpan(bgColor), 0, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannable.setSpan(new ForegroundColorSpan(textColor), 0, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannable.setSpan(new AbsoluteSizeSpan(14, true), 0, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         if (isBold) {
-            spannable.setSpan(new StyleSpan(Typeface.BOLD), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannable.setSpan(new StyleSpan(Typeface.BOLD), 0, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
         return spannable;
@@ -845,11 +829,8 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                 FlowModel newDevice = new FlowModel();
                 newDevice.connectedDevice = device;
                 _connectedDevices.add(newDevice);
-                currentDeviceModel = newDevice;
 
-                //layoutClear();
                 Log.d(TAG, "Device connected: " + device.getAddress());
-                //layoutPost("Device Connected", device.getAddress());
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 int toRemove = -1;
 
@@ -1023,7 +1004,13 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                     if (packet != null) {
                         switch (packet.PacketType) {
                             case PublicKey:
-                                deviceModel.connectionType = PKOC_ConnectionType.Uncompressed;
+                                // Since we are parsing the encrypted packets here, the public key will be processed for both flows
+                                // This will happen after the PKOC flow is determined, so if the value has been upgraded in security,
+                                // we wish to convey they that through the UI still.
+                                if (deviceModel.connectionType != PKOC_ConnectionType.ECHDE_Full)
+                                {
+                                    deviceModel.connectionType = PKOC_ConnectionType.Uncompressed;
+                                }
                                 deviceModel.publicKey = packet.Data;
                                 Log.d(TAG, "Determined PKOC flow: Normal flow");
                                 Log.d(TAG, "THIS IS THE ONE Public key: " + Hex.toHexString(packet.Data));
@@ -1035,10 +1022,6 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             case UncompressedTransientPublicKey:
                                 Log.d(TAG, "Uncompressed transient public key: " + Hex.toHexString(packet.Data));
                                 deviceModel.receivedTransientPublicKey = packet.Data;
-                                break;
-                            case EncryptedDataFollows:
-                                // This case should not be reached because we already decrypted the data above
-                                Log.w(TAG, "Unexpected EncryptedDataFollows packet");
                                 break;
                             case LastUpdateTime:
                                 deviceModel.creationTime = new BigInteger(packet.Data).intValue();
@@ -1057,9 +1040,14 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                 //check to validate if we can do the normal flow or need the more secure.  This will happen if the credential is sent in ECDHE Flow (Perfect Security)
                 if (deviceModel.publicKey == null && deviceModel.signature == null) {
                     if (deviceModel.receivedTransientPublicKey != null) {
-                        deviceModel.sharedSecret = CryptoProvider.getSharedSecret(
+                        // Get the raw ECDH shared secret
+                        byte[] rawSharedSecret = CryptoProvider.getSharedSecret(
                                 deviceModel.transientKeyPair.getPrivate(),
                                 deviceModel.receivedTransientPublicKey);
+                                Log.i("ECDHE rawSharedSecrent", Arrays.toString(rawSharedSecret));
+
+                        // Derive the AES-CCM key by hashing the shared secret with SHA-256
+                        deviceModel.sharedSecret = CryptoProvider.deriveAesKeyFromSharedSecretSimple(rawSharedSecret);
 
                         if (deviceModel.sharedSecret == null)
                         {
@@ -1147,8 +1135,6 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             // Use SpannableStringBuilder to build the final text
                             SpannableStringBuilder formattedText = new SpannableStringBuilder();
 
-                            currentDeviceModel = deviceModel;
-
                             String connectionTypeText = "Connection Type: Unknown";
                             if (deviceModel.connectionType == PKOC_ConnectionType.ECHDE_Full) {
                                 connectionTypeText = "Connection Type: ECDHE Perfect Secrecy Mode";
@@ -1200,7 +1186,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             headerHeader.setSpan(new AbsoluteSizeSpan(14, true), 0, headerHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(headerHeader);
 
-                            formattedText.append(applyColorAndSize(header.toUpperCase(), 0, header.length(), Color.WHITE, Color.parseColor("#707173"), 14, false));
+                            formattedText.append(applyColorAndSize(header.toUpperCase(), header.length(), Color.WHITE, Color.parseColor("#707173"), false));
 
                             // x-Portion of the public key
                             SpannableString xPortionHeader = new SpannableString("\n\nX Portion 256 Bit HEX: \n".toUpperCase());
@@ -1209,7 +1195,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             xPortionHeader.setSpan(new AbsoluteSizeSpan(14, true), 0, xPortionHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(xPortionHeader);
 
-                            formattedText.append(applyColorAndSize(xPortion.toUpperCase(), 0, xPortion.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLACK"), 14, true));
+                            formattedText.append(applyColorAndSize(xPortion.toUpperCase(), xPortion.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLACK"), true));
 
                             // 256 bit decimal of the public key
                             SpannableString decimalTFSb = new SpannableString("\n\n256 Bit Decimal: \n".toUpperCase());
@@ -1218,7 +1204,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             decimalTFSb.setSpan(new AbsoluteSizeSpan(14, true), 0, decimalTFSb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(decimalTFSb);
 
-                            formattedText.append(applyColorAndSize(credential256BitDecimal, 0, credential256BitDecimal.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLACK"), 14, true));
+                            formattedText.append(applyColorAndSize(credential256BitDecimal, credential256BitDecimal.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLACK"), true));
 
                             // 128 bit hex of the public key
                             SpannableString hexOTEb = new SpannableString("\n\n128 Bit HEX: \n".toUpperCase());
@@ -1227,7 +1213,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             hexOTEb.setSpan(new AbsoluteSizeSpan(14, true), 0, hexOTEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(hexOTEb);
 
-                            formattedText.append(applyColorAndSize(credential128Bit.toUpperCase(), 0, credential128Bit.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLUE"), 14, true));
+                            formattedText.append(applyColorAndSize(credential128Bit.toUpperCase(), credential128Bit.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLUE"), true));
 
                             // 128 bit decimal of the public key
                             SpannableString decimalOTEb = new SpannableString("\n\n128 Bit Decimal: \n".toUpperCase());
@@ -1236,7 +1222,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             decimalOTEb.setSpan(new AbsoluteSizeSpan(14, true), 0, decimalOTEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(decimalOTEb);
 
-                            formattedText.append(applyColorAndSize(credential128BitDecimal, 0, credential128BitDecimal.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLUE"), 14, true));
+                            formattedText.append(applyColorAndSize(credential128BitDecimal, credential128BitDecimal.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLUE"), true));
 
                             // 64 bit hex of the public key
                             SpannableString hexSFb = new SpannableString("\n\n64 Bit Hex: \n".toUpperCase());
@@ -1245,7 +1231,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             hexSFb.setSpan(new AbsoluteSizeSpan(14, true), 0, hexSFb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(hexSFb);
 
-                            formattedText.append(applyColorAndSize(credential64Bit.toUpperCase(), 0, credential64Bit.length(), Color.parseColor("#9CC3C9"), Color.parseColor("YELLOW"), 14, true));
+                            formattedText.append(applyColorAndSize(credential64Bit.toUpperCase(), credential64Bit.length(), Color.parseColor("#9CC3C9"), Color.parseColor("YELLOW"), true));
 
                             // 64 bit decimal of the public key
                             SpannableString decimalSFb = new SpannableString("\n\n64 Bit Decimal: \n".toUpperCase());
@@ -1254,7 +1240,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             decimalSFb.setSpan(new AbsoluteSizeSpan(14, true), 0, decimalSFb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(decimalSFb);
 
-                            formattedText.append(applyColorAndSize(credential64BitDecimal, 0, credential64BitDecimal.length(), Color.parseColor("#9CC3C9"), Color.parseColor("YELLOW"), 14, true));
+                            formattedText.append(applyColorAndSize(credential64BitDecimal, credential64BitDecimal.length(), Color.parseColor("#9CC3C9"), Color.parseColor("YELLOW"), true));
 
                             // Y-Portion of the public key
                             SpannableString portionYKey = new SpannableString("\n\nY Portion HEX (Not Used): \n".toUpperCase());
@@ -1263,30 +1249,30 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             portionYKey.setSpan(new AbsoluteSizeSpan(14, true), 0, portionYKey.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(portionYKey);
 
-                            formattedText.append(applyColorAndSize(yPortion.toUpperCase(), 0, yPortion.length(), Color.WHITE, Color.parseColor("#707173"), 14, false));
-                        // Set the formatted text to the TextView
-                        textView.setText(formattedText);
-                        // Hide reader detail button
-                        Button rdrButton = findViewById(R.id.rdrButton);
-                        rdrButton.setVisibility(View.GONE);
+                            formattedText.append(applyColorAndSize(yPortion.toUpperCase(), yPortion.length(), Color.WHITE, Color.parseColor("#707173"), false));
+                            // Set the formatted text to the TextView
+                            textView.setText(formattedText);
+                            // Hide reader detail button
+                            Button rdrButton = findViewById(R.id.rdrButton);
+                            rdrButton.setVisibility(View.GONE);
 
-                        // Set up the email button
-                        Button emailButton = findViewById(R.id.emailButton);
-                        emailButton.setVisibility(View.VISIBLE); // Make the button visible
-                        emailButton.setOnClickListener(v -> sendEmail());
+                            // Set up the email button
+                            Button emailButton = findViewById(R.id.emailButton);
+                            emailButton.setVisibility(View.VISIBLE); // Make the button visible
+                            emailButton.setOnClickListener(v -> sendEmail());
 
-                        // Set up the scan button
-                        Button scanButton = findViewById(R.id.scanButton);
-                        scanButton.setVisibility(View.VISIBLE); // Make the button visible
-                        scanButton.setOnClickListener(v -> resetToScanScreen());
+                            // Set up the scan button
+                            Button scanButton = findViewById(R.id.scanButton);
+                            scanButton.setVisibility(View.VISIBLE); // Make the button visible
+                            scanButton.setOnClickListener(v -> resetToScanScreen());
 
-                        // Hide other fields
-                        readerLocationUUIDView.setVisibility(View.GONE);
-                        readerSiteUUIDView.setVisibility(View.GONE);
-                        sitePublicKeyView.setVisibility(View.GONE);
-                        nfcAdvertisingStatusView.setVisibility(View.GONE);
-                        bleAdvertisingStatusView.setVisibility(View.GONE);
-                    }
+                            // Hide other fields
+                            readerLocationUUIDView.setVisibility(View.GONE);
+                            readerSiteUUIDView.setVisibility(View.GONE);
+                            sitePublicKeyView.setVisibility(View.GONE);
+                            nfcAdvertisingStatusView.setVisibility(View.GONE);
+                            bleAdvertisingStatusView.setVisibility(View.GONE);
+                        }
                     });
                     boolean sigValid = false;
 
@@ -1303,13 +1289,6 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
 
                         ECDSASigner ecSign = new ECDSASigner();
                         ecSign.init(false, pubKeyParams);
-
-                        // Dhruv Added check to correctly identify connection type when going through ECDHE flow when the onCharacteristicWriteRequest is called the second time
-                        if(deviceModel.sharedSecret != null && deviceModel.signature != null && deviceModel.publicKey != null)
-                        {
-                            deviceModel.connectionType = PKOC_ConnectionType.ECHDE_Full;
-                            Log.d(TAG, "Determined PKOC flow: ECDHE Perfect Secrecy");
-                        }
 
                         byte[] signatureMessage = generateSignaturePackage(deviceModel);
                         final byte[] hash = CryptoProvider.getSHA256(signatureMessage);
@@ -1446,13 +1425,13 @@ before returning the concatenated byte array for signing
                 Log.d("NFC", "Reader ephemeral public key x component: " + Hex.toHexString(readerX));
 
                 byte[] toSign = org.bouncycastle.util.Arrays.concatenate(siteIdentifier, readerIdentifier, deviceX, readerX);
-                Log.d("NFC", "Message to sign: " + Hex.toHexString(toSign));
+                Log.d("NFC", "ECDHE Flow Message to sign: " + Hex.toHexString(toSign));
 
                 return toSign;
             }
 
             byte[] toSignNormalFlow = CryptoProvider.getCompressedPublicKeyBytes(deviceModel.transientKeyPair.getPublic().getEncoded());
-            Log.d("NFC", "Message to sign: " + Hex.toHexString(toSignNormalFlow));
+            Log.d("NFC", "Normal Flow Message to sign: " + Hex.toHexString(toSignNormalFlow));
             //layoutPost("Message to sign", Hex.toHexString(toSignNormalFlow));
 
             return toSignNormalFlow;
@@ -1522,16 +1501,14 @@ before returning the concatenated byte array for signing
         }
     }
     private void showInvalidKeyDialog() {
-        runOnUiThread(() -> {
-            new AlertDialog.Builder(MainActivity.this)
-                    .setTitle("Invalid Key Validation")
-                    .setMessage("The public key is invalid. Please try again.")
-                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                        // Dismiss the dialog
-                    })
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .show();
-        });
+        runOnUiThread(() -> new AlertDialog.Builder(MainActivity.this)
+                .setTitle("Invalid Key Validation")
+                .setMessage("The public key is invalid. Please try again.")
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    // Dismiss the dialog
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show());
     }
     private byte[] extractPublicKey(byte[] authResponse) {
         int index = 0;

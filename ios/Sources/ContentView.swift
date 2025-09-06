@@ -7,19 +7,15 @@ struct ContentView : View
     @State var settingsLinkSelected = false
     @State var aboutLinkSelected = false
     @State var qrLinkSelected = false
-    
+    @State var sitesLinkSelected = false
+    @State var logsLinkSelected = false
+
     @State var _transmissionType : TransmissionType = TransmissionType.BLE
 
     func loadValues()
     {
-        if let transmissionType : Int = UserDefaults.standard.integer(forKey: TransmissionTypeSelected) as Int?
-        {
-            let transmissionTypeSelected = TransmissionType(rawValue: transmissionType)
-            if (transmissionTypeSelected != nil)
-            {
-                _transmissionType = transmissionTypeSelected!
-            }
-        }
+        let rawValue = UserDefaults.standard.object(forKey: TransmissionTypeSelected) as? Int
+        _transmissionType = TransmissionType(rawValue: rawValue ?? TransmissionType.BLE.rawValue) ?? .BLE
     }
 
     func loadSecureKeysData()
@@ -29,7 +25,7 @@ struct ContentView : View
             result in switch result
             {
                 case .failure(let error):
-                    print("ERROR/WARNING: \(error)")
+                    print ("ERROR/WARNING: \(error)")
                     CryptoProvider.generateAndSendPublishKey()
                     {
                         _ in
@@ -43,12 +39,15 @@ struct ContentView : View
                 case .success(let keys):
                     do
                     {
-                        try CryptoProvider.loadKeys(privateKey: P256.Signing.PrivateKey(rawRepresentation: keys.privateKey), publicKey: P256.Signing.PublicKey(rawRepresentation: keys.publicKey))
+                        try CryptoProvider.loadKeys(
+                            privateKey: P256.Signing.PrivateKey(rawRepresentation: keys.privateKey),
+                            publicKey: P256.Signing.PublicKey(rawRepresentation: keys.publicKey)
+                        )
                     }
                     catch
                     {
-                            print("Error: Error in converting keys from storage to app data")
-                            fatalError()
+                        print("Error: Error in converting keys from storage to app data")
+                        fatalError()
                     }
             }
         }
@@ -56,7 +55,12 @@ struct ContentView : View
     
     func storeSecureKeyData()
     {
-        KeyStore.save(keyData: KeyData(publicKey: CryptoProvider.exportPublicKey().rawRepresentation, privateKey: CryptoProvider.exportPrivateKey().rawRepresentation))
+        KeyStore.save(
+            keyData: KeyData(
+                publicKey: CryptoProvider.exportPublicKey().rawRepresentation,
+                privateKey: CryptoProvider.exportPrivateKey().rawRepresentation
+            )
+        )
         {
             result in switch result
             {
@@ -84,7 +88,7 @@ struct ContentView : View
                 {
                     PresentDeviceView()
                 }
-                                
+
                 Image(uiImage: UIImage(named: ProductImages.PSIA_Logo_Typographic)!)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -99,7 +103,7 @@ struct ContentView : View
             .toolbar
             {
                 let placement = ToolbarItemPlacement.topBarTrailing
-            
+
                 ToolbarItemGroup(placement: placement)
                 {
                     Menu
@@ -111,6 +115,7 @@ struct ContentView : View
                         {
                             Label("Settings", systemImage: "gearshape")
                         }).navigationTitle("Settings")
+
                         Button(action:
                         {
                             aboutLinkSelected = true
@@ -118,6 +123,7 @@ struct ContentView : View
                         {
                             Label("About", systemImage: "info.circle")
                         }).navigationTitle("About")
+
                         Button(action:
                         {
                             qrLinkSelected = true
@@ -125,25 +131,60 @@ struct ContentView : View
                         {
                             Label("Display QR Public Key", systemImage: "qrcode")
                         }).navigationTitle("Display QR Public Key")
+                        
+                        Button(action:
+                        {
+                            sitesLinkSelected = true
+                        }, label:
+                        {
+                            Label("Sites & Readers", systemImage: "list.bullet.rectangle")
+                        }).navigationTitle("Sites & Readers")
+                        
+                        Button(action:
+                        {
+                            logsLinkSelected = true
+                        }, label:
+                        {
+                            Label("Diagnostics Log", systemImage: "doc.text.magnifyingglass")
+                        }).navigationTitle("Diagnostics Log")
+                        
                     }
                     label:
                     {
-                        Label("Add", systemImage: "ellipsis.circle")
+                        Label("Menu", systemImage: "ellipsis.circle")
                     }
                 }
             }
-            .background(NavigationLink(destination: SettingsView().navigationTitle("Settings"), isActive: $settingsLinkSelected)
-            {
-                EmptyView()
-            }.hidden())
-            .background(NavigationLink(destination: AboutView().navigationTitle("About"), isActive: $aboutLinkSelected)
-            {
-                EmptyView()
-            }.hidden())
-            .background(NavigationLink(destination: DisplayPublicKeyView().navigationTitle("Display QR Public Key"), isActive: $qrLinkSelected)
-            {
-                EmptyView()
-            }.hidden())
+            .background(
+                NavigationLink(
+                    destination: SitesView().navigationTitle("Sites & Readers"),
+                    isActive: $sitesLinkSelected
+                ) { EmptyView() }.hidden()
+            )
+            .background(
+                NavigationLink(
+                    destination: SettingsView().navigationTitle("Settings"),
+                    isActive: $settingsLinkSelected
+                ) { EmptyView() }.hidden()
+            )
+            .background(
+                NavigationLink(
+                    destination: AboutView().navigationTitle("About"),
+                    isActive: $aboutLinkSelected
+                ) { EmptyView() }.hidden()
+            )
+            .background(
+                NavigationLink(
+                    destination: DisplayPublicKeyView().navigationTitle("Display QR Public Key"),
+                    isActive: $qrLinkSelected
+                ) { EmptyView() }.hidden()
+            )
+            .background(
+                NavigationLink(
+                    destination: DiagnosticsLogView().navigationTitle("Diagnostics Log"),
+                    isActive: $logsLinkSelected
+                ) { EmptyView() }.hidden()
+            )
         }
         .navigationViewStyle(navigationViewStyleForView)
     }

@@ -14,58 +14,69 @@ permissions:
   contents: read
 
 jobs:
-  lint-test:
+  detect:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      android: ${{ steps.filter.outputs.android }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            android:
+              - 'android/**'
+              - '.github/workflows/android-build-test.yml'
+
+  build:
     name: Android - Build & Test
     runs-on: ubuntu-latest
-
+    needs: detect
+    if: needs.detect.outputs.android == 'true'
     defaults:
       run:
         shell: bash
         working-directory: android
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Detect changes in android/
-        id: changes
-        run: |
-          if git diff --quiet origin/${{ github.base_ref || 'main' }} HEAD -- android/; then
-            echo "changed=false" >> $GITHUB_OUTPUT
-          else
-            echo "changed=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: No-op if no android changes
-        if: steps.changes.outputs.changed == 'false'
-        run: echo "No android changes � passing without build."
-
+      - uses: actions/checkout@v4
       - name: Set up JDK 17
-        if: steps.changes.outputs.changed == 'true'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
           cache: gradle
-
       - name: Set up Android SDK
-        if: steps.changes.outputs.changed == 'true'
         uses: android-actions/setup-android@v3
-
       - name: Validate Gradle Wrapper
-        if: steps.changes.outputs.changed == 'true'
         uses: gradle/actions/wrapper-validation@v3
-
       - name: Make Gradle executable
-        if: steps.changes.outputs.changed == 'true'
         run: chmod +x ./gradlew
-
       - name: Android Lint (Debug)
-        if: steps.changes.outputs.changed == 'true'
         run: ./gradlew lintDebug
-
       - name: Unit tests (Debug)
-        if: steps.changes.outputs.changed == 'true'
         run: ./gradlew testDebugUnitTest --console=plain
+
+  ci:
+    name: CI — Android
+    runs-on: ubuntu-latest
+    needs: [build, detect]
+    if: ${{ always() }}
+    steps:
+      - name: Aggregate result
+        run: |
+          # If build didn't run (no changes), pass.
+          if [ "${{ needs.detect.outputs.android }}" != "true" ]; then
+            echo "No Android changes — passing CI."
+            exit 0
+          fi
+          # Build ran; mirror its result.
+          if [ "${{ needs.build.result }}" = "success" ]; then
+            echo "Android build passed."
+            exit 0
+          else
+            echo "Android build failed: ${{ needs.build.result }}"
+            exit 1
+          fi
