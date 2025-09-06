@@ -52,6 +52,24 @@ jobs:
           api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
           api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
 
+      - name: Show Xcode environment
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          xcodebuild -showsdks
+          security find-identity -v -p codesigning || true
+
+      - name: List schemes & targets
+        run: |
+          set -euo pipefail
+          xcodebuild -list -project "$PROJECT"
+
+      - name: Show signing settings for the scheme
+        run: |
+          set -euo pipefail
+          xcodebuild -showBuildSettings -project "$PROJECT" -scheme "$SCHEME" | \
+            egrep 'PRODUCT_BUNDLE_IDENTIFIER|DEVELOPMENT_TEAM|CODE_SIGN_STYLE|CODE_SIGN_IDENTITY|PROVISIONING_PROFILE_SPECIFIER|INFOPLIST_FILE' || true
+
       - name: Bump build number
         run: |
           set -euo pipefail
