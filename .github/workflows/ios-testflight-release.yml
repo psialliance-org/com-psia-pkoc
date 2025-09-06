@@ -69,7 +69,7 @@ jobs:
               -archivePath build/App.xcarchive \
               -destination 'generic/platform=iOS' \
               -allowProvisioningUpdates \
-              CODE_SIGN_STYLE=Manual \
+              CODE_SIGN_STYLE=Automatic \
               CODE_SIGN_IDENTITY="Apple Distribution" \
               DEVELOPMENT_TEAM=$TEAM_ID \
               PRODUCT_BUNDLE_IDENTIFIER=$BUNDLE_ID \
