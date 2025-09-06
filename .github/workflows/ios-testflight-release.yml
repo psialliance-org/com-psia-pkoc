@@ -77,16 +77,6 @@ jobs:
               CODE_SIGN_IDENTITY="" \
               clean archive
 
-      - name: Debug provisioning profiles
-        run: |
-            ls -l ~/Library/MobileDevice/Provisioning\ Profiles || true
-            for f in ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision; do
-              echo "---- $f ----"
-              security cms -D -i "$f" > decoded.plist
-              /usr/libexec/PlistBuddy -c 'Print :Name' decoded.plist || true
-              /usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' decoded.plist || true
-            done
-
       - name: Create ExportOptions.plist
         run: |
           mkdir -p build
@@ -95,7 +85,7 @@ jobs:
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
           <dict>
-            <key>method</key><string>app-store</string>
+            <key>method</key><string>app-store-connect</string>
             <key>uploadSymbols</key><true/>
             <key>teamID</key><string>__TEAM_ID__</string>
             <key>provisioningProfiles</key>
