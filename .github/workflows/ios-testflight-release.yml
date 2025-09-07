@@ -223,7 +223,7 @@ jobs:
           FASTLANE_OPT_OUT_USAGE: "1"
         run: |
           set -euo pipefail
-          IPA_PATH="ios/${{ steps.export.outputs.ipa }}"
+          IPA_PATH="${{ steps.export.outputs.ipa }}"
           fastlane pilot upload \
             --api_key_path "$ASC_KEY_JSON" \
             --ipa "$IPA_PATH" \
