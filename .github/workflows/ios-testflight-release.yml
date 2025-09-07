@@ -160,6 +160,7 @@ jobs:
             <key>provisioningProfiles</key>
             <dict>
               <key>${BUNDLE_ID}</key><string>${APP_PROFILE_NAME}</string>
+              <key>${EXT_BUNDLE_ID}</key><string>${EXT_BUNDLE_ID}</string>
             </dict>
             <key>uploadSymbols</key><true/>
           </dict>
