@@ -18,6 +18,7 @@ concurrency:
 env:
   TEAM_ID: LJ99BF5CNX
   BUNDLE_ID: com.elatec.pkoc
+  EXT_BUNDLE_ID: com.elatec.pkoc.dynamicisland
   SCHEME: PSIAExperienceApp
   PROJECT: PSIAExperienceApp.xcodeproj
 
@@ -45,12 +46,19 @@ jobs:
           p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
           p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
 
-      - name: Download provisioning profiles (App Store)
+      - name: Download application provisioning profiles (App Store)
         uses: apple-actions/download-provisioning-profiles@v4
         with:
-          bundle-id: |
-            ${{ env.BUNDLE_ID }}
-            ${{ env.BUNDLE_ID }}.dynamicisland
+          bundle-id: ${{ env.BUNDLE_ID }}
+          profile-type: IOS_APP_STORE
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+
+      - name: Download extension provisioning profiles (App Store)
+        uses: apple-actions/download-provisioning-profiles@v4
+        with:
+          bundle-id: ${{ env.EXT_BUNDLE_ID }}
           profile-type: IOS_APP_STORE
           issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
           api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
