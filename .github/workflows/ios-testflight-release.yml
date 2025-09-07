@@ -207,14 +207,19 @@ jobs:
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
 
-      - name: Prepare App Store Connect API key for Fastlane
+      - name: Prepare App Store Connect API key (secure)
         run: |
           set -euo pipefail
-          cat > asc_key.json <<JSON
-          { "key_id": "${{ secrets.APPSTORE_API_KEY_ID }}",
-            "issuer_id": "${{ secrets.APPSTORE_ISSUER_ID }}",
-            "key": "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" }
+          umask 177
+          KEY_FILE="$RUNNER_TEMP/asc_key.p8"
+          JSON_FILE="$RUNNER_TEMP/asc_key.json"
+          printf '%s\n' "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" > "$KEY_FILE"
+          cat > "$JSON_FILE" <<JSON
+          {"key_id":"${{ secrets.APPSTORE_API_KEY_ID }}",
+          "issuer_id":"${{ secrets.APPSTORE_ISSUER_ID }}",
+          "key_filepath":"$KEY_FILE"}
           JSON
+          echo "ASC_KEY_JSON=$JSON_FILE" >> "$GITHUB_ENV"
 
       - name: Install fastlane
         run: sudo gem install fastlane -N
@@ -223,17 +228,21 @@ jobs:
         run: |
           set -euo pipefail
           fastlane pilot distribute \
-            --api_key_path asc_key.json \
+            --api_key_path "$ASC_KEY_JSON" \
             --app_identifier com.elatec.pkoc \
-            --latest \
+            --build_number "${GITHUB_RUN_NUMBER}" \
             --distribute_external true \
             --groups "PKOC External" \
             --notify_external_testers true \
             --submit_beta_review true \
-            --changelog "${{ steps.changelog.outputs.changelog }}"
+            --changelog "${{ steps.changelog.outputs.changelog }}" \
+            --wait_processing_interval 30
+
+      - name: Cleanup ASC key
+        run: rm -f "$ASC_KEY_JSON" "$KEY_FILE"
 
       - name: Tag this commit with the TestFlight build number
-        if: ${{ always() }}  # still tag if distribution succeeded; adjust if you prefer 'success()'
+        if: ${{ success() }}
         run: |
           set -euo pipefail
           git config user.name  "github-actions[bot]"
