@@ -21,6 +21,20 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     {
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: nil)
+        Task
+        {
+            @MainActor in let discoveries = $discoveredPeripherals.eraseToAnyPublisher()
+            let selectedID  = $connectedPeripheral
+                .map { $0?.identifier }
+                .eraseToAnyPublisher()
+            let scanning = $isScanning.eraseToAnyPublisher()
+
+            PKOCProximityController.shared.start(
+                discoveries: discoveries,
+                selectedID: selectedID,
+                isScanning: scanning
+            )
+        }
     }
 
     func startScan()
@@ -32,7 +46,7 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
             discoveredPeripherals.removeAll()
             discoveredPeripheralSet.removeAll()
             objectWillChange.send()
-            
+                        
             let serviceUUIDs = [ServiceUUID, ServiceLegacyUUID]
             centralManager.scanForPeripherals(withServices: serviceUUIDs)
 
@@ -85,41 +99,61 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
                 AppLog.error("Central state is unknown default", tag: "BLE")
         }
     }
+    
+    private func discoveryThreshold() -> Int
+    {
+        let ud = UserDefaults.standard
+        if ud.object(forKey: DiscoveryRangeValue) == nil
+        {
+            ud.set(-80, forKey: DiscoveryRangeValue)
+        }
+        return ud.integer(forKey: DiscoveryRangeValue)
+    }
 
+    private func activationThreshold() -> Int
+    {
+        let slider = UserDefaults.standard.double(forKey: RangeValue)
+        return Int(slider * -5.0 - 35.0)
+    }
+    
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber)
     {
         AppLog.debug("Discovered peripheral: \(peripheral.identifier) RSSI=\(RSSI)", tag: "BLE")
 
+        let t1 = discoveryThreshold()
+        let t2 = activationThreshold()
+        let rssi = RSSI.intValue
+
         if !discoveredPeripheralSet.contains(peripheral)
         {
-            var progress = RSSI.doubleValue
-            progress += 120
-            
-            if (progress >= 120)
+            guard rssi >= t1 else
             {
-                progress = 50
+                return
+            }
+
+            var progress = RSSI.doubleValue + 120.0
+            if progress >= 120.0
+            {
+                progress = 50.0
             }
             
             var name = peripheral.name
             let advertisedName = advertisementData["kCBAdvDataLocalName"] as? String
-            
-            if (advertisedName != nil)
+            if advertisedName != nil
             {
                 name = advertisedName
             }
-            
-            if (name == nil)
+            if name == nil
             {
                 name = "Reader"
             }
             
             var progressTint = Color(hex: 0x9CC3C9)
-            
             if let enableRanging: Bool = UserDefaults.standard.bool(forKey: EnableRanging) as Bool?
             {
-                if (enableRanging)
+                if enableRanging
                 {
-                    progressTint = Color.red
+                    progressTint = .red
                 }
             }
             
@@ -129,10 +163,10 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
                 peripheral: peripheral,
                 progress: progress,
                 iconName: "lock.fill",
-                iconTint: Color.gray,
+                iconTint: .gray,
                 progressTint: progressTint,
                 lastSeen: Date()
-                ))
+            ))
             
             discoveredPeripheralSet.insert(peripheral)
             objectWillChange.send()
@@ -141,55 +175,52 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
         {
             if let index = discoveredPeripherals.firstIndex(where: { $0.peripheral == peripheral })
             {
-                var progress = RSSI.doubleValue
-                progress += 120
+                if rssi < t1
+                {
+                    AppLog.debug("Below discovery threshold, removing: \(discoveredPeripherals[index].name)", tag: "BLE")
+                    discoveredPeripherals.remove(at: index)
+                    discoveredPeripheralSet.remove(peripheral)
+                    objectWillChange.send()
+                    return
+                }
 
+                let progress = RSSI.doubleValue + 120.0
                 discoveredPeripherals[index].lastSeen = Date()
-
-                if (progress < 120)
+                if progress < 120.0
                 {
                     discoveredPeripherals[index].progress = progress
                 }
-                
                 objectWillChange.send()
             }
         }
-                
+        
         if let enableRanging: Bool = UserDefaults.standard.bool(forKey: EnableRanging) as Bool?
         {
-            if (enableRanging)
+            if enableRanging, rssi < 0
             {
-                if (RSSI.doubleValue < 0)
+                if RSSI.intValue >= t2
                 {
-                    if var ranging: Double = UserDefaults.standard.double(forKey: RangeValue) as Double?
-                    {
-                        ranging *= -5
-                        ranging -= 35
-                        
-                        if (RSSI.doubleValue >= ranging)
-                        {
-                            AppLog.info("Proximity threshold met, attempting connect", tag: "BLE")
-                            connectPKOCReader(PKOCperipheral: peripheral)
+                    AppLog.info("Activation threshold met, attempting connect", tag: "BLE")
+                    connectPKOCReader(PKOCperipheral: peripheral)
 
-                            if let index = discoveredPeripherals.firstIndex(where: { $0.peripheral == peripheral })
-                            {
-                                discoveredPeripherals[index].progressTint = Color(hex: 0x9CC3C9)
-                                objectWillChange.send()
-                            }
-                        }
+                    if let index = discoveredPeripherals.firstIndex(where: { $0.peripheral == peripheral })
+                    {
+                        discoveredPeripherals[index].progressTint = Color(hex: 0x9CC3C9)
+                        objectWillChange.send()
                     }
                 }
             }
         }
         
-        if (discoveredPeripherals.count > 0)
+        if discoveredPeripherals.count > 0
         {
-            for i in 0...discoveredPeripherals.count - 1
+            for i in 0 ..< discoveredPeripherals.count
             {
-                if (discoveredPeripherals[i].lastSeen.timeIntervalSinceNow < -15)
+                if discoveredPeripherals[i].lastSeen.timeIntervalSinceNow < -15
                 {
                     AppLog.debug("Removing stale peripheral: \(discoveredPeripherals[i].name)", tag: "BLE")
-                    discoveredPeripherals.remove(at: i);
+                    discoveredPeripheralSet.remove(discoveredPeripherals[i].peripheral)
+                    discoveredPeripherals.remove(at: i)
                     objectWillChange.send()
                     return
                 }
@@ -271,6 +302,7 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     func disconnectPeripheral(PKOCperipheral: CBPeripheral)
     {
         AppLog.info("Disconnecting from peripheral \(PKOCperipheral.identifier)", tag: "BLE")
+
         if let index = discoveredPeripherals.firstIndex(where: { $0.peripheral == PKOCperipheral })
         {
             if (discoveredPeripherals.count <= index)
@@ -281,11 +313,9 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
             discoveredPeripherals[index].isBusy = false
             objectWillChange.send()
         }
-    
-        self.connectedPeripheral = nil
+
         centralManager?.cancelPeripheralConnection(PKOCperipheral)
     }
-    
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?)
     {
         if let error = error
@@ -293,6 +323,8 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
             AppLog.error("Error occured during Disconnection \(error)", tag: "BLE")
             return
         }
+        
+        self.connectedPeripheral = nil
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 4)
         {
@@ -447,39 +479,45 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
                 case .Response:
                     var iconName = "lock.fill"
                     var iconTint = Color.red
-                    
-                    if (packet.data[0] == ReaderUnlockStatus.AccessGranted.rawValue)
+
+                    let status = ReaderUnlockStatus(rawValue: packet.data[0]) ?? .Unknown
+                    if status == .AccessGranted
                     {
                         iconName = "lock.open.fill"
                         iconTint = Color(hex: 0x9CC3C9)
                     }
-                
-                    if (packet.data[0] == ReaderUnlockStatus.CompletedTransaction.rawValue)
+                    if status == .CompletedTransaction
                     {
                         iconName = "lock.open.fill"
                         iconTint = Color.yellow
                         Toast.text("TLV Success - Access decision unknown", config: .init(direction: .bottom)).show()
                     }
-                    
+
+                    var label = "Reader"
                     if let index = discoveredPeripherals.firstIndex(where: { $0.peripheral == peripheral })
                     {
                         discoveredPeripherals[index].iconName = iconName
                         discoveredPeripherals[index].iconTint = iconTint
+                        label = discoveredPeripherals[index].name
                         objectWillChange.send()
-                        
+
                         DispatchQueue.main.asyncAfter(deadline: .now() + 4)
                         {
-                            if (self.discoveredPeripherals.count <= index)
-                            {
-                                return
-                            }
-                            
+                            if self.discoveredPeripherals.count <= index { return }
                             self.discoveredPeripherals[index].iconName = "lock.fill"
                             self.discoveredPeripherals[index].iconTint = Color.gray
                             self.objectWillChange.send()
                         }
                     }
-                    
+
+                    Task
+                    {
+                        @MainActor in PKOCProximityController.shared.onBLEOutcome(
+                            status: status,
+                            displayName: label
+                        )
+                    }
+
                     disconnectPeripheral(PKOCperipheral: peripheral)
                     return
                     
