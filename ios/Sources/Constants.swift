@@ -14,6 +14,7 @@ let TransmissionTypeSelected = "TransmissionTypeSelected";
 let AutoDiscoverDevices = "AutoDiscoverDevices";
 let EnableRanging = "EnableRanging";
 let RangeValue = "RangeValue";
+let DiscoveryRangeValue = "DiscoveryRangeValue"
 let DisplayMAC = "DisplayMAC";
 let EulaAccepted = "EulaAccepted";
 

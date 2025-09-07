@@ -7,17 +7,36 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6F2B3B792E64A27A0077B6D1 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F2B3B782E64A27A0077B6D1 /* WidgetKit.framework */; };
+		6F2B3B7B2E64A27A0077B6D1 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F2B3B7A2E64A27A0077B6D1 /* SwiftUI.framework */; };
+		6F2B3B992E64AB3F0077B6D1 /* Toast in Frameworks */ = {isa = PBXBuildFile; productRef = 6F2B3B982E64AB3F0077B6D1 /* Toast */; };
+		6F2B3B9A2E64AB740077B6D1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6FB6CDF42DF634E400555103 /* Assets.xcassets */; };
+		6F2B3B9B2E64AB740077B6D1 /* FlowModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CDFC2DF634E400555103 /* FlowModel.swift */; };
+		6F2B3B9D2E64AB740077B6D1 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CDF32DF634E400555103 /* AboutView.swift */; };
+		6F2B3BA02E64AB740077B6D1 /* TLVProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CE072DF634E400555103 /* TLVProvider.swift */; };
+		6F2B3BA12E64AB740077B6D1 /* BLE_Packet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CDF52DF634E400555103 /* BLE_Packet.swift */; };
+		6F2B3BA32E64AB740077B6D1 /* ReaderUnlockStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CE042DF634E400555103 /* ReaderUnlockStatus.swift */; };
+		6F2B3BA42E64AB740077B6D1 /* SiteModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CE062DF634E400555103 /* SiteModel.swift */; };
+		6F2B3BA62E64AB740077B6D1 /* ListModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CDFE2DF634E400555103 /* ListModel.swift */; };
+		6F2B3BA82E64AB740077B6D1 /* PKOC_ConnectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CDFF2DF634E400555103 /* PKOC_ConnectionType.swift */; };
+		6F2B3BAA2E64AB740077B6D1 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CDF82DF634E400555103 /* Constants.swift */; };
+		6F2B3BAC2E64AB740077B6D1 /* KeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CDFD2DF634E400555103 /* KeyStore.swift */; };
+		6F2B3BAE2E64AB740077B6D1 /* UIImages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CE092DF634E400555103 /* UIImages.swift */; };
+		6F2B3BB12E64AB740077B6D1 /* BLE_PacketType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CDF62DF634E400555103 /* BLE_PacketType.swift */; };
+		6F2B3BB42E64AB740077B6D1 /* ReaderModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CE032DF634E400555103 /* ReaderModel.swift */; };
+		6F2B3BB62E64AB740077B6D1 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CDFB2DF634E400555103 /* Extensions.swift */; };
+		6F2B3BB72E64AB740077B6D1 /* TransmissionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CE082DF634E400555103 /* TransmissionType.swift */; };
+		6F2B3BB82E64AB740077B6D1 /* CryptoProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CDFA2DF634E400555103 /* CryptoProvider.swift */; };
+		6F2B3BBC2E64ABD20077B6D1 /* BigInt in Frameworks */ = {isa = PBXBuildFile; productRef = 6F2B3BBB2E64ABD20077B6D1 /* BigInt */; };
+		6F2B3BBE2E64ABD20077B6D1 /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 6F2B3BBD2E64ABD20077B6D1 /* CryptoSwift */; };
+		6F2B3BC02E64ABD20077B6D1 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 6F2B3BBF2E64ABD20077B6D1 /* GRDB */; };
+		6F2B3BDE2E64B21A0077B6D1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6F2B3BD72E64B21A0077B6D1 /* Assets.xcassets */; };
+		6F2B3BDF2E64B21A0077B6D1 /* PKOCIslandWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F2B3BDB2E64B21A0077B6D1 /* PKOCIslandWidget.swift */; };
+		6F2B3BE02E64B21A0077B6D1 /* PKOCIslandViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F2B3BDA2E64B21A0077B6D1 /* PKOCIslandViews.swift */; };
+		6F2B3BE52E64B4150077B6D1 /* pkocExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 6F2B3B772E64A27A0077B6D1 /* pkocExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		6F2B3BF02E64CCEE0077B6D1 /* RangeSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F2B3BEF2E64CCEE0077B6D1 /* RangeSlider.swift */; };
+		6F2B3BF12E64CCEE0077B6D1 /* RangeSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F2B3BEF2E64CCEE0077B6D1 /* RangeSlider.swift */; };
 		6F54B4A42E4FCB9300B6980B /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 6F54B4A32E4FCB9300B6980B /* GRDB */; };
-		6F54B4A62E4FCC4A00B6980B /* PKOC_Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F54B4A52E4FCC4100B6980B /* PKOC_Database.swift */; };
-		6F54B4A82E4FCE5800B6980B /* Repositories.GRDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F54B4A72E4FCE4700B6980B /* Repositories.GRDB.swift */; };
-		6F54B4AA2E4FD2A200B6980B /* PKOC_Repositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F54B4A92E4FD29E00B6980B /* PKOC_Repositories.swift */; };
-		6F8180012E366B00008A22C5 /* DisplayPublicKeyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8180002E366AF5008A22C5 /* DisplayPublicKeyView.swift */; };
-		6F8180072E366E22008A22C5 /* DisplayPublicKeyOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8180062E366E19008A22C5 /* DisplayPublicKeyOption.swift */; };
-		6FA0FA5E2E50C76D00F53786 /* AppComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FA0FA5D2E50C76000F53786 /* AppComposition.swift */; };
-		6FA0FA602E50C84600F53786 /* SitesVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FA0FA5F2E50C84000F53786 /* SitesVM.swift */; };
-		6FA0FA622E50C84F00F53786 /* ReadersVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FA0FA612E50C84A00F53786 /* ReadersVM.swift */; };
-		6FA0FA642E50C88900F53786 /* SitesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FA0FA632E50C87300F53786 /* SitesView.swift */; };
-		6FA0FA662E50C8A100F53786 /* ReadersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FA0FA652E50C89B00F53786 /* ReadersView.swift */; };
 		6FB6CE0B2DF634E400555103 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6FB6CDF42DF634E400555103 /* Assets.xcassets */; };
 		6FB6CE0C2DF634E400555103 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CDF92DF634E400555103 /* ContentView.swift */; };
 		6FB6CE0D2DF634E400555103 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CDFB2DF634E400555103 /* Extensions.swift */; };
@@ -41,13 +60,19 @@
 		6FB6CE1F2DF634E400555103 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CDF32DF634E400555103 /* AboutView.swift */; };
 		6FB6CE202DF634E400555103 /* FlowModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CDFC2DF634E400555103 /* FlowModel.swift */; };
 		6FB6CE212DF634E400555103 /* BLE_Packet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB6CDF52DF634E400555103 /* BLE_Packet.swift */; };
-		6FEE3D2F2E55E3B800DE8E53 /* DiagnosticsLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FEE3D2E2E55E3B400DE8E53 /* DiagnosticsLogView.swift */; };
 		842361282C64ED6800962062 /* BigInt in Frameworks */ = {isa = PBXBuildFile; productRef = 842361272C64ED6800962062 /* BigInt */; settings = {ATTRIBUTES = (Required, ); }; };
 		849016B62C665B7100169C23 /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 849016B52C665B7100169C23 /* CryptoSwift */; };
 		84F6CFA12C6E3EC20005890C /* Toast in Frameworks */ = {isa = PBXBuildFile; productRef = 84F6CFA02C6E3EC20005890C /* Toast */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		6F2B3BE62E64B4150077B6D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 96F759FB2962D9EF00D36D9F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6F2B3B762E64A27A0077B6D1;
+			remoteInfo = pkocExtension;
+		};
 		6F6853962E4A2A2A00F5D52A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 96F759FB2962D9EF00D36D9F /* Project object */;
@@ -58,6 +83,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		6F2B3BE82E64B4150077B6D1 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				6F2B3BE52E64B4150077B6D1 /* pkocExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		849016B32C66490100169C23 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -71,17 +107,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		6F2B3B772E64A27A0077B6D1 /* pkocExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = pkocExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		6F2B3B782E64A27A0077B6D1 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		6F2B3B7A2E64A27A0077B6D1 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		6F2B3BD72E64B21A0077B6D1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		6F2B3BD92E64B21A0077B6D1 /* pkoc.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = pkoc.entitlements; sourceTree = "<group>"; };
+		6F2B3BDA2E64B21A0077B6D1 /* PKOCIslandViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PKOCIslandViews.swift; sourceTree = "<group>"; };
+		6F2B3BDB2E64B21A0077B6D1 /* PKOCIslandWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PKOCIslandWidget.swift; sourceTree = "<group>"; };
+		6F2B3BE92E64B6D80077B6D1 /* pkocExtension-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "pkocExtension-Info.plist"; sourceTree = "<group>"; };
+		6F2B3BEF2E64CCEE0077B6D1 /* RangeSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RangeSlider.swift; sourceTree = "<group>"; };
 		6F347D792E4A279D00AC2045 /* PSIAExperienceAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PSIAExperienceAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		6F54B4A52E4FCC4100B6980B /* PKOC_Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PKOC_Database.swift; sourceTree = "<group>"; };
-		6F54B4A72E4FCE4700B6980B /* Repositories.GRDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Repositories.GRDB.swift; sourceTree = "<group>"; };
-		6F54B4A92E4FD29E00B6980B /* PKOC_Repositories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PKOC_Repositories.swift; sourceTree = "<group>"; };
-		6F8180002E366AF5008A22C5 /* DisplayPublicKeyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayPublicKeyView.swift; sourceTree = "<group>"; };
-		6F8180062E366E19008A22C5 /* DisplayPublicKeyOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayPublicKeyOption.swift; sourceTree = "<group>"; };
-		6FA0FA5D2E50C76000F53786 /* AppComposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppComposition.swift; sourceTree = "<group>"; };
-		6FA0FA5F2E50C84000F53786 /* SitesVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitesVM.swift; sourceTree = "<group>"; };
-		6FA0FA612E50C84A00F53786 /* ReadersVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadersVM.swift; sourceTree = "<group>"; };
-		6FA0FA632E50C87300F53786 /* SitesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitesView.swift; sourceTree = "<group>"; };
-		6FA0FA652E50C89B00F53786 /* ReadersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadersView.swift; sourceTree = "<group>"; };
 		6FB6CDF32DF634E400555103 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		6FB6CDF42DF634E400555103 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6FB6CDF52DF634E400555103 /* BLE_Packet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLE_Packet.swift; sourceTree = "<group>"; };
@@ -106,16 +141,65 @@
 		6FB6CE082DF634E400555103 /* TransmissionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransmissionType.swift; sourceTree = "<group>"; };
 		6FB6CE092DF634E400555103 /* UIImages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImages.swift; sourceTree = "<group>"; };
 		6FB6CE0A2DF634E400555103 /* UpdatingListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatingListView.swift; sourceTree = "<group>"; };
-		6FEE3D2E2E55E3B400DE8E53 /* DiagnosticsLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticsLogView.swift; sourceTree = "<group>"; };
 		849016B72C66652800169C23 /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		96F75A032962D9EF00D36D9F /* PSIAExperienceApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PSIAExperienceApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		6F2B3BD12E64AE5D0077B6D1 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				DiagnosticsLogView.swift,
+			);
+			target = 6F2B3B762E64A27A0077B6D1 /* pkocExtension */;
+		};
+		6F2B3BD42E64B0130077B6D1 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				DisplayPublicKeyView.swift,
+			);
+			target = 6F2B3B762E64A27A0077B6D1 /* pkocExtension */;
+		};
+		6F2B3BD62E64B02C0077B6D1 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ReadersView.swift,
+				SitesView.swift,
+			);
+			target = 6F2B3B762E64A27A0077B6D1 /* pkocExtension */;
+		};
+		6F2B3BF22E64E4E60077B6D1 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ActivityKitIslandClient.swift,
+				PKOCProximityController.swift,
+			);
+			target = 6F2B3B762E64A27A0077B6D1 /* pkocExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		6F2B3BD02E64AE4E0077B6D1 /* Logging */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (6F2B3BD12E64AE5D0077B6D1 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Logging; sourceTree = "<group>"; };
+		6F2B3BD22E64AE640077B6D1 /* DynamicIsland */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (6F2B3BF22E64E4E60077B6D1 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = DynamicIsland; sourceTree = "<group>"; };
+		6F2B3BD32E64B0070077B6D1 /* DisplayPublicKey */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (6F2B3BD42E64B0130077B6D1 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = DisplayPublicKey; sourceTree = "<group>"; };
+		6F2B3BD52E64B0200077B6D1 /* ManageKeys */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (6F2B3BD62E64B02C0077B6D1 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = ManageKeys; sourceTree = "<group>"; };
 		6F347D7A2E4A279D00AC2045 /* PSIAExperienceAppTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = PSIAExperienceAppTests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		6F2B3B742E64A27A0077B6D1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6F2B3B992E64AB3F0077B6D1 /* Toast in Frameworks */,
+				6F2B3B7B2E64A27A0077B6D1 /* SwiftUI.framework in Frameworks */,
+				6F2B3B792E64A27A0077B6D1 /* WidgetKit.framework in Frameworks */,
+				6F2B3BC02E64ABD20077B6D1 /* GRDB in Frameworks */,
+				6F2B3BBE2E64ABD20077B6D1 /* CryptoSwift in Frameworks */,
+				6F2B3BBC2E64ABD20077B6D1 /* BigInt in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6F347D762E4A279D00AC2045 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -137,19 +221,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6F2B3BDC2E64B21A0077B6D1 /* DynamicIsland */ = {
+			isa = PBXGroup;
+			children = (
+				6F2B3BD72E64B21A0077B6D1 /* Assets.xcassets */,
+				6F2B3BD92E64B21A0077B6D1 /* pkoc.entitlements */,
+				6F2B3BDA2E64B21A0077B6D1 /* PKOCIslandViews.swift */,
+				6F2B3BDB2E64B21A0077B6D1 /* PKOCIslandWidget.swift */,
+			);
+			path = DynamicIsland;
+			sourceTree = "<group>";
+		};
 		849016CF2C666BC200169C23 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				6FEE3D2E2E55E3B400DE8E53 /* DiagnosticsLogView.swift */,
-				6FA0FA652E50C89B00F53786 /* ReadersView.swift */,
-				6FA0FA632E50C87300F53786 /* SitesView.swift */,
-				6FA0FA612E50C84A00F53786 /* ReadersVM.swift */,
-				6FA0FA5F2E50C84000F53786 /* SitesVM.swift */,
-				6FA0FA5D2E50C76000F53786 /* AppComposition.swift */,
-				6F54B4A92E4FD29E00B6980B /* PKOC_Repositories.swift */,
-				6F54B4A72E4FCE4700B6980B /* Repositories.GRDB.swift */,
-				6F54B4A52E4FCC4100B6980B /* PKOC_Database.swift */,
+				6F2B3BD52E64B0200077B6D1 /* ManageKeys */,
+				6F2B3BD32E64B0070077B6D1 /* DisplayPublicKey */,
+				6F2B3BD22E64AE640077B6D1 /* DynamicIsland */,
+				6F2B3BD02E64AE4E0077B6D1 /* Logging */,
 				6FB6CDF32DF634E400555103 /* AboutView.swift */,
+				6F2B3BEF2E64CCEE0077B6D1 /* RangeSlider.swift */,
 				6FB6CDF42DF634E400555103 /* Assets.xcassets */,
 				6FB6CDF52DF634E400555103 /* BLE_Packet.swift */,
 				6FB6CDF62DF634E400555103 /* BLE_PacketType.swift */,
@@ -157,8 +248,6 @@
 				6FB6CDF82DF634E400555103 /* Constants.swift */,
 				6FB6CDF92DF634E400555103 /* ContentView.swift */,
 				6FB6CDFA2DF634E400555103 /* CryptoProvider.swift */,
-				6F8180062E366E19008A22C5 /* DisplayPublicKeyOption.swift */,
-				6F8180002E366AF5008A22C5 /* DisplayPublicKeyView.swift */,
 				6FB6CDFB2DF634E400555103 /* Extensions.swift */,
 				6FB6CDFC2DF634E400555103 /* FlowModel.swift */,
 				6FB6CDFD2DF634E400555103 /* KeyStore.swift */,
@@ -182,6 +271,8 @@
 		84C0C1C72C6554AA003C74CD /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				6F2B3B782E64A27A0077B6D1 /* WidgetKit.framework */,
+				6F2B3B7A2E64A27A0077B6D1 /* SwiftUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -189,6 +280,8 @@
 		96F759FA2962D9EF00D36D9F = {
 			isa = PBXGroup;
 			children = (
+				6F2B3BE92E64B6D80077B6D1 /* pkocExtension-Info.plist */,
+				6F2B3BDC2E64B21A0077B6D1 /* DynamicIsland */,
 				849016CF2C666BC200169C23 /* Sources */,
 				849016B72C66652800169C23 /* Package.swift */,
 				6F347D7A2E4A279D00AC2045 /* PSIAExperienceAppTests */,
@@ -202,6 +295,7 @@
 			children = (
 				96F75A032962D9EF00D36D9F /* PSIAExperienceApp.app */,
 				6F347D792E4A279D00AC2045 /* PSIAExperienceAppTests.xctest */,
+				6F2B3B772E64A27A0077B6D1 /* pkocExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -209,6 +303,35 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		6F2B3B762E64A27A0077B6D1 /* pkocExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6F2B3B882E64A27B0077B6D1 /* Build configuration list for PBXNativeTarget "pkocExtension" */;
+			buildPhases = (
+				6F2B3B732E64A27A0077B6D1 /* Sources */,
+				6F2B3B742E64A27A0077B6D1 /* Frameworks */,
+				6F2B3B752E64A27A0077B6D1 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				6F2B3BD02E64AE4E0077B6D1 /* Logging */,
+				6F2B3BD22E64AE640077B6D1 /* DynamicIsland */,
+				6F2B3BD32E64B0070077B6D1 /* DisplayPublicKey */,
+				6F2B3BD52E64B0200077B6D1 /* ManageKeys */,
+			);
+			name = pkocExtension;
+			packageProductDependencies = (
+				6F2B3B982E64AB3F0077B6D1 /* Toast */,
+				6F2B3BBB2E64ABD20077B6D1 /* BigInt */,
+				6F2B3BBD2E64ABD20077B6D1 /* CryptoSwift */,
+				6F2B3BBF2E64ABD20077B6D1 /* GRDB */,
+			);
+			productName = pkocExtension;
+			productReference = 6F2B3B772E64A27A0077B6D1 /* pkocExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		6F347D782E4A279D00AC2045 /* PSIAExperienceAppTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6F347D7F2E4A279D00AC2045 /* Build configuration list for PBXNativeTarget "PSIAExperienceAppTests" */;
@@ -240,10 +363,18 @@
 				96F75A002962D9EF00D36D9F /* Frameworks */,
 				96F75A012962D9EF00D36D9F /* Resources */,
 				849016B32C66490100169C23 /* Embed Frameworks */,
+				6F2B3BE82E64B4150077B6D1 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				6F2B3BE72E64B4150077B6D1 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				6F2B3BD02E64AE4E0077B6D1 /* Logging */,
+				6F2B3BD22E64AE640077B6D1 /* DynamicIsland */,
+				6F2B3BD32E64B0070077B6D1 /* DisplayPublicKey */,
+				6F2B3BD52E64B0200077B6D1 /* ManageKeys */,
 			);
 			name = PSIAExperienceApp;
 			packageProductDependencies = (
@@ -266,6 +397,9 @@
 				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1640;
 				TargetAttributes = {
+					6F2B3B762E64A27A0077B6D1 = {
+						CreatedOnToolsVersion = 16.4;
+					};
 					6F347D782E4A279D00AC2045 = {
 						CreatedOnToolsVersion = 16.4;
 						TestTargetID = 96F75A022962D9EF00D36D9F;
@@ -297,11 +431,21 @@
 			targets = (
 				96F75A022962D9EF00D36D9F /* PSIAExperienceApp */,
 				6F347D782E4A279D00AC2045 /* PSIAExperienceAppTests */,
+				6F2B3B762E64A27A0077B6D1 /* pkocExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		6F2B3B752E64A27A0077B6D1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6F2B3BDE2E64B21A0077B6D1 /* Assets.xcassets in Resources */,
+				6F2B3B9A2E64AB740077B6D1 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6F347D772E4A279D00AC2045 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -320,6 +464,32 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		6F2B3B732E64A27A0077B6D1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6F2B3B9B2E64AB740077B6D1 /* FlowModel.swift in Sources */,
+				6F2B3B9D2E64AB740077B6D1 /* AboutView.swift in Sources */,
+				6F2B3BF02E64CCEE0077B6D1 /* RangeSlider.swift in Sources */,
+				6F2B3BA02E64AB740077B6D1 /* TLVProvider.swift in Sources */,
+				6F2B3BA12E64AB740077B6D1 /* BLE_Packet.swift in Sources */,
+				6F2B3BA32E64AB740077B6D1 /* ReaderUnlockStatus.swift in Sources */,
+				6F2B3BDF2E64B21A0077B6D1 /* PKOCIslandWidget.swift in Sources */,
+				6F2B3BE02E64B21A0077B6D1 /* PKOCIslandViews.swift in Sources */,
+				6F2B3BA42E64AB740077B6D1 /* SiteModel.swift in Sources */,
+				6F2B3BA62E64AB740077B6D1 /* ListModel.swift in Sources */,
+				6F2B3BA82E64AB740077B6D1 /* PKOC_ConnectionType.swift in Sources */,
+				6F2B3BAA2E64AB740077B6D1 /* Constants.swift in Sources */,
+				6F2B3BAC2E64AB740077B6D1 /* KeyStore.swift in Sources */,
+				6F2B3BAE2E64AB740077B6D1 /* UIImages.swift in Sources */,
+				6F2B3BB12E64AB740077B6D1 /* BLE_PacketType.swift in Sources */,
+				6F2B3BB42E64AB740077B6D1 /* ReaderModel.swift in Sources */,
+				6F2B3BB62E64AB740077B6D1 /* Extensions.swift in Sources */,
+				6F2B3BB72E64AB740077B6D1 /* TransmissionType.swift in Sources */,
+				6F2B3BB82E64AB740077B6D1 /* CryptoProvider.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6F347D752E4A279D00AC2045 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -339,37 +509,32 @@
 				6FB6CE112DF634E400555103 /* TransmissionType.swift in Sources */,
 				6FB6CE122DF634E400555103 /* KeyStore.swift in Sources */,
 				6FB6CE132DF634E400555103 /* PresentDeviceView.swift in Sources */,
-				6FA0FA5E2E50C76D00F53786 /* AppComposition.swift in Sources */,
-				6F54B4AA2E4FD2A200B6980B /* PKOC_Repositories.swift in Sources */,
 				6FB6CE142DF634E400555103 /* ReaderUnlockStatus.swift in Sources */,
 				6FB6CE152DF634E400555103 /* BluetoothProvider.swift in Sources */,
 				6FB6CE162DF634E400555103 /* CryptoProvider.swift in Sources */,
-				6FA0FA662E50C8A100F53786 /* ReadersView.swift in Sources */,
 				6FB6CE172DF634E400555103 /* SettingsView.swift in Sources */,
 				6FB6CE182DF634E400555103 /* SiteModel.swift in Sources */,
-				6FA0FA622E50C84F00F53786 /* ReadersVM.swift in Sources */,
-				6F8180072E366E22008A22C5 /* DisplayPublicKeyOption.swift in Sources */,
 				6FB6CE192DF634E400555103 /* TLVProvider.swift in Sources */,
 				6FB6CE1A2DF634E400555103 /* PSIAExperienceApp.swift in Sources */,
+				6F2B3BF12E64CCEE0077B6D1 /* RangeSlider.swift in Sources */,
 				6FB6CE1B2DF634E400555103 /* UIImages.swift in Sources */,
 				6FB6CE1C2DF634E400555103 /* BLE_PacketType.swift in Sources */,
 				6FB6CE1D2DF634E400555103 /* UpdatingListView.swift in Sources */,
-				6F54B4A82E4FCE5800B6980B /* Repositories.GRDB.swift in Sources */,
-				6FEE3D2F2E55E3B800DE8E53 /* DiagnosticsLogView.swift in Sources */,
-				6FA0FA642E50C88900F53786 /* SitesView.swift in Sources */,
 				6FB6CE1E2DF634E400555103 /* ListModel.swift in Sources */,
 				6FB6CE1F2DF634E400555103 /* AboutView.swift in Sources */,
-				6F54B4A62E4FCC4A00B6980B /* PKOC_Database.swift in Sources */,
 				6FB6CE202DF634E400555103 /* FlowModel.swift in Sources */,
 				6FB6CE212DF634E400555103 /* BLE_Packet.swift in Sources */,
-				6F8180012E366B00008A22C5 /* DisplayPublicKeyView.swift in Sources */,
-				6FA0FA602E50C84600F53786 /* SitesVM.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		6F2B3BE72E64B4150077B6D1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6F2B3B762E64A27A0077B6D1 /* pkocExtension */;
+			targetProxy = 6F2B3BE62E64B4150077B6D1 /* PBXContainerItemProxy */;
+		};
 		6F6853972E4A2A2A00F5D52A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 96F75A022962D9EF00D36D9F /* PSIAExperienceApp */;
@@ -378,6 +543,81 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		6F2B3B892E64A27B0077B6D1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = DynamicIsland/pkoc.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = LJ99BF5CNX;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "pkocExtension-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = pkoc;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.elatec.pkoc.dynamicisland;
+				PRODUCT_MODULE_NAME = PSIAExperienceAppDynamicIsland;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6F2B3B8A2E64A27B0077B6D1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = DynamicIsland/pkoc.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = LJ99BF5CNX;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "pkocExtension-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = pkoc;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.elatec.pkoc.dynamicisland;
+				PRODUCT_MODULE_NAME = PSIAExperienceAppDynamicIsland;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		6F347D7D2E4A279D00AC2045 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -591,6 +831,8 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NFCReaderUsageDescription = "Uses NFC to transmit a secure credential";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Please allow Bluetooth, for this App is using Bluetooth to scan for nearby devices.";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Bluetooth is required to connect to PKOC readers.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -649,6 +891,8 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NFCReaderUsageDescription = "Uses NFC to transmit a secure credential";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Please allow Bluetooth, for this App is using Bluetooth to scan for nearby devices.";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Bluetooth is required to connect to PKOC readers.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -687,6 +931,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		6F2B3B882E64A27B0077B6D1 /* Build configuration list for PBXNativeTarget "pkocExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6F2B3B892E64A27B0077B6D1 /* Debug */,
+				6F2B3B8A2E64A27B0077B6D1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		6F347D7F2E4A279D00AC2045 /* Build configuration list for PBXNativeTarget "PSIAExperienceAppTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -752,6 +1005,26 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		6F2B3B982E64AB3F0077B6D1 /* Toast */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84F6CF9F2C6E3EC20005890C /* XCRemoteSwiftPackageReference "toast-swift" */;
+			productName = Toast;
+		};
+		6F2B3BBB2E64ABD20077B6D1 /* BigInt */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 842361262C64ED6800962062 /* XCRemoteSwiftPackageReference "BigInt" */;
+			productName = BigInt;
+		};
+		6F2B3BBD2E64ABD20077B6D1 /* CryptoSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 849016B42C665B7100169C23 /* XCRemoteSwiftPackageReference "CryptoSwift" */;
+			productName = CryptoSwift;
+		};
+		6F2B3BBF2E64ABD20077B6D1 /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6F54B4A22E4FCB9300B6980B /* XCRemoteSwiftPackageReference "GRDB" */;
+			productName = GRDB;
+		};
 		6F54B4A32E4FCB9300B6980B /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 6F54B4A22E4FCB9300B6980B /* XCRemoteSwiftPackageReference "GRDB" */;

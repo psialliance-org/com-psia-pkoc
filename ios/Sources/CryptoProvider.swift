@@ -136,7 +136,7 @@ public class CryptoProvider : ObservableObject
             kSecAttrKeySizeInBits as String: 256,
             kSecPrivateKeyAttrs as String:
                 [
-                    kSecAttrIsPermanent as String: true
+                    kSecAttrIsPermanent as String: false
                 ]
         ]
         
