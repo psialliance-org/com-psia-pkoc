@@ -1,4 +1,4 @@
-name: iOS � TestFlight
+name: iOS - TestFlight
 
 on:
   push:
@@ -51,12 +51,38 @@ jobs:
           api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
           api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
 
-      - name: Bump build number
+      - name: Bump build number (from GitHub run number)
         run: |
           set -euo pipefail
-          SETTINGS=$(xcodebuild -showBuildSettings -project "$PROJECT" -scheme "$SCHEME" 2>/dev/null)
-          PLIST_PATH=$(printf "%s\n" "$SETTINGS" | awk '/INFOPLIST_FILE/ {print $3; exit}')
-          /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $GITHUB_RUN_NUMBER" "$PLIST_PATH"
+
+          SETTINGS="$(xcodebuild -showBuildSettings -project "$PROJECT" -scheme "$SCHEME" 2>/dev/null)"
+          PLIST_PATH="$(printf "%s\n" "$SETTINGS" | awk '/INFOPLIST_FILE/ {print $3; exit}')"
+
+          RUN_NUM="${GITHUB_RUN_NUMBER}"
+          MIN_ALLOWED=15                                # last uploaded was 14
+          if [[ "$RUN_NUM" -lt "$MIN_ALLOWED" ]]
+          then
+            BUILD_NUM="$MIN_ALLOWED"
+          else
+            BUILD_NUM="$RUN_NUM"
+          fi
+
+          if /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST_PATH" >/dev/null 2>&1
+          then
+            /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${BUILD_NUM}" "$PLIST_PATH"
+          else
+            /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string ${BUILD_NUM}" "$PLIST_PATH"
+          fi
+
+          echo "Set CFBundleVersion -> ${BUILD_NUM} in ${PLIST_PATH}"
+
+      - name: Sync CURRENT_PROJECT_VERSION to run number
+        run: |
+          set -euo pipefail
+          BUILD_NUM="${GITHUB_RUN_NUMBER}"
+          [[ "$BUILD_NUM" -lt 15 ]] && BUILD_NUM=15
+          agvtool new-version -all "${BUILD_NUM}"
+
 
       - name: Archive (Release)
         run: |
