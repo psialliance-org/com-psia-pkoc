@@ -48,7 +48,9 @@ jobs:
       - name: Download provisioning profiles (App Store)
         uses: apple-actions/download-provisioning-profiles@v4
         with:
-          bundle-id: ${{ env.BUNDLE_ID }}
+          bundle-id: |
+            ${{ env.BUNDLE_ID }}
+            ${{ env.BUNDLE_ID }}.dynamicisland
           profile-type: IOS_APP_STORE
           issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
           api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
