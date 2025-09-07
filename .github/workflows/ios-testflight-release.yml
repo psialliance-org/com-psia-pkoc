@@ -165,14 +165,6 @@ jobs:
             -exportOptionsPlist build/ExportOptions.plist
           echo "ipa=$(ls build/*.ipa | head -n1)" >> "$GITHUB_OUTPUT"
 
-      - name: Upload to TestFlight
-        uses: apple-actions/upload-testflight-build@v3
-        with:
-          app-path: ios/${{ steps.export.outputs.ipa }}
-          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
-
       - name: Build What-to-Test changelog (commits since last TF tag)
         id: changelog
         run: |
@@ -226,16 +218,17 @@ jobs:
           JSON
           echo "ASC_KEY_JSON=$JSON_FILE" >> "$GITHUB_ENV"
 
-      - name: Distribute latest build to PKOC External
+      - name: Upload + wait + distribute (Fastlane)
         env:
           FASTLANE_OPT_OUT_USAGE: "1"
         run: |
           set -euo pipefail
-          fastlane pilot distribute \
+          IPA_PATH="ios/${{ steps.export.outputs.ipa }}"
+          fastlane pilot upload \
             --api_key_path "$ASC_KEY_JSON" \
+            --ipa "$IPA_PATH" \
             --app_identifier "$BUNDLE_ID" \
             --app_platform ios \
-            --build_number "${GITHUB_RUN_NUMBER}" \
             --distribute_external true \
             --groups "PKOC External" \
             --notify_external_testers true \
