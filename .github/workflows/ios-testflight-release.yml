@@ -207,28 +207,23 @@ jobs:
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
 
-      - name: Prepare App Store Connect API key (secure)
-        run: |
-          set -euo pipefail
-          umask 177
-          KEY_FILE="$RUNNER_TEMP/asc_key.p8"
-          JSON_FILE="$RUNNER_TEMP/asc_key.json"
-          printf '%s\n' "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" > "$KEY_FILE"
-          cat > "$JSON_FILE" <<JSON
-          {"key_id":"${{ secrets.APPSTORE_API_KEY_ID }}",
-          "issuer_id":"${{ secrets.APPSTORE_ISSUER_ID }}",
-          "key_filepath":"$KEY_FILE"}
-          JSON
-          echo "ASC_KEY_JSON=$JSON_FILE" >> "$GITHUB_ENV"
-
       - name: Install fastlane
         run: sudo gem install fastlane -N
+
+      - name: Prepare App Store Connect API key for Fastlane
+        run: |
+          set -euo pipefail
+          cat > asc_key.json <<JSON
+          { "key_id": "${{ secrets.APPSTORE_API_KEY_ID }}",
+            "issuer_id": "${{ secrets.APPSTORE_ISSUER_ID }}",
+            "key": "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" }
+          JSON
 
       - name: Distribute latest build to PKOC External
         run: |
           set -euo pipefail
           fastlane pilot distribute \
-            --api_key_path "$ASC_KEY_JSON" \
+            --api_key_path "asc_key.json" \
             --app_identifier com.elatec.pkoc \
             --build_number "${GITHUB_RUN_NUMBER}" \
             --distribute_external true \
@@ -239,7 +234,7 @@ jobs:
             --wait_processing_interval 30
 
       - name: Cleanup ASC key
-        run: rm -f "$ASC_KEY_JSON" "$KEY_FILE"
+        run: rm -f "asc_key.json"
 
       - name: Tag this commit with the TestFlight build number
         if: ${{ success() }}
