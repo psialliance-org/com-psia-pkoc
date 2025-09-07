@@ -233,7 +233,7 @@ jobs:
           set -euo pipefail
           fastlane pilot distribute \
             --api_key_path "$ASC_KEY_JSON" \
-            --app_identifier "$APP_ID" \
+            --app_identifier "$BUNDLE_ID" \
             --app_platform ios \
             --build_number "${GITHUB_RUN_NUMBER}" \
             --distribute_external true \
