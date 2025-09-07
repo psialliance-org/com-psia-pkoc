@@ -1,4 +1,4 @@
-name: iOS — Build & Test
+name: iOS - Build & Test
 
 on:
   push:
