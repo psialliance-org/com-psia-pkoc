@@ -71,19 +71,61 @@ jobs:
 
       - name: Create ExportOptions.plist
         run: |
-            mkdir -p build
-            cat > build/ExportOptions.plist <<PLIST
-            <?xml version="1.0" encoding="UTF-8"?>
-            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-            <plist version="1.0">
-            <dict>
-              <key>method</key><string>app-store-connect</string>
-              <key>teamID</key><string>$TEAM_ID</string>
-              <key>uploadSymbols</key><true/>
-            </dict>
-            </plist>
-            PLIST
+          set -euo pipefail
 
+          profiles_dir="$HOME/Library/MobileDevice/Provisioning Profiles"
+
+          # Find the installed App Store profile name for com.elatec.pkoc
+          find_profile_name()
+          {
+              local bundle_id="$1"
+              local team_id="${TEAM_ID}"
+
+              while IFS= read -r -d '' f
+              do
+                  plist="$(security cms -D -i "$f" 2>/dev/null || true)"
+                  [[ -z "$plist" ]] && continue
+
+                  # Skip Ad Hoc / dev
+                  isAdHoc="$(/usr/libexec/PlistBuddy -c 'Print :ProvisionsAllDevices' /dev/stdin <<<"$plist" 2>/dev/null || true)"
+                  [[ "$isAdHoc" == "true" ]] && continue
+
+                  app_id="$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' /dev/stdin <<<"$plist" 2>/dev/null || true)"
+                  expected="${team_id}.${bundle_id}"
+
+                  if [[ "$app_id" == "$expected" ]]
+                  then
+                      /usr/libexec/PlistBuddy -c 'Print :Name' /dev/stdin <<<"$plist"
+                      return 0
+                  fi
+              done < <(find "$profiles_dir" -name '*.mobileprovision' -print0)
+
+              return 1
+          }
+
+          APP_PROFILE_NAME="$(find_profile_name "${BUNDLE_ID}")" || {
+            echo "Failed to resolve App Store profile name for ${BUNDLE_ID}" >&2
+            exit 1
+          }
+
+          mkdir -p build
+          cat > build/ExportOptions.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store</string>
+            <key>teamID</key><string>${TEAM_ID}</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>signingCertificate</key><string>Apple Distribution</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>${BUNDLE_ID}</key><string>${APP_PROFILE_NAME}</string>
+            </dict>
+            <key>uploadSymbols</key><true/>
+          </dict>
+          </plist>
+          PLIST
 
       - name: Export .ipa
         id: export
