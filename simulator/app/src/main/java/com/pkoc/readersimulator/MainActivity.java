@@ -18,6 +18,7 @@ import android.text.style.BackgroundColorSpan;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -533,6 +534,8 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             formattedText.append(applyColorAndSize(yPortion, yPortion.length(), Color.WHITE, Color.parseColor("#707173"), false));
 
                             // Set the formatted text to the TextView
+                            RelativeLayout mainLayout = findViewById(R.id.mainLayout);
+                            mainLayout.setBackgroundColor(getResources().getColor(android.R.color.white, getTheme()));
                             textView.setText(formattedText);
 
                             // Hide reader detail button
@@ -638,6 +641,10 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
             String initialText = "<b>Scan a PKOC BLE or NFC Credential</b>";
             textView.setText(Html.fromHtml(initialText, Html.FROM_HTML_MODE_LEGACY));
 
+            RelativeLayout mainLayout = findViewById(R.id.mainLayout);
+            //mainLayout.setBackgroundColor(getResources().getColor(android.R.color.transparent, getTheme()));
+            mainLayout.setBackgroundResource(0);
+            mainLayout.setBackgroundResource(R.drawable.reader_background);
             // Hide the email button
             Button emailButton = findViewById(R.id.emailButton);
             emailButton.setVisibility(View.GONE);
@@ -1251,6 +1258,8 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
 
                             formattedText.append(applyColorAndSize(yPortion.toUpperCase(), yPortion.length(), Color.WHITE, Color.parseColor("#707173"), false));
                             // Set the formatted text to the TextView
+                            RelativeLayout mainLayout = findViewById(R.id.mainLayout);
+                            mainLayout.setBackgroundColor(getResources().getColor(android.R.color.white, getTheme()));
                             textView.setText(formattedText);
                             // Hide reader detail button
                             Button rdrButton = findViewById(R.id.rdrButton);

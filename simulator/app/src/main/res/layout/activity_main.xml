@@ -4,6 +4,7 @@
     android:id="@+id/mainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/reader_background"
     tools:context=".MainActivity">
 
     <androidx.appcompat.widget.Toolbar
@@ -18,107 +19,113 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@android:color/transparent"
         android:layout_below="@id/my_toolbar">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="#00FFFFFF"
             android:paddingBottom="16dp"> <!-- Add padding at the bottom -->
 
             <TextView
                 android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="16dp"
+                android:background="@android:color/transparent"
                 android:text="Scan a PKOC NFC or BLE Credential"
-                android:textColor="@color/colorPrimaryDark"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="@color/colorPrimaryDark"
                 android:textSize="24sp" />
 
             <TextView
                 android:id="@+id/readerLocationUUID"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/textView"
+                android:layout_centerHorizontal="false"
+                android:layout_marginTop="16dp"
                 android:text="Reader Location UUID: "
                 android:textSize="16sp"
-                android:layout_below="@id/textView"
-                android:layout_marginTop="16dp"
-                android:layout_centerHorizontal="false"
                 android:visibility="gone" />
 
             <TextView
                 android:id="@+id/readerSiteUUID"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/readerLocationUUID"
+                android:layout_centerHorizontal="false"
+                android:layout_marginTop="8dp"
                 android:text="Reader Site UUID: "
                 android:textSize="16sp"
-                android:layout_below="@id/readerLocationUUID"
-                android:layout_marginTop="8dp"
-                android:layout_centerHorizontal="false"
                 android:visibility="gone" />
 
             <TextView
                 android:id="@+id/sitePublicKey"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/readerSiteUUID"
+                android:layout_centerHorizontal="false"
+                android:layout_marginTop="8dp"
                 android:text="Site Public Key: "
                 android:textSize="16sp"
-                android:layout_below="@id/readerSiteUUID"
-                android:layout_marginTop="8dp"
-                android:layout_centerHorizontal="false"
                 android:visibility="gone" />
 
             <TextView
                 android:id="@+id/nfcadvertisingStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/sitePublicKey"
+                android:layout_centerHorizontal="false"
+                android:layout_marginTop="8dp"
                 android:text="NFC Advertising Status: "
                 android:textSize="16sp"
-                android:layout_below="@id/sitePublicKey"
-                android:layout_marginTop="8dp"
-                android:layout_centerHorizontal="false"
                 android:visibility="gone" />
 
             <TextView
                 android:id="@+id/bleadvertisingStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="BLE Advertising Status: "
-                android:textSize="16sp"
                 android:layout_below="@+id/nfcadvertisingStatus"
                 android:layout_marginTop="8dp"
+                android:text="BLE Advertising Status: "
+                android:textSize="16sp"
                 android:visibility="gone" />
 
             <Button
                 android:id="@+id/emailButton"
+                style="@android:style/Widget.Material.Button.Inset"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Email PKOC Information"
                 android:layout_below="@id/bleadvertisingStatus"
-                android:layout_marginTop="16dp"
                 android:layout_centerHorizontal="true"
-                android:visibility="gone"/> <!-- Initially hidden -->
+                android:layout_marginTop="16dp"
+                android:text="Email PKOC Information"
+                android:visibility="gone" /> <!-- Initially hidden -->
 
             <Button
                 android:id="@+id/scanButton"
+                style="@android:style/Widget.Material.Button.Inset"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Scan New Tag"
                 android:layout_below="@id/emailButton"
-                android:layout_marginTop="16dp"
                 android:layout_centerHorizontal="true"
-                android:visibility="gone"/> <!-- Initially hidden -->
+                android:layout_marginTop="16dp"
+                android:text="Scan New Tag"
+                android:visibility="gone" /> <!-- Initially hidden -->
 
             <Button
                 android:id="@+id/rdrButton"
+                style="@android:style/Widget.Material.Button.Inset"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Show Reader Details"
-                android:layout_below="@+id/bleadvertisingStatus"
-                android:layout_marginTop="16dp"
+                android:layout_below="@id/bleadvertisingStatus"
                 android:layout_centerHorizontal="true"
-                android:visibility="visible"/> <!-- Initially visible -->
+                android:layout_marginTop="16dp"
+                android:text="Show Reader Details"
+                android:visibility="visible" />
 
         </RelativeLayout>
     </ScrollView>

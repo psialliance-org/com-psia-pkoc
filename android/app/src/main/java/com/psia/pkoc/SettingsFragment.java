@@ -268,8 +268,8 @@ public class SettingsFragment extends Fragment
         if (toFlow == PKOC_ConnectionType.Uncompressed)
             binding.RadioGroup.check(binding.UncompressedButton.getId());
 
-        if (toFlow == PKOC_ConnectionType.ECHDE_Full)
-            binding.RadioGroup.check(binding.ECHDEComplete.getId());
+        //if (toFlow == PKOC_ConnectionType.ECHDE_Full)
+        //    binding.RadioGroup.check(binding.ECHDEComplete.getId());
 
         // Show/hide ECDHE-specific fields
         boolean isEcdhe = toFlow == PKOC_ConnectionType.ECHDE_Full;

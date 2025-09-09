@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PKOC NFC Simulator</string>
+    <string name="app_name">PKOC NFC and BLE Simulator</string>
     <string name="show_reader_details">Show Reader Details</string>
     <string name="hide_reader_details">Hide Reader Details</string>
     <string name="nfc_is_not_available_on_this_device">NFC is not available on this device.</string>
@@ -7,4 +7,5 @@
     <string name="reader_site_uuid">"Reader Site UUID: "</string>
     <string name="site_public_key">"Site Public Key: "</string>
     <string name="b_advertising_status_b"><![CDATA["<b>Advertising Status:</b> "]]></string>
+    <string name="elatec_GmbH" translatable="false">Elatec GmbH</string>
 </resources>
