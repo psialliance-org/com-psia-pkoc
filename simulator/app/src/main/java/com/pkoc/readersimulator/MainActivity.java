@@ -17,7 +17,10 @@ import android.text.Spannable;
 import android.text.style.BackgroundColorSpan;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -147,6 +150,13 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         sitePublicKeyView.setText(Html.fromHtml(sitePublicKeyText, Html.FROM_HTML_MODE_LEGACY));
         nfcAdvertisingStatusView.setText(Html.fromHtml(nfcAdvertisingStatusText, Html.FROM_HTML_MODE_LEGACY));
         bleAdvertisingStatusView.setText(Html.fromHtml(bleAdvertisingStatusText, Html.FROM_HTML_MODE_LEGACY));
+
+        ImageView ledImage = findViewById(R.id.reader_led);
+        AlphaAnimation blinkAnim = new AlphaAnimation(0.0f, 1.0f);
+        blinkAnim.setDuration(1000);
+        blinkAnim.setRepeatMode(Animation.REVERSE);
+        blinkAnim.setRepeatCount(Animation.INFINITE);
+        ledImage.startAnimation(blinkAnim);
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (nfcAdapter == null) {
@@ -536,8 +546,13 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             // Set the formatted text to the TextView
                             RelativeLayout mainLayout = findViewById(R.id.mainLayout);
                             mainLayout.setBackgroundColor(getResources().getColor(android.R.color.white, getTheme()));
+
+                            // Update display with Public Key read
                             textView.setText(formattedText);
 
+                            ImageView ledflash = findViewById(R.id.reader_led);
+                            ledflash.clearAnimation();
+                            ledflash.setVisibility(View.GONE);
                             // Hide reader detail button
                             Button rdrButton = findViewById(R.id.rdrButton);
                             rdrButton.setVisibility(View.GONE);
@@ -642,7 +657,6 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
             textView.setText(Html.fromHtml(initialText, Html.FROM_HTML_MODE_LEGACY));
 
             RelativeLayout mainLayout = findViewById(R.id.mainLayout);
-            //mainLayout.setBackgroundColor(getResources().getColor(android.R.color.transparent, getTheme()));
             mainLayout.setBackgroundResource(0);
             mainLayout.setBackgroundResource(R.drawable.reader_background);
             // Hide the email button
@@ -656,6 +670,15 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
             // Show the reader button
             Button rdrButton = findViewById(R.id.rdrButton);
             rdrButton.setVisibility(View.VISIBLE);
+
+            // Show green LED
+            ImageView ledImage = findViewById(R.id.reader_led);
+            ledImage.setVisibility(View.VISIBLE);
+            AlphaAnimation blinkAnim = new AlphaAnimation(0.0f, 1.0f);
+            blinkAnim.setDuration(1000);
+            blinkAnim.setRepeatMode(Animation.REVERSE);
+            blinkAnim.setRepeatCount(Animation.INFINITE);
+            ledImage.startAnimation(blinkAnim);
 
             // Check if the button text is "Show Reader Details"
             if (rdrButton.getText().toString().equals("Show Reader Details")) {
@@ -1257,13 +1280,21 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             formattedText.append(portionYKey);
 
                             formattedText.append(applyColorAndSize(yPortion.toUpperCase(), yPortion.length(), Color.WHITE, Color.parseColor("#707173"), false));
-                            // Set the formatted text to the TextView
+
                             RelativeLayout mainLayout = findViewById(R.id.mainLayout);
                             mainLayout.setBackgroundColor(getResources().getColor(android.R.color.white, getTheme()));
+
+                            // Update the screen with the public key read data
+                            // Set the formatted text to the TextView
                             textView.setText(formattedText);
                             // Hide reader detail button
                             Button rdrButton = findViewById(R.id.rdrButton);
                             rdrButton.setVisibility(View.GONE);
+
+                            // Hide the flashing green LED
+                            ImageView ledflash = findViewById(R.id.reader_led);
+                            ledflash.clearAnimation();
+                            ledflash.setVisibility(View.GONE);
 
                             // Set up the email button
                             Button emailButton = findViewById(R.id.emailButton);
