@@ -1,0 +1,263 @@
+name: iOS - TestFlight
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'ios/**'
+      - '.github/workflows/ios-testflight-release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ios-testflight-release
+  cancel-in-progress: true
+
+env:
+  TEAM_ID: LJ99BF5CNX
+  BUNDLE_ID: com.elatec.pkoc
+  EXT_BUNDLE_ID: com.elatec.pkoc.dynamicisland
+  SCHEME: PSIAExperienceApp
+  PROJECT: PSIAExperienceApp.xcodeproj
+
+jobs:
+  build-and-upload:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: ios
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Xcode 16.4
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '16.4'
+
+      - name: Import signing certificate (p12)
+        uses: apple-actions/import-codesign-certs@v3
+        with:
+          p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
+          p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
+
+      - name: Download application provisioning profile (App Store)
+        uses: apple-actions/download-provisioning-profiles@v4
+        with:
+          bundle-id: ${{ env.BUNDLE_ID }}
+          profile-type: IOS_APP_STORE
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+
+      - name: Download extension provisioning profile (App Store)
+        uses: apple-actions/download-provisioning-profiles@v4
+        with:
+          bundle-id: ${{ env.EXT_BUNDLE_ID }}
+          profile-type: IOS_APP_STORE
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+
+      - name: Bump build number (from GitHub run number)
+        run: |
+          set -euo pipefail
+
+          SETTINGS="$(xcodebuild -showBuildSettings -project "$PROJECT" -scheme "$SCHEME" 2>/dev/null)"
+          PLIST_PATH="$(printf "%s\n" "$SETTINGS" | awk '/INFOPLIST_FILE/ {print $3; exit}')"
+
+          RUN_NUM="${GITHUB_RUN_NUMBER}"
+          MIN_ALLOWED=15                                # last uploaded was 14
+          if [[ "$RUN_NUM" -lt "$MIN_ALLOWED" ]]
+          then
+            BUILD_NUM="$MIN_ALLOWED"
+          else
+            BUILD_NUM="$RUN_NUM"
+          fi
+
+          if /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST_PATH" >/dev/null 2>&1
+          then
+            /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${BUILD_NUM}" "$PLIST_PATH"
+          else
+            /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string ${BUILD_NUM}" "$PLIST_PATH"
+          fi
+
+          echo "Set CFBundleVersion -> ${BUILD_NUM} in ${PLIST_PATH}"
+
+      - name: Sync CURRENT_PROJECT_VERSION to run number
+        run: |
+          set -euo pipefail
+          BUILD_NUM="${GITHUB_RUN_NUMBER}"
+          [[ "$BUILD_NUM" -lt 15 ]] && BUILD_NUM=15
+          agvtool new-version -all "${BUILD_NUM}"
+
+
+      - name: Archive (Release)
+        run: |
+            set -euo pipefail
+            xcodebuild \
+              -project "$PROJECT" \
+              -scheme "$SCHEME" \
+              -configuration Release \
+              -archivePath build/App.xcarchive \
+              -destination 'generic/platform=iOS' \
+              clean archive
+
+      - name: Create ExportOptions.plist
+        run: |
+          set -euo pipefail
+
+          profiles_dir="$HOME/Library/MobileDevice/Provisioning Profiles"
+
+          # Find the installed App Store profile name for com.elatec.pkoc
+          find_profile_name()
+          {
+              local bundle_id="$1"
+              local team_id="${TEAM_ID}"
+
+              while IFS= read -r -d '' f
+              do
+                  plist="$(security cms -D -i "$f" 2>/dev/null || true)"
+                  [[ -z "$plist" ]] && continue
+
+                  # Skip Ad Hoc / dev
+                  isAdHoc="$(/usr/libexec/PlistBuddy -c 'Print :ProvisionsAllDevices' /dev/stdin <<<"$plist" 2>/dev/null || true)"
+                  [[ "$isAdHoc" == "true" ]] && continue
+
+                  app_id="$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' /dev/stdin <<<"$plist" 2>/dev/null || true)"
+                  expected="${team_id}.${bundle_id}"
+
+                  if [[ "$app_id" == "$expected" ]]
+                  then
+                      /usr/libexec/PlistBuddy -c 'Print :Name' /dev/stdin <<<"$plist"
+                      return 0
+                  fi
+              done < <(find "$profiles_dir" -name '*.mobileprovision' -print0)
+
+              return 1
+          }
+
+          APP_PROFILE_NAME="$(find_profile_name "${BUNDLE_ID}")" || {
+            echo "Failed to resolve App Store profile name for ${BUNDLE_ID}" >&2
+            exit 1
+          }
+
+          mkdir -p build
+          cat > build/ExportOptions.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>teamID</key><string>${TEAM_ID}</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>signingCertificate</key><string>Apple Distribution</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>${BUNDLE_ID}</key><string>${APP_PROFILE_NAME}</string>
+              <key>${EXT_BUNDLE_ID}</key><string>${EXT_BUNDLE_ID}</string>
+            </dict>
+            <key>uploadSymbols</key><true/>
+          </dict>
+          </plist>
+          PLIST
+
+      - name: Export .ipa
+        id: export
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/App.xcarchive \
+            -exportPath build \
+            -exportOptionsPlist build/ExportOptions.plist
+          echo "ipa=$(ls build/*.ipa | head -n1)" >> "$GITHUB_OUTPUT"
+
+      - name: Build What-to-Test changelog (commits since last TF tag)
+        id: changelog
+        run: |
+          set -euo pipefail
+
+          git fetch --prune --tags
+          LAST_TAG="$(git tag -l 'testflight/*' --sort=-version:refname | head -n1 || true)"
+
+          if [[ -n "${LAST_TAG:-}" ]]
+          then
+            RANGE="${LAST_TAG}..HEAD"
+          else
+            # First time: from repo root
+            FIRST="$(git rev-list --max-parents=0 HEAD | tail -n1)"
+            RANGE="${FIRST}..HEAD"
+          fi
+
+          LOG="$(git log --pretty='- %s (%h)' --no-merges ${RANGE})"
+          if [[ -z "${LOG}" ]]
+          then
+            LOG="Automated CI build ${GITHUB_RUN_NUMBER}"
+          fi
+
+          # keep it tidy; TestFlight UI truncates long notes
+          LOG="$(echo "$LOG" | head -n 200)"
+          printf '%s\n' "$LOG" > TF_CHANGELOG.txt
+
+          # expose for later steps
+          {
+            echo 'changelog<<EOF'
+            cat TF_CHANGELOG.txt
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Install fastlane
+        run: sudo gem install fastlane -N
+
+      - name: Prepare App Store Connect API key (fastlane JSON)
+        run: |
+          set -euo pipefail
+          umask 077
+          JSON_FILE="$RUNNER_TEMP/asc_key.json"
+          # Convert multiline .p8 to JSON-safe single string with \n
+          ESCAPED_KEY="$(printf '%s' "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" | awk '{printf "%s\\n", $0}' | sed 's/\\n$//')"
+          cat > "$JSON_FILE" <<JSON
+          {
+            "key_id":    "${{ secrets.APPSTORE_API_KEY_ID }}",
+            "issuer_id": "${{ secrets.APPSTORE_ISSUER_ID }}",
+            "key":       "$ESCAPED_KEY"
+          }
+          JSON
+          echo "ASC_KEY_JSON=$JSON_FILE" >> "$GITHUB_ENV"
+
+      - name: Upload + wait + distribute (Fastlane)
+        env:
+          FASTLANE_OPT_OUT_USAGE: "1"
+        run: |
+          set -euo pipefail
+          IPA_PATH="${{ steps.export.outputs.ipa }}"
+          fastlane pilot upload \
+            --api_key_path "$ASC_KEY_JSON" \
+            --ipa "$IPA_PATH" \
+            --app_identifier "$BUNDLE_ID" \
+            --app_platform ios \
+            --distribute_external true \
+            --groups "PKOC External" \
+            --notify_external_testers true \
+            --submit_beta_review true \
+            --changelog "${{ steps.changelog.outputs.changelog }}" \
+            --wait_processing_interval 30 \
+            --wait_processing_timeout_duration 3600
+
+      - name: Cleanup ASC key
+        if: ${{ always() }}
+        run: rm -f "$ASC_KEY_JSON"
+
+      - name: Tag this commit with the TestFlight build number
+        if: ${{ success() }}
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          TAG="testflight/${GITHUB_RUN_NUMBER}"
+          git tag -f "$TAG" "${GITHUB_SHA}"
+          git push -f origin "$TAG"

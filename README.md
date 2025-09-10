@@ -3,9 +3,14 @@
 A multi-platform, open-source codebase implementing the **PKOC** (Public Key Open Credential) protocol across **Android** and **iOS**.  
 This repo hosts three apps that enable secure, interoperable identity exchange over **Bluetooth Low Energy (BLE)** and **Near Field Communication (NFC)**.
 
+### Build & Test Pipelines
 [![iOS — Build & Test](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/ios-build-test.yml/badge.svg)](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/ios-build-test.yml)
 [![Android - Build & Test](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/android-build-test.yml/badge.svg)](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/android-build-test.yml)
 [![Simulator - Build & Test](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/simulator-build-test.yml/badge.svg)](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/simulator-build-test.yml)
+
+### Release/Test Pipelines
+[![iOS - TestFlight](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/ios-testflight-release.yml/badge.svg)](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/ios-testflight-release.yml)
+
 ## Repository Layout
 
 ```

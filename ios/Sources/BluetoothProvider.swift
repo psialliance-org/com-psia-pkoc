@@ -21,33 +21,47 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     {
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: nil)
+        Task
+        {
+            @MainActor in let discoveries = $discoveredPeripherals.eraseToAnyPublisher()
+            let selectedID  = $connectedPeripheral
+                .map { $0?.identifier }
+                .eraseToAnyPublisher()
+            let scanning = $isScanning.eraseToAnyPublisher()
+
+            PKOCProximityController.shared.start(
+                discoveries: discoveries,
+                selectedID: selectedID,
+                isScanning: scanning
+            )
+        }
     }
 
     func startScan()
     {
         if centralManager.state == .poweredOn
         {
+            AppLog.info("Starting BLE scan", tag: "BLE")
             isScanning = true
             discoveredPeripherals.removeAll()
             discoveredPeripheralSet.removeAll()
             objectWillChange.send()
-            
-            var ServiceUUIDS = [CBUUID]()
-            ServiceUUIDS.append(ServiceUUID)
-            ServiceUUIDS.append(ServiceLegacyUUID)
-            centralManager.scanForPeripherals(withServices: ServiceUUIDS)
+                        
+            let serviceUUIDs = [ServiceUUID, ServiceLegacyUUID]
+            centralManager.scanForPeripherals(withServices: serviceUUIDs)
 
             timer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true)
-            {
-                [weak self] timer in
+            { [weak self] _ in
                 self?.centralManager.stopScan()
-                self?.centralManager.scanForPeripherals(withServices: ServiceUUIDS)
+                self?.centralManager.scanForPeripherals(withServices: serviceUUIDs)
+                AppLog.debug("Rescanning for peripherals", tag: "BLE")
             }
         }
     }
 
     func stopScan()
     {
+        if isScanning { AppLog.info("Stopping BLE scan", tag: "BLE") }
         isScanning = false
         timer?.invalidate()
         centralManager.stopScan()
@@ -58,63 +72,88 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
         switch central.state
         {
             case .unknown:
+                AppLog.warn("Central state unknown", tag: "BLE")
                 stopScan()
             case .resetting:
+                AppLog.warn("Central state resetting", tag: "BLE")
                 stopScan()
             case .unsupported:
+                AppLog.error("BLE unsupported", tag: "BLE")
                 stopScan()
             case .unauthorized:
+                AppLog.error("BLE unauthorized", tag: "BLE")
                 stopScan()
             case .poweredOff:
+                AppLog.warn("BLE powered off", tag: "BLE")
                 stopScan()
             case .poweredOn:
-                if let autoDiscoverDevices: Bool = UserDefaults.standard.bool(forKey: AutoDiscoverDevices) as Bool?
+                AppLog.info("Central powered on", tag: "BLE")
+                if UserDefaults.standard.bool(forKey: AutoDiscoverDevices)
                 {
-                    if (autoDiscoverDevices)
+                    if (!isScanning)
                     {
-                        if (!isScanning)
-                        {
-                            startScan()
-                        }
+                        startScan()
                     }
                 }
             @unknown default:
-                print("central.state is unknown")
+                AppLog.error("Central state is unknown default", tag: "BLE")
         }
     }
+    
+    private func discoveryThreshold() -> Int
+    {
+        let ud = UserDefaults.standard
+        if ud.object(forKey: DiscoveryRangeValue) == nil
+        {
+            ud.set(-80, forKey: DiscoveryRangeValue)
+        }
+        return ud.integer(forKey: DiscoveryRangeValue)
+    }
 
+    private func activationThreshold() -> Int
+    {
+        let slider = UserDefaults.standard.double(forKey: RangeValue)
+        return Int(slider * -5.0 - 35.0)
+    }
+    
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber)
     {
+        AppLog.debug("Discovered peripheral: \(peripheral.identifier) RSSI=\(RSSI)", tag: "BLE")
+
+        let t1 = discoveryThreshold()
+        let t2 = activationThreshold()
+        let rssi = RSSI.intValue
+
         if !discoveredPeripheralSet.contains(peripheral)
         {
-            var progress = RSSI.doubleValue
-            progress += 120
-            
-            if (progress >= 120)
+            guard rssi >= t1 else
             {
-                progress = 50
+                return
+            }
+
+            var progress = RSSI.doubleValue + 120.0
+            if progress >= 120.0
+            {
+                progress = 50.0
             }
             
             var name = peripheral.name
             let advertisedName = advertisementData["kCBAdvDataLocalName"] as? String
-            
-            if (advertisedName != nil)
+            if advertisedName != nil
             {
                 name = advertisedName
             }
-            
-            if (name == nil)
+            if name == nil
             {
                 name = "Reader"
             }
             
             var progressTint = Color(hex: 0x9CC3C9)
-            
             if let enableRanging: Bool = UserDefaults.standard.bool(forKey: EnableRanging) as Bool?
             {
-                if (enableRanging)
+                if enableRanging
                 {
-                    progressTint = Color.red
+                    progressTint = .red
                 }
             }
             
@@ -124,10 +163,10 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
                 peripheral: peripheral,
                 progress: progress,
                 iconName: "lock.fill",
-                iconTint: Color.gray,
+                iconTint: .gray,
                 progressTint: progressTint,
                 lastSeen: Date()
-                ))
+            ))
             
             discoveredPeripheralSet.insert(peripheral)
             objectWillChange.send()
@@ -136,53 +175,52 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
         {
             if let index = discoveredPeripherals.firstIndex(where: { $0.peripheral == peripheral })
             {
-                var progress = RSSI.doubleValue
-                progress += 120
+                if rssi < t1
+                {
+                    AppLog.debug("Below discovery threshold, removing: \(discoveredPeripherals[index].name)", tag: "BLE")
+                    discoveredPeripherals.remove(at: index)
+                    discoveredPeripheralSet.remove(peripheral)
+                    objectWillChange.send()
+                    return
+                }
 
+                let progress = RSSI.doubleValue + 120.0
                 discoveredPeripherals[index].lastSeen = Date()
-
-                if (progress < 120)
+                if progress < 120.0
                 {
                     discoveredPeripherals[index].progress = progress
                 }
-                
                 objectWillChange.send()
             }
         }
-                
+        
         if let enableRanging: Bool = UserDefaults.standard.bool(forKey: EnableRanging) as Bool?
         {
-            if (enableRanging)
+            if enableRanging, rssi < 0
             {
-                if (RSSI.doubleValue < 0)
+                if RSSI.intValue >= t2
                 {
-                    if var ranging: Double = UserDefaults.standard.double(forKey: RangeValue) as Double?
-                    {
-                        ranging *= -5
-                        ranging -= 35
-                        
-                        if (RSSI.doubleValue >= ranging)
-                        {
-                            connectPKOCReader(PKOCperipheral: peripheral)
+                    AppLog.info("Activation threshold met, attempting connect", tag: "BLE")
+                    connectPKOCReader(PKOCperipheral: peripheral)
 
-                            if let index = discoveredPeripherals.firstIndex(where: { $0.peripheral == peripheral })
-                            {
-                                discoveredPeripherals[index].progressTint = Color(hex: 0x9CC3C9)
-                                objectWillChange.send()
-                            }
-                        }
+                    if let index = discoveredPeripherals.firstIndex(where: { $0.peripheral == peripheral })
+                    {
+                        discoveredPeripherals[index].progressTint = Color(hex: 0x9CC3C9)
+                        objectWillChange.send()
                     }
                 }
             }
         }
         
-        if (discoveredPeripherals.count > 0)
+        if discoveredPeripherals.count > 0
         {
-            for i in 0...discoveredPeripherals.count - 1
+            for i in 0 ..< discoveredPeripherals.count
             {
-                if (discoveredPeripherals[i].lastSeen.timeIntervalSinceNow < -15)
+                if discoveredPeripherals[i].lastSeen.timeIntervalSinceNow < -15
                 {
-                    discoveredPeripherals.remove(at: i);
+                    AppLog.debug("Removing stale peripheral: \(discoveredPeripherals[i].name)", tag: "BLE")
+                    discoveredPeripheralSet.remove(discoveredPeripherals[i].peripheral)
+                    discoveredPeripherals.remove(at: i)
                     objectWillChange.send()
                     return
                 }
@@ -192,7 +230,7 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     
     func connectPKOCReader(PKOCperipheral: CBPeripheral!)
     {
-        print("Enter connectPKOCReader")
+        AppLog.info("Enter connectPKOCReader", tag: "BLE", payload: PKOCperipheral.identifier.uuidString.data(using: .utf8))
         
         stopScan()
         
@@ -228,6 +266,7 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
         {
             if (self.connectedPeripheral != nil)
             {
+                AppLog.error("Connection timed out", tag: "BLE")
                 self.disconnectPeripheral(PKOCperipheral: self.connectedPeripheral!)
                 
                 if let index = self.discoveredPeripherals.firstIndex(where: { $0.peripheral == self.connectedPeripheral })
@@ -251,20 +290,21 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral)
     {
-        print("Enter centralManager didConnect")
-        
+        AppLog.info("Enter centralManager didConnect", tag: "BLE")
         discoverServices(PKOCperipheral: self.connectedPeripheral!)
     }
     
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?)
     {
-        print("Failed to connect \(String(describing: error))")
+        AppLog.error("Failed to connect \(String(describing: error))", tag: "BLE")
     }
     
     func disconnectPeripheral(PKOCperipheral: CBPeripheral)
     {
+        AppLog.info("Disconnecting from peripheral \(PKOCperipheral.identifier)", tag: "BLE")
+
         if let index = discoveredPeripherals.firstIndex(where: { $0.peripheral == PKOCperipheral })
-        {            
+        {
             if (discoveredPeripherals.count <= index)
             {
                 return
@@ -273,18 +313,18 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
             discoveredPeripherals[index].isBusy = false
             objectWillChange.send()
         }
-    
-        self.connectedPeripheral = nil
+
         centralManager?.cancelPeripheralConnection(PKOCperipheral)
     }
-    
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?)
     {
         if let error = error
         {
-            print("Error occured during Disconnection \(error)")
+            AppLog.error("Error occured during Disconnection \(error)", tag: "BLE")
             return
         }
+        
+        self.connectedPeripheral = nil
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 4)
         {
@@ -300,12 +340,12 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
             }
         }
         
-        print("Successfully disconnected from PKOC Peripheral")
+        AppLog.info("Successfully disconnected from PKOC Peripheral", tag: "BLE")
     }
     
     func discoverServices(PKOCperipheral: CBPeripheral)
     {
-        print("Enter discoverServices")
+        AppLog.info("Enter discoverServices", tag: "BLE")
         PKOCperipheral.delegate = self
         PKOCperipheral.discoverServices([ServiceUUID, ServiceLegacyUUID])
     }
@@ -314,17 +354,17 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     {
         guard let PKOCservice = peripheral.services else
         {
-            print("Failed to Discover Services/No Services found.")
+            AppLog.error("Failed to Discover Services/No Services found.", tag: "BLE")
             return
         }
         
-        print("Services: \(PKOCservice)")
+        AppLog.info("Services: \(PKOCservice)", tag: "BLE")
         discoverCharacteristics(PKOCperipheral: peripheral)
     }
     
     func discoverCharacteristics(PKOCperipheral: CBPeripheral)
     {
-        print("Going into discover Characteristics Function")
+        AppLog.info("Going into discover Characteristics Function", tag: "BLE")
         let PKOCservices = PKOCperipheral.services
         
         if (PKOCservices != nil)
@@ -332,7 +372,7 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
             let i = PKOCservices!.count
             if (i <= 0)
             {
-                print("Failed to discover PKOC service; exiting handshake")
+                AppLog.error("Failed to discover PKOC service; exiting handshake", tag: "BLE")
                 disconnectPeripheral(PKOCperipheral: PKOCperipheral)
                 return;
             }
@@ -343,12 +383,11 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?)
     {
-        print("Enter peripheral didDiscoverCharacteristicsFor")
+        AppLog.info("Enter peripheral didDiscoverCharacteristicsFor", tag: "BLE")
         
         guard let PKOCcharacteristics = service.characteristics else
         {
-            print("Unable to Find any characteristics within the service.")
-            print("error: \(String(describing: error?.localizedDescription))")
+            AppLog.error("Unable to Find any characteristics within the service. error: \(String(describing: error?.localizedDescription))", tag: "BLE")
             return
         }
         
@@ -365,7 +404,7 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
             }
             else
             {
-                print("Not a required Characteristic, where did you come from \(characteristic.uuid)")
+                AppLog.debug("Not a required Characteristic: \(characteristic.uuid)", tag: "BLE")
             }
         }
     }
@@ -379,11 +418,11 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     {
         if let error = error
         {
-            print("An error occured when trying to subscribe to a characteristics. \(error) \(characteristic.uuid)")
+            AppLog.error("An error occured when trying to subscribe to a characteristic. \(error) \(characteristic.uuid)", tag: "BLE")
             return
         }
         
-        print("Subscribed to notifications on \(characteristic.uuid)")
+        AppLog.info("Subscribed to notifications on \(characteristic.uuid)", tag: "BLE")
     }
     
     func loadSiteForVerification(from flowModel: FlowModel?) -> SiteModel?
@@ -420,13 +459,11 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
         return result
     }
 
-
-    
     func handleNotifications(peripheral: CBPeripheral, notificationData: Data)
     {
-        print("Notification Data: \(notificationData)")
+        AppLog.debug("Notification Data", tag: "BLE", payload: notificationData)
         let byteArray = [UInt8](notificationData)
-        print("Byte Array: \(byteArray)")
+        AppLog.debug("Received BLE Byte Array: \(Data(byteArray).toHexString())", tag: "BLE")
         
         if (byteArray.isEmpty)
         {
@@ -442,65 +479,90 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
                 case .Response:
                     var iconName = "lock.fill"
                     var iconTint = Color.red
-                    
-                    if (packet.data[0] == ReaderUnlockStatus.AccessGranted.rawValue)
+
+                    let status = ReaderUnlockStatus(rawValue: packet.data[0]) ?? .Unknown
+                    if status == .AccessGranted
                     {
                         iconName = "lock.open.fill"
                         iconTint = Color(hex: 0x9CC3C9)
                     }
-                
-                    if (packet.data[0] == ReaderUnlockStatus.CompletedTransaction.rawValue)
+                    if status == .CompletedTransaction
                     {
                         iconName = "lock.open.fill"
                         iconTint = Color.yellow
                         Toast.text("TLV Success - Access decision unknown", config: .init(direction: .bottom)).show()
                     }
-                    
+
+                    var label = "Reader"
                     if let index = discoveredPeripherals.firstIndex(where: { $0.peripheral == peripheral })
                     {
                         discoveredPeripherals[index].iconName = iconName
                         discoveredPeripherals[index].iconTint = iconTint
+                        label = discoveredPeripherals[index].name
                         objectWillChange.send()
-                        
+
                         DispatchQueue.main.asyncAfter(deadline: .now() + 4)
                         {
-                            if (self.discoveredPeripherals.count <= index)
-                            {
-                                return
-                            }
-                            
+                            if self.discoveredPeripherals.count <= index { return }
                             self.discoveredPeripherals[index].iconName = "lock.fill"
                             self.discoveredPeripherals[index].iconTint = Color.gray
                             self.objectWillChange.send()
                         }
                     }
-                    
+
+                    Task
+                    {
+                        @MainActor in PKOCProximityController.shared.onBLEOutcome(
+                            status: status,
+                            displayName: label
+                        )
+                    }
+
                     disconnectPeripheral(PKOCperipheral: peripheral)
                     return
                     
                 case .ProtocolVersion:
                     _flowModel?.reader.ProtocolVersion = packet.data
+                    AppLog.debug("ProtocolVersion received", tag: "BLE", payload: Data(packet.data))
                     break
                     
                 case .CompressedEphemeralPublicKey:
                     _flowModel?.reader.ReaderEphemeralPublicKey = packet.data
+                    AppLog.debug("CompressedEphemeralPublicKey received", tag: "BLE", payload: Data(packet.data))
                     break
 
                 case .ReaderLocationIdentifier:
                     _flowModel?.reader.ReaderIdentifier = packet.data
+                    AppLog.debug("ReaderIdentifier received", tag: "BLE", payload: Data(packet.data))
                     break
                     
                 case .SiteIdenifier:
                     _flowModel?.reader.SiteIdentifier = packet.data;
+                    AppLog.debug("SiteIdentifier received", tag: "BLE", payload: Data(packet.data))
                     break
                     
                 case .DigitalSignature:
-                    print(Data(packet.data).hexadecimal())
+                    AppLog.info("DigitalSignature received", tag: "BLE", payload: Data(packet.data))
                     
-                    if (_flowModel == nil || _flowModel?.site == nil)
+                    if (_flowModel == nil)
                     {
                         disconnectPeripheral(PKOCperipheral: peripheral)
                         return
+                    }
+                
+                    let toVerify = _flowModel?.reader
+                    if (toVerify?.ReaderIdentifier != nil && toVerify?.SiteIdentifier != nil && toVerify?.ReaderEphemeralPublicKey != nil)
+                    {
+                        let siteToFind : SiteModel? = loadSiteForVerification(from: _flowModel)
+                        
+                        if (siteToFind == nil)
+                        {
+                            AppLog.error("Site not found for verification", tag: "BLE")
+                            disconnectPeripheral(PKOCperipheral: peripheral)
+                            return
+                        }
+
+                        _flowModel?.site = siteToFind
                     }
                                                             
                     _flowModel!.readerValid = CryptoProvider.verifySignedMessage(
@@ -510,6 +572,7 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
                     
                     if (!_flowModel!.readerValid!)
                     {
+                        AppLog.error("Signature verification failed", tag: "BLE")
                         disconnectPeripheral(PKOCperipheral: peripheral)
                         return
                     }
@@ -517,30 +580,17 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
                     break
                                         
                 default:
-                    print("Notification data decoded: \(notificationData.base64EncodedString())")
+                    AppLog.debug("Notification data decoded: \(notificationData.base64EncodedString())", tag: "BLE")
                     break
             }
         }
-        
-        let toVerify = _flowModel?.reader
-        if (toVerify?.ReaderIdentifier != nil && toVerify?.SiteIdentifier != nil && toVerify?.ReaderEphemeralPublicKey != nil)
-        {
-            let siteToFind : SiteModel? = loadSiteForVerification(from: _flowModel)
-            
-            if (siteToFind == nil)
-            {
-                disconnectPeripheral(PKOCperipheral: peripheral)
-                return
-            }
-
-            _flowModel?.site = siteToFind
-        }
-            
+                    
         if (_flowModel?.connectionType == PKOC_ConnectionType.ECDHE_Full)
         {
             if (_flowModel?.reader == nil)
             {
                 _flowModel?.status = ReaderUnlockStatus.Unrecognized
+                AppLog.error("Reader nil during ECDHE_Full", tag: "BLE")
                 disconnectPeripheral(PKOCperipheral: peripheral)
                 return
             }
@@ -548,32 +598,32 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
             if (_flowModel?.reader.ReaderIdentifier == nil)
             {
                 _flowModel?.status = ReaderUnlockStatus.Unrecognized
+                AppLog.error("ReaderIdentifier nil during ECDHE_Full", tag: "BLE")
                 disconnectPeripheral(PKOCperipheral: peripheral)
                 return
             }
             
             if (_flowModel?.transientKeyPair == nil)
             {
+                AppLog.info("Generating transient key", tag: "BLE")
                 _flowModel?.transientKeyPair = CryptoProvider.generateTransientKey()
 
                 let publicKeySecKey = CryptoProvider.fromCompressedPublicKey(compressedPublicKey: _flowModel!.reader.ReaderEphemeralPublicKey!)
                 
                 if (publicKeySecKey == nil)
                 {
+                    AppLog.error("Failed to decompress public key", tag: "BLE")
                     disconnectPeripheral(PKOCperipheral: peripheral)
                     return
                 }
                 
-                // Get the raw ECDH shared secret
                 let rawSharedSecret = [UInt8] (CryptoProvider.createSharedSecret(
                     privateKey: _flowModel!.transientKeyPair!,
                     publicKey: publicKeySecKey!)!)
-                
-                // Derive the AES-CCM key by hashing the shared secret with SHA-256
                 _flowModel?.sharedSecret = CryptoProvider.deriveAesKeyFromSharedSecretSimple(rawSharedSecret)
+                AppLog.info("Shared secret derived", tag: "BLE")
                 
                 let transientPublicKey = SecKeyCopyPublicKey(_flowModel!.transientKeyPair!)
-                
                 var error: Unmanaged<CFError>?
                 let transientPublicKeyData = SecKeyCopyExternalRepresentation(transientPublicKey!, &error)
                 var transientPublicKeyBytes = [UInt8](repeating: 0, count: 65)
@@ -581,6 +631,7 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
                 let transientPublicKeyTLV = TLVProvider.getTLV(type: BLE_PacketType.UncompressedEphemeralPublicKey, data:transientPublicKeyBytes)
                 let echdePacket = transientPublicKeyTLV
                 
+                AppLog.debug("Sending transient public key", tag: "BLE", payload: Data(echdePacket))
                 peripheral.writeValue(Data(_: echdePacket), for: self.writeCharacteristic!, type: CBCharacteristicWriteType.withoutResponse)
                 return
             }
@@ -615,11 +666,11 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     }
     
     func completeTransaction(peripheral : CBPeripheral)
-    {        
+    {
         let signature = CryptoProvider.signNonceWithPrivateKey(nonce: Data(generateSignatureMessage()))
-        print("Signature: " + Data(signature).hexadecimal())
+        AppLog.debug("Signature", tag: "BLE", payload: Data(signature))
         let publicKey = CryptoProvider.exportPublicKey().x963Representation
-        print("public key: " + Data(publicKey).hexadecimal())
+        AppLog.debug("Public key", tag: "BLE", payload: Data(publicKey))
         
         var secondsStamp = UInt32(Date().timeIntervalSince1970)
         if let secondsStampHistorical: Int = UserDefaults.standard.integer(forKey: PKOC_CreationTime) as Int?
@@ -641,6 +692,7 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
             
             if (encryptedData == nil)
             {
+                AppLog.error("Encryption failed", tag: "BLE")
                 disconnectPeripheral(PKOCperipheral: peripheral)
                 return
             }
@@ -648,29 +700,33 @@ class BluetoothProvider : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
             packet = TLVProvider.getTLV(type: BLE_PacketType.EncryptedDataFollows, data: encryptedData!)
         }
         
-        print(Data(packet).hexadecimal())
-        
+        AppLog.debug("Sending packet", tag: "BLE", payload: Data(packet))
         peripheral.writeValue(Data(_: packet), for: self.writeCharacteristic!, type: CBCharacteristicWriteType.withoutResponse)
     }
     
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?)
     {
-        guard let data = characteristic.value else
+        if let error = error
         {
-            print("ERROR: No value read from characteristic")
+            AppLog.error("Error reading characteristic: \(error)", tag: "BLE")
             return
         }
-        print("Data received: \(data.base64EncodedData()) \(data.base64EncodedString()), size: \(data.count)")
+        guard let data = characteristic.value else
+        {
+            AppLog.error("ERROR: No value read from characteristic", tag: "BLE")
+            return
+        }
+        AppLog.debug("Data received, size: \(data.count)", tag: "BLE", payload: data)
         handleNotifications(peripheral: peripheral, notificationData: characteristic.value!)
     }
     
     func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?)
     {
-        guard let data = characteristic.value else
+        if let error = error
         {
-            print("\(String(describing: error))");
+            AppLog.error("Write error: \(error)", tag: "BLE")
             return
         }
-        print("Data sent: \(data) \(data.base64EncodedData())")
+        AppLog.debug("Data written confirmed for \(characteristic.uuid)", tag: "BLE")
     }
 }
