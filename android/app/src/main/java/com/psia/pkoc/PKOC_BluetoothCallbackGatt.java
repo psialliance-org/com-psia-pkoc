@@ -28,6 +28,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Arrays;
+import java.util.UUID;
 
 /**
  * Bluetooth Gatt Callback for PKOC
@@ -87,11 +88,14 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
 
                 case ReaderLocationIdentifier:
                     Log.d("handleDatagrams", "ReaderLocationIdentifier data: " + Arrays.toString(gattTypes.get(a).Data));
+                    Log.d("handleDatagrams", "ReaderLocationIdentifier UUID: " + bytesToUUID(data));
+
                     _flowModel.reader.setReaderIdentifier(gattTypes.get(a).Data);
                     break;
 
                 case SiteIdentifier:
                     Log.d("handleDatagrams", "SiteIdentifier data: " + Arrays.toString(gattTypes.get(a).Data));
+                    Log.d("handleDatagrams", "SiteIdentifier UUID: " + bytesToUUID(data));
                     _flowModel.reader.setSiteIdentifier(gattTypes.get(a).Data);
                     break;
 
@@ -529,4 +533,13 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
             handleDatagrams(gatt, charData);
         });
     }
+
+
+    private static String bytesToUUID(byte[] bytes) {
+        ByteBuffer bb = ByteBuffer.wrap(bytes);
+        long high = bb.getLong();
+        long low = bb.getLong();
+        return new UUID(high, low).toString();
+    }
+
 }

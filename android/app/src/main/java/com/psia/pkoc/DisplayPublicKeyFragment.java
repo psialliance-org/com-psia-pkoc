@@ -1,6 +1,7 @@
 package com.psia.pkoc;
 
 import static com.psia.pkoc.CryptoProvider.GetPublicKey;
+import static org.bouncycastle.asn1.cms.CMSObjectIdentifiers.data;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -42,7 +44,7 @@ public class DisplayPublicKeyFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated (@NonNull View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         try {
@@ -76,16 +78,55 @@ public class DisplayPublicKeyFragment extends Fragment {
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+
         });
 
-       binding.copyKeyButton.setOnClickListener(v -> {
+        binding.copyKeyButton.setOnClickListener(v -> {
             String textToCopy = getSelectedKeyData();
             ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("Public Key", textToCopy);
             clipboard.setPrimaryClip(clip);
             Toast.makeText(requireContext(), "Copied to clipboard", Toast.LENGTH_SHORT).show();
         });
+
+
+        binding.customKeyLengthInput.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                validateCustomKeyLength();
+                try {
+                    String updatedKey = getSelectedKeyData();
+                    binding.publicKeyTextView.setText(updatedKey);
+                    updateQRCode(updatedKey);
+                } catch (WriterException e) {
+                    Log.e("MainActivity", "Error updating QR code after custom length input: " + e.getMessage());
+                }
+            }
+        });
+
+        binding.customKeyLengthInput.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {
+                Object selectedItem = binding.keyOptionSpinner.getSelectedItem();
+                if (selectedItem != null && selectedItem.toString().equals("Custom bits (between 64 and 256)")) {
+                    try {
+                        String updatedKey = getSelectedKeyData();
+                        binding.publicKeyTextView.setText(updatedKey);
+                        updateQRCode(updatedKey);
+                    } catch (WriterException e) {
+                        Log.e("MainActivity", "Error updating QR code after custom length change: " + e.getMessage());
+                    }
+                }
+            }
+        });
+
     }
 
     private String getSelectedKeyData() {
@@ -95,26 +136,69 @@ public class DisplayPublicKeyFragment extends Fragment {
         if (!selectedOption.equals("Full Public Key") && formattedKey.length() >= 66) {
             String keySegment = formattedKey.substring(2, 66); // skip first 2 chars, take next 64
             int length = 0;
-            switch (selectedOption)
-            {
+            switch (selectedOption) {
                 case "64-bit":
                     length = 16;
                     break;
                 case "128-bit":
                     length = 32;
                     break;
+                case "200-bit":
+                    length = 50;
+                    break;
                 case "256-bit":
                     length = 64;
                     break;
+                case "Custom bits (between 64 and 256)":
+                    length = getCustomLength(); // returns hex length
+                    break;
             }
-            if (length > 0)
-            {
-                String hexPart = keySegment.substring(keySegment.length() - length);
-                BigInteger decimalValue = new BigInteger(hexPart, 16);
-                return decimalValue.toString();
+
+            if (length > 0) {
+                if (keySegment.length() >= length) {
+                    String hexPart = keySegment.substring(keySegment.length() - length);
+                    BigInteger decimalValue = new BigInteger(hexPart, 16);
+                    return decimalValue.toString();
+                } else {
+                    Toast.makeText(requireContext(), "Key segment too short for specified length.", Toast.LENGTH_SHORT).show();
+                }
             }
         }
+
         return formattedKey;
+    }
+
+    private int getCustomLength() {
+        String customLengthText = binding.customKeyLengthInput.getText().toString();
+        if (customLengthText.isEmpty()) {
+            return 0;
+        }
+        try {
+            int customLength = Integer.parseInt(customLengthText);
+            if (customLength >= 65 && customLength <= 255) {
+                return customLength / 4; // Convert bits to hex length
+            } else {
+                Toast.makeText(requireContext(), "Please enter a length between 65 and 255.", Toast.LENGTH_SHORT).show();
+            }
+        } catch (NumberFormatException e) {
+            Toast.makeText(requireContext(), "Invalid number format.", Toast.LENGTH_SHORT).show();
+        }
+        return 0;
+    }
+
+    private void validateCustomKeyLength() {
+        String customLengthText = binding.customKeyLengthInput.getText().toString();
+        if (customLengthText.isEmpty()) {
+            return;
+        }
+        try {
+            int customLength = Integer.parseInt(customLengthText);
+            if (customLength < 65 || customLength > 255) {
+                Toast.makeText(requireContext(), "Please enter a length between 65 and 255.", Toast.LENGTH_SHORT).show();
+            }
+        } catch (NumberFormatException e) {
+            Toast.makeText(requireContext(), "Invalid number format.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void updateQRCode(String data) throws WriterException {

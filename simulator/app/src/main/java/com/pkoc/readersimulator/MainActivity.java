@@ -17,7 +17,11 @@ import android.text.Spannable;
 import android.text.style.BackgroundColorSpan;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -146,6 +150,13 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         sitePublicKeyView.setText(Html.fromHtml(sitePublicKeyText, Html.FROM_HTML_MODE_LEGACY));
         nfcAdvertisingStatusView.setText(Html.fromHtml(nfcAdvertisingStatusText, Html.FROM_HTML_MODE_LEGACY));
         bleAdvertisingStatusView.setText(Html.fromHtml(bleAdvertisingStatusText, Html.FROM_HTML_MODE_LEGACY));
+
+        ImageView ledImage = findViewById(R.id.reader_led);
+        AlphaAnimation blinkAnim = new AlphaAnimation(0.0f, 1.0f);
+        blinkAnim.setDuration(1000);
+        blinkAnim.setRepeatMode(Animation.REVERSE);
+        blinkAnim.setRepeatCount(Animation.INFINITE);
+        ledImage.startAnimation(blinkAnim);
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (nfcAdapter == null) {
@@ -408,18 +419,19 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             // Extract 64 Bit and 128 Bit Credentials from X Portion
                             String credential64Bit = xPortion.substring(xPortion.length() - 16);
                             String credential128Bit = xPortion.substring(xPortion.length() - 32);
+                            String credential200Bit = xPortion.substring(xPortion.length() - 50); // 50 hex chars = 200 bits
 
                             // Convert Hex to Decimal
                             String credential64BitDecimal = new BigInteger(credential64Bit, 16).toString(10);
                             String credential128BitDecimal = new BigInteger(credential128Bit, 16).toString(10);
+                            String credential200BitDecimal = new BigInteger(credential200Bit, 16).toString(10);
                             String credential256BitDecimal = new BigInteger(xPortion, 16).toString(10);
 
                             // Use SpannableStringBuilder to build the final text
                             SpannableStringBuilder formattedText = new SpannableStringBuilder();
 
-                            // Connection type will always be normal for NFC connections
-                            String connectionTypeText = "Connection Type: Normal Flow";
 
+                            String connectionTypeText = "Connection Type: Normal Flow";
                             SpannableString connectionTypeSpannable = new SpannableString(connectionTypeText + "\n\n");
                             connectionTypeSpannable.setSpan(new StyleSpan(Typeface.BOLD), 0, connectionTypeText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             connectionTypeSpannable.setSpan(new ForegroundColorSpan(Color.BLACK), 0, connectionTypeText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -435,50 +447,51 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             formattedText.append(publicKeyHeader);
 
                             // Apply colors and font size to the Public Key
-                            //Header
                             SpannableStringBuilder publicKeySpannable = new SpannableStringBuilder(publicKey);
                             publicKeySpannable.setSpan(new BackgroundColorSpan(Color.WHITE), 0, 130, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             publicKeySpannable.setSpan(new ForegroundColorSpan(Color.parseColor("#707173")), 0, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             publicKeySpannable.setSpan(new AbsoluteSizeSpan(14, true), 0, 130, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            //256 bit - xPortion
+                            // 256 bit - xPortion
                             publicKeySpannable.setSpan(new StyleSpan(Typeface.BOLD), 2, 66, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             publicKeySpannable.setSpan(new BackgroundColorSpan(Color.parseColor("#9CC3C9")), 2, 66, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             publicKeySpannable.setSpan(new ForegroundColorSpan(Color.parseColor("BLACK")), 2, 66, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-                            //128 bit
+                            // 200 bit
+                            publicKeySpannable.setSpan(new StyleSpan(Typeface.BOLD), 17, 66, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            publicKeySpannable.setSpan(new ForegroundColorSpan(Color.parseColor("RED")), 17, 66, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE); // RED
+                            // 128 bit
                             publicKeySpannable.setSpan(new StyleSpan(Typeface.ITALIC), 34, 66, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             publicKeySpannable.setSpan(new ForegroundColorSpan(Color.parseColor("BLUE")), 34, 50, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE); // Light blue
 
-                            //64 bit
+                            // 64 bit
                             publicKeySpannable.setSpan(new ForegroundColorSpan(Color.parseColor("YELLOW")), 50, 66, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-                            //y portion
+                            // y portion
                             publicKeySpannable.setSpan(new ForegroundColorSpan(Color.parseColor("#707173")), 66, 130, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
                             formattedText.append(publicKeySpannable);
 
                             // Append the rest of the text with specified colors and font size for Headers and values
-                            // This is ***AFTER THE PUBIC KEY DISPLAY***
+                            // This is ***AFTER THE PUBLIC KEY DISPLAY***
 
-                            SpannableString headerHeader = new SpannableString("\n\nHeader: (Not Used)\n");
+                            SpannableString headerHeader = new SpannableString("\n\nHeader: (Not Used)\n".toUpperCase());
                             headerHeader.setSpan(new StyleSpan(Typeface.BOLD), 0, headerHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             headerHeader.setSpan(new ForegroundColorSpan(Color.BLACK), 0, headerHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             headerHeader.setSpan(new AbsoluteSizeSpan(14, true), 0, headerHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(headerHeader);
 
-                            formattedText.append(applyColorAndSize(header, header.length(), Color.WHITE, (Color.parseColor("#707173")), false));
+                            formattedText.append(applyColorAndSize(header.toUpperCase(), header.length(), Color.WHITE, Color.parseColor("#707173"), false));
 
                             // x-Portion of the public key
-                            SpannableString xPortionHeader = new SpannableString("\n\nX Portion 256 Bit HEX: \n");
+                            SpannableString xPortionHeader = new SpannableString("\n\nX Portion 256 Bit HEX: \n".toUpperCase());
                             xPortionHeader.setSpan(new StyleSpan(Typeface.BOLD), 0, xPortionHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             xPortionHeader.setSpan(new ForegroundColorSpan(Color.BLACK), 0, xPortionHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             xPortionHeader.setSpan(new AbsoluteSizeSpan(14, true), 0, xPortionHeader.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(xPortionHeader);
 
-                            formattedText.append(applyColorAndSize(xPortion, xPortion.length(), (Color.parseColor("#9CC3C9")), (Color.parseColor("BLACK")), true));
+                            formattedText.append(applyColorAndSize(xPortion.toUpperCase(), xPortion.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLACK"), true));
 
                             // 256 bit decimal of the public key
-                            SpannableString decimalTFSb = new SpannableString("\n\n256 Bit Decimal: \n");
+                            SpannableString decimalTFSb = new SpannableString("\n\n256 Bit Decimal: \n".toUpperCase());
                             decimalTFSb.setSpan(new StyleSpan(Typeface.BOLD), 0, decimalTFSb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             decimalTFSb.setSpan(new ForegroundColorSpan(Color.BLACK), 0, decimalTFSb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             decimalTFSb.setSpan(new AbsoluteSizeSpan(14, true), 0, decimalTFSb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -486,24 +499,42 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
 
                             formattedText.append(applyColorAndSize(credential256BitDecimal, credential256BitDecimal.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLACK"), true));
 
+                            // 200 bit hex of the public key
+                            SpannableString hex2TEb = new SpannableString("\n\n200 Bit HEX: \n".toUpperCase());
+                            hex2TEb.setSpan(new StyleSpan(Typeface.BOLD), 0, hex2TEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            hex2TEb.setSpan(new ForegroundColorSpan(Color.BLACK), 0, hex2TEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            hex2TEb.setSpan(new AbsoluteSizeSpan(14, true), 0, hex2TEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            formattedText.append(hex2TEb);
+
+                            formattedText.append(applyColorAndSize(credential200Bit.toUpperCase(), credential200Bit.length(), Color.parseColor("#9CC3C9"), Color.parseColor("RED"), true));
+
+                            // 200 bit decimal of the public key
+                            SpannableString decimal2TEb = new SpannableString("\n\n200 Bit Decimal: \n".toUpperCase());
+                            decimal2TEb.setSpan(new StyleSpan(Typeface.BOLD), 0, decimal2TEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            decimal2TEb.setSpan(new ForegroundColorSpan(Color.BLACK), 0, decimal2TEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            decimal2TEb.setSpan(new AbsoluteSizeSpan(14, true), 0, decimal2TEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            formattedText.append(decimal2TEb);
+
+                            formattedText.append(applyColorAndSize(credential200BitDecimal, credential200BitDecimal.length(), Color.parseColor("#9CC3C9"), Color.parseColor("RED"), true));
+
+
                             // 128 bit hex of the public key
-                            SpannableString hexOTEb = new SpannableString("\n\n128 Bit HEX: \n");
+                            SpannableString hexOTEb = new SpannableString("\n\n128 Bit HEX: \n".toUpperCase());
                             hexOTEb.setSpan(new StyleSpan(Typeface.BOLD), 0, hexOTEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             hexOTEb.setSpan(new ForegroundColorSpan(Color.BLACK), 0, hexOTEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             hexOTEb.setSpan(new AbsoluteSizeSpan(14, true), 0, hexOTEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(hexOTEb);
 
-                            formattedText.append(applyColorAndSize(credential128Bit, credential128Bit.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLUE"), true));
+                            formattedText.append(applyColorAndSize(credential128Bit.toUpperCase(), credential128Bit.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLUE"), true));
 
                             // 128 bit decimal of the public key
-                            SpannableString decimalOTEb = new SpannableString("\n\n128 Bit Decimal: \n");
+                            SpannableString decimalOTEb = new SpannableString("\n\n128 Bit Decimal: \n".toUpperCase());
                             decimalOTEb.setSpan(new StyleSpan(Typeface.BOLD), 0, decimalOTEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             decimalOTEb.setSpan(new ForegroundColorSpan(Color.BLACK), 0, decimalOTEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             decimalOTEb.setSpan(new AbsoluteSizeSpan(14, true), 0, decimalOTEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             formattedText.append(decimalOTEb);
 
-                            formattedText.append(applyColorAndSize(credential128BitDecimal, credential128BitDecimal.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLUE"), true)); // Light blue
-
+                            formattedText.append(applyColorAndSize(credential128BitDecimal, credential128BitDecimal.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLUE"), true));
 
                             // 64 bit hex of the public key
                             SpannableString hexSFb = new SpannableString("\n\n64 Bit Hex: \n");
@@ -533,8 +564,15 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             formattedText.append(applyColorAndSize(yPortion, yPortion.length(), Color.WHITE, Color.parseColor("#707173"), false));
 
                             // Set the formatted text to the TextView
+                            RelativeLayout mainLayout = findViewById(R.id.mainLayout);
+                            mainLayout.setBackgroundColor(getResources().getColor(android.R.color.white, getTheme()));
+
+                            // Update display with Public Key read
                             textView.setText(formattedText);
 
+                            ImageView ledflash = findViewById(R.id.reader_led);
+                            ledflash.clearAnimation();
+                            ledflash.setVisibility(View.GONE);
                             // Hide reader detail button
                             Button rdrButton = findViewById(R.id.rdrButton);
                             rdrButton.setVisibility(View.GONE);
@@ -638,6 +676,9 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
             String initialText = "<b>Scan a PKOC BLE or NFC Credential</b>";
             textView.setText(Html.fromHtml(initialText, Html.FROM_HTML_MODE_LEGACY));
 
+            RelativeLayout mainLayout = findViewById(R.id.mainLayout);
+            mainLayout.setBackgroundResource(0);
+            mainLayout.setBackgroundResource(R.drawable.reader_background);
             // Hide the email button
             Button emailButton = findViewById(R.id.emailButton);
             emailButton.setVisibility(View.GONE);
@@ -649,6 +690,15 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
             // Show the reader button
             Button rdrButton = findViewById(R.id.rdrButton);
             rdrButton.setVisibility(View.VISIBLE);
+
+            // Show green LED
+            ImageView ledImage = findViewById(R.id.reader_led);
+            ledImage.setVisibility(View.VISIBLE);
+            AlphaAnimation blinkAnim = new AlphaAnimation(0.0f, 1.0f);
+            blinkAnim.setDuration(1000);
+            blinkAnim.setRepeatMode(Animation.REVERSE);
+            blinkAnim.setRepeatCount(Animation.INFINITE);
+            ledImage.startAnimation(blinkAnim);
 
             // Check if the button text is "Show Reader Details"
             if (rdrButton.getText().toString().equals("Show Reader Details")) {
@@ -1126,10 +1176,12 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             // Extract 64 Bit and 128 Bit Credentials from X Portion
                             String credential64Bit = xPortion.substring(xPortion.length() - 16);
                             String credential128Bit = xPortion.substring(xPortion.length() - 32);
+                            String credential200Bit = xPortion.substring(xPortion.length() - 50); // 50 hex chars = 200 bits
 
                             // Convert Hex to Decimal
                             String credential64BitDecimal = new BigInteger(credential64Bit, 16).toString(10);
                             String credential128BitDecimal = new BigInteger(credential128Bit, 16).toString(10);
+                            String credential200BitDecimal = new BigInteger(credential200Bit, 16).toString(10);
                             String credential256BitDecimal = new BigInteger(xPortion, 16).toString(10);
 
                             // Use SpannableStringBuilder to build the final text
@@ -1164,7 +1216,9 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             publicKeySpannable.setSpan(new StyleSpan(Typeface.BOLD), 2, 66, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             publicKeySpannable.setSpan(new BackgroundColorSpan(Color.parseColor("#9CC3C9")), 2, 66, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             publicKeySpannable.setSpan(new ForegroundColorSpan(Color.parseColor("BLACK")), 2, 66, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
+                            // 200 bit
+                            publicKeySpannable.setSpan(new StyleSpan(Typeface.BOLD), 17, 66, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            publicKeySpannable.setSpan(new ForegroundColorSpan(Color.parseColor("RED")), 17, 66, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE); // RED
                             // 128 bit
                             publicKeySpannable.setSpan(new StyleSpan(Typeface.ITALIC), 34, 66, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             publicKeySpannable.setSpan(new ForegroundColorSpan(Color.parseColor("BLUE")), 34, 50, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE); // Light blue
@@ -1205,6 +1259,25 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             formattedText.append(decimalTFSb);
 
                             formattedText.append(applyColorAndSize(credential256BitDecimal, credential256BitDecimal.length(), Color.parseColor("#9CC3C9"), Color.parseColor("BLACK"), true));
+
+                            // 200 bit hex of the public key
+                            SpannableString hex2TEb = new SpannableString("\n\n200 Bit HEX: \n".toUpperCase());
+                            hex2TEb.setSpan(new StyleSpan(Typeface.BOLD), 0, hex2TEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            hex2TEb.setSpan(new ForegroundColorSpan(Color.BLACK), 0, hex2TEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            hex2TEb.setSpan(new AbsoluteSizeSpan(14, true), 0, hex2TEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            formattedText.append(hex2TEb);
+
+                            formattedText.append(applyColorAndSize(credential200Bit.toUpperCase(), credential200Bit.length(), Color.parseColor("#9CC3C9"), Color.parseColor("RED"), true));
+
+                            // 200 bit decimal of the public key
+                            SpannableString decimal2TEb = new SpannableString("\n\n200 Bit Decimal: \n".toUpperCase());
+                            decimal2TEb.setSpan(new StyleSpan(Typeface.BOLD), 0, decimal2TEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            decimal2TEb.setSpan(new ForegroundColorSpan(Color.BLACK), 0, decimal2TEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            decimal2TEb.setSpan(new AbsoluteSizeSpan(14, true), 0, decimal2TEb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            formattedText.append(decimal2TEb);
+
+                            formattedText.append(applyColorAndSize(credential200BitDecimal, credential200BitDecimal.length(), Color.parseColor("#9CC3C9"), Color.parseColor("RED"), true));
+
 
                             // 128 bit hex of the public key
                             SpannableString hexOTEb = new SpannableString("\n\n128 Bit HEX: \n".toUpperCase());
@@ -1250,11 +1323,21 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                             formattedText.append(portionYKey);
 
                             formattedText.append(applyColorAndSize(yPortion.toUpperCase(), yPortion.length(), Color.WHITE, Color.parseColor("#707173"), false));
+
+                            RelativeLayout mainLayout = findViewById(R.id.mainLayout);
+                            mainLayout.setBackgroundColor(getResources().getColor(android.R.color.white, getTheme()));
+
+                            // Update the screen with the public key read data
                             // Set the formatted text to the TextView
                             textView.setText(formattedText);
                             // Hide reader detail button
                             Button rdrButton = findViewById(R.id.rdrButton);
                             rdrButton.setVisibility(View.GONE);
+
+                            // Hide the flashing green LED
+                            ImageView ledflash = findViewById(R.id.reader_led);
+                            ledflash.clearAnimation();
+                            ledflash.setVisibility(View.GONE);
 
                             // Set up the email button
                             Button emailButton = findViewById(R.id.emailButton);

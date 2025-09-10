@@ -70,6 +70,7 @@
         <item>Full Public Key</item>
         <item>64-bit</item>
         <item>128-bit</item>
+        <item>200-bit</item>
         <item>256-bit</item>
     </string-array>
 

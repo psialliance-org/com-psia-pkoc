@@ -23,6 +23,7 @@ struct DisplayPublicKeyView : View
                 Text("Full Public Key").tag(DisplayPublicKeyOption.FullPublicKey)
                 Text("64 Bit").tag(DisplayPublicKeyOption.Bit64)
                 Text("128 Bit").tag(DisplayPublicKeyOption.Bit128)
+				Text("200 Bit").tag(DisplayPublicKeyOption.Bit200)
                 Text("256 Bit").tag(DisplayPublicKeyOption.Bit256)
             }
             .padding(.vertical, 8)
@@ -53,6 +54,11 @@ struct DisplayPublicKeyView : View
                         let last16 = xComponent.suffix(16)
                         let value = BigUInt(Data(last16))
                         publicKey = value.description
+						
+					case .Bit200:
+						let last25 = xComponent.suffix(25)
+						let value = BigUInt(Data(last25))
+						publicKey = value.description
 
                     case .Bit256:
                         let value = BigUInt(Data(xComponent))
