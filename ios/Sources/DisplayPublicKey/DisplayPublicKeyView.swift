@@ -56,8 +56,8 @@ struct DisplayPublicKeyView : View
                         publicKey = value.description
 						
 					case .Bit200:
-						let last50 = xComponent.suffix(50)
-						let value = BigUint(data(last50))
+						let last25 = xComponent.suffix(25)
+						let value = BigUInt(Data(last25))
 						publicKey = value.description
 
                     case .Bit256:
