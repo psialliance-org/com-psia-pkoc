@@ -44,47 +44,40 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Setup Xcode 16.4
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '16.4'
-
-      - name: Cache SwiftPM & DerivedData
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/Library/Caches/org.swift.swiftpm
-            ~/.swiftpm
-            ios/derived_data
-          key: ${{ runner.os }}-xcode-16.4-spm-${{ hashFiles('**/Package.resolved') }}
-          restore-keys: |
-            ${{ runner.os }}-xcode-16.4-spm-
-
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: swift
           build-mode: manual
 
-      - name: Resolve Swift Package Dependencies
+      - name: Setup Xcode 16.4
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '16.4'
+
+      - name: Show Xcode & tools
         run: |
           set -euo pipefail
-          xcodebuild \
-            -resolvePackageDependencies \
-            -project PSIAExperienceApp.xcodeproj \
-            -scheme PSIAExperienceAppTests
+          xcode-select -p
+          xcodebuild -version
+          clang --version
 
-      - name: Build & Test (single step)
+      - name: Show available destinations
+        run: |
+          xcodebuild \
+            -project PSIAExperienceApp.xcodeproj \
+            -scheme PSIAExperienceAppTests \
+            -showdestinations
+
+      - name: Build & Test PSIAExperienceApp
         run: |
           set -euo pipefail
           xcodebuild \
             -project PSIAExperienceApp.xcodeproj \
             -scheme PSIAExperienceAppTests \
-            -derivedDataPath derived_data \
             -sdk iphonesimulator \
             -destination 'platform=iOS Simulator,OS=18.5,name=iPhone 16' \
-            -disableAutomaticPackageResolution YES \
-            test
+            clean test
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
