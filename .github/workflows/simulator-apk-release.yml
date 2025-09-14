@@ -1,11 +1,11 @@
-name: Android - Signed Release APK
+name: Simulator - Signed Release APK
 
 on:
   push:
     branches: [ main ]
     paths:
-      - 'android/**'
-      - '.github/workflows/android-apk-release.yml'
+      - 'simulator/**'
+      - '.github/workflows/simulator-apk-release.yml'
   workflow_dispatch:
     inputs:
       release_tag:
@@ -25,11 +25,11 @@ permissions:
   contents: write
 
 concurrency:
-  group: android-release-${{ github.ref }}
+  group: simulator-release-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  ANDROID_WORKDIR: android
+  ANDROID_WORKDIR: simulator
   APP_MODULE: app
   ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
   ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -76,16 +76,16 @@ jobs:
       - name: Rename APK for release
         run: |
           SRC=app/build/outputs/apk/release/app-release.apk
-          DEST=app/build/outputs/apk/release/pkoc-android-${{ github.run_number }}.apk
+          DEST=app/build/outputs/apk/release/pkoc-simulator-${{ github.run_number }}.apk
           cp "$SRC" "$DEST"
           echo "APK_PATH=$DEST" >> $GITHUB_ENV
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: android/${{ github.run_number }}
+          tag_name: simulator/${{ github.run_number }}
           target_commitish: ${{ github.sha }}
-          name: android/${{ github.run_number }}
+          name: simulator/${{ github.run_number }}
           prerelease: true
           generate_release_notes: true
           files: ${{ env.APK_PATH }}
