@@ -88,4 +88,4 @@ jobs:
           name: simulator/${{ github.run_number }}
           prerelease: true
           generate_release_notes: true
-          files: ${{ env.APK_PATH }}
+          files: ${{ env.ANDROID_WORKDIR }}/${{ env.APK_PATH }}
