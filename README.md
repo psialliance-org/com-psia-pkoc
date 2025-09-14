@@ -10,6 +10,8 @@ This repo hosts three apps that enable secure, interoperable identity exchange o
 
 ### Release/Test Pipelines
 [![iOS - TestFlight](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/ios-testflight-release.yml/badge.svg)](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/ios-testflight-release.yml)
+[![Android - Signed Release APK](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/android-apk-release.yml/badge.svg)](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/android-apk-release.yml)
+[![Simulator - Signed Release APK](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/simulator-apk-release.yml/badge.svg)](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/simulator-apk-release.yml)
 
 ## Repository Layout
 
@@ -96,13 +98,13 @@ sequenceDiagram
     participant C as Credential (Phone)
     participant R as Reader (Simulator)
     Note over C,R: PKOC over BLE (GATT)
-    C->>R: Advertise presence (adv payload / service UUID)
-    R->>C: GATT connect
+    R->>C: Advertise presence (adv payload / service UUID)
+    C->>R: Scan & connect
     R->>C: Nonce / challenge request
     C->>R: Signed response + credential data (per PKOC)
     R->>C: Verification result
-    R->>R: Grant / deny decision
 ```
+
 ### PKOC ECDHE Perfect Forward Secrecy Flow
 
 ```mermaid
