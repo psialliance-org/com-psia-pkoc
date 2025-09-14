@@ -18,7 +18,7 @@ jobs:
     outputs:
       ios: ${{ steps.filter.outputs.ios }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - id: filter
@@ -39,7 +39,7 @@ jobs:
         shell: bash
         working-directory: ios
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Xcode 16.4
         uses: maxim-lobanov/setup-xcode@v1
