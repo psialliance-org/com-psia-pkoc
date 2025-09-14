@@ -1,11 +1,11 @@
-name: Android — Signed Release APK
+name: Android - Signed Release APK
 
 on:
   push:
     branches: [ main ]
     paths:
       - 'android/**'
-      - '.github/workflows/android-release.yml'
+      - '.github/workflows/android-apk-release.yml'
   workflow_dispatch:
     inputs:
       release_tag:
