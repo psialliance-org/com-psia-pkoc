@@ -16,8 +16,8 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/attaswift/BigInt.git", from: "5.6.0"),
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.9.0"),
-        .package(url: "https://github.com/BastiaanJansen/toast-swift", from: "2.1.3")
-        .package(url: "https://github.com/groue/GRDB.swift.git", from: "7.6.1"))
+        .package(url: "https://github.com/BastiaanJansen/toast-swift", from: "2.1.3"),
+        .package(url: "https://github.com/groue/GRDB.swift.git", from: "7.6.1"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -27,7 +27,7 @@ let package = Package(
             dependencies: [
                 .product(name: "BigInt", package: "BigInt"),
                 .product(name: "CryptoSwift", package: "CryptoSwift"),
-                .product(name: "Toast", package: "toast-swift")
+                .product(name: "Toast", package: "toast-swift"),
                 .product(name: "GRDB", package: "GRDB.swift")
             ],
             exclude: [],
@@ -35,7 +35,8 @@ let package = Package(
                 .copy("PSIAExperienceApp.entitlements"),
                 .copy("Assets.xcassets")
             ]
-        ).testTarget(
+        ),
+        .testTarget(
             name: "PSIAExperienceTests",
             dependencies: ["PSIAExperienceApp"]
         ),

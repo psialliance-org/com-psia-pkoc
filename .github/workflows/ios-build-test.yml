@@ -82,7 +82,7 @@ jobs:
             -scheme PSIAExperienceAppTests \
             -derivedDataPath derived_data \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,OS=latest,name=iPhone 16' \
+            -destination 'platform=iOS Simulator,OS=18.5,name=iPhone 16' \
             -parallelizeTargets \
             -parallel-testing-enabled YES \
             -parallel-testing-worker-count 4 \
@@ -99,7 +99,7 @@ jobs:
             -scheme PSIAExperienceAppTests \
             -derivedDataPath derived_data \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,OS=latest,name=iPhone 16' \
+            -destination 'platform=iOS Simulator,OS=18.5,name=iPhone 16' \
             -parallel-testing-enabled YES \
             -parallel-testing-worker-count 4 \
             test-without-building
