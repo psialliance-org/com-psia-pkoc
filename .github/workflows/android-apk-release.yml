@@ -73,6 +73,13 @@ jobs:
       - name: Assemble signed release APK
         run: ./gradlew :${{ env.APP_MODULE }}:clean :${{ env.APP_MODULE }}:assembleRelease --stacktrace
 
+      - name: Rename APK for release
+        run: |
+          SRC=android/app/build/outputs/apk/release/app-release.apk
+          DEST=android/app/build/outputs/apk/release/pkoc-android-${{ github.run_number }}.apk
+          cp "$SRC" "$DEST"
+          echo "APK_PATH=$DEST" >> $GITHUB_ENV
+
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -81,4 +88,4 @@ jobs:
           name: android/${{ github.run_number }}
           prerelease: true
           generate_release_notes: true
-          files: android/app/build/outputs/apk/release/app-release.apk
+          files: ${{ env.APK_PATH }}
