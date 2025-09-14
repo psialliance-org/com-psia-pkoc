@@ -1,12 +1,13 @@
 version: 2
 updates:
-  # Keep GitHub Actions up to date
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-
-  # Android apps (Gradle) — credential + simulator
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+        
   - package-ecosystem: "gradle"
     directory: "/android"
     schedule:
@@ -17,17 +18,7 @@ updates:
     schedule:
       interval: "weekly"
 
-  # iOS app (Swift Package Manager)
   - package-ecosystem: "swift"
     directory: "/ios"
     schedule:
       interval: "weekly"
-
-  # Optional: group small updates to reduce PR noise
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    groups:
-      minor-and-patch:
-        update-types: ["minor", "patch"]
