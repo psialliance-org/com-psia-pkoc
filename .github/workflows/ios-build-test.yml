@@ -49,21 +49,60 @@ jobs:
         with:
           xcode-version: '16.4'
 
+      - name: Cache SwiftPM & DerivedData
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/org.swift.swiftpm
+            ~/.swiftpm
+            ios/derived_data
+          key: ${{ runner.os }}-xcode-16.4-spm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-xcode-16.4-spm-
+
+      - name: Resolve Swift Package Dependencies
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -resolvePackageDependencies \
+            -project PSIAExperienceApp.xcodeproj \
+            -scheme PSIAExperienceApp
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: swift
           build-mode: manual
 
-      - name: Build & Test PSIAExperienceApp
+      - name: Build for Testing (no clean, fast flags)
         run: |
           set -euo pipefail
           xcodebuild \
             -project PSIAExperienceApp.xcodeproj \
             -scheme PSIAExperienceAppTests \
+            -derivedDataPath derived_data \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,OS=18.5,name=iPhone 16' \
-            clean test
+            -destination 'platform=iOS Simulator,OS=latest,name=iPhone 16' \
+            -parallelizeTargets \
+            -parallel-testing-enabled YES \
+            -parallel-testing-worker-count 4 \
+            CODE_SIGNING_ALLOWED=NO \
+            ONLY_ACTIVE_ARCH=YES \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            build-for-testing
+
+      - name: Test without Building
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project PSIAExperienceApp.xcodeproj \
+            -scheme PSIAExperienceAppTests \
+            -derivedDataPath derived_data \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,OS=latest,name=iPhone 16' \
+            -parallel-testing-enabled YES \
+            -parallel-testing-worker-count 4 \
+            test-without-building
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -86,4 +125,3 @@ jobs:
           else
             echo "iOS build failed: ${{ needs.build-test-ios.result }}"
             exit 1
-          fi
