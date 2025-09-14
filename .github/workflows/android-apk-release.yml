@@ -73,28 +73,12 @@ jobs:
       - name: Assemble signed release APK
         run: ./gradlew :${{ env.APP_MODULE }}:clean :${{ env.APP_MODULE }}:assembleRelease --stacktrace
 
-      - name: Compute release tag & name
-        id: tag
-        run: |
-          SHORTSHA="$(echo "${GITHUB_SHA}" | cut -c1-7)"
-          DATESTAMP="$(date -u +'%Y%m%d-%H%M%S')"
-          AUTO_TAG="android-${DATESTAMP}-${SHORTSHA}"
-          TAG="${{ inputs.release_tag || '' }}"
-          NAME="${{ inputs.release_name || '' }}"
-          echo "tag=${TAG:-$AUTO_TAG}" >> $GITHUB_OUTPUT
-          echo "name=${NAME:-${TAG:-$AUTO_TAG}}" >> $GITHUB_OUTPUT
-
-      - name: Create Git tag if not on tag
-        if: ${{ github.ref_type != 'tag' }}
-        run: |
-          git tag "${{ steps.tag.outputs.tag }}"
-          git push origin "${{ steps.tag.outputs.tag }}"
-
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.tag.outputs.tag }}
-          name: ${{ steps.tag.outputs.name }}
-          prerelease: ${{ inputs.prerelease || true }}
+          tag_name: android/${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          name: android/${{ github.run_number }}
+          prerelease: true
           generate_release_notes: true
           files: android/app/build/outputs/apk/release/app-release.apk
