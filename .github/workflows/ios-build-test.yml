@@ -46,19 +46,11 @@ jobs:
         with:
           xcode-version: '16.4'
 
-      - name: Show Xcode & tools
-        run: |
-          set -euo pipefail
-          xcode-select -p
-          xcodebuild -version
-          clang --version
-
-      - name: Show available destinations
-        run: |
-          xcodebuild \
-            -project PSIAExperienceApp.xcodeproj \
-            -scheme PSIAExperienceAppTests \
-            -showdestinations
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: swift
+          build-mode: manual
 
       - name: Build & Test PSIAExperienceApp
         run: |
@@ -69,6 +61,9 @@ jobs:
             -sdk iphonesimulator \
             -destination 'platform=iOS Simulator,OS=18.5,name=iPhone 16' \
             clean test
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
 
   ci:
     name: CI — iOS

@@ -42,23 +42,41 @@ jobs:
         working-directory: simulator
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
           cache: gradle
+
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+
       - name: Validate Gradle Wrapper
         uses: gradle/actions/wrapper-validation@v3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: java-kotlin
+          build-mode: manual
+
+      - name: Build (Debug)
+        run: ./gradlew --no-daemon assembleDebug
+
       - name: Make Gradle executable
         run: chmod +x ./gradlew
+
       - name: Android Lint (Debug)
         run: ./gradlew lintDebug
+
       - name: Unit tests (Debug)
         run: ./gradlew testDebugUnitTest --console=plain
 
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        
   ci:
     name: CI — Simulator
     runs-on: ubuntu-latest
