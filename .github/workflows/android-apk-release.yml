@@ -66,6 +66,9 @@ jobs:
         run: |
           echo "$ANDROID_KEYSTORE_B64" | base64 -d > $RUNNER_TEMP/upload-keystore.jks
           echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/upload-keystore.jks" >> $GITHUB_ENV
+          
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
 
       - name: Assemble signed release APK
         run: ./gradlew :${{ env.APP_MODULE }}:clean :${{ env.APP_MODULE }}:assembleRelease --stacktrace
