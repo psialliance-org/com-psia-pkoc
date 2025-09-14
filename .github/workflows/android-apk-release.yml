@@ -1,0 +1,97 @@
+name: Android — Signed Release APK
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'android/**'
+      - '.github/workflows/android-release.yml'
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Tag for the GitHub Release (optional; auto-generated if empty)'
+        type: string
+        default: ''
+      release_name:
+        description: 'Release name/title (optional; defaults to tag)'
+        type: string
+        default: ''
+      prerelease:
+        description: 'Mark as prerelease'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-release-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  ANDROID_WORKDIR: android
+  APP_MODULE: app
+  ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+  ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+  ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+  ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: ${{ env.ANDROID_WORKDIR }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v2
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Decode keystore
+        run: |
+          echo "$ANDROID_KEYSTORE_B64" | base64 -d > $RUNNER_TEMP/upload-keystore.jks
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/upload-keystore.jks" >> $GITHUB_ENV
+
+      - name: Assemble signed release APK
+        run: ./gradlew :${{ env.APP_MODULE }}:clean :${{ env.APP_MODULE }}:assembleRelease --stacktrace
+
+      - name: Compute release tag & name
+        id: tag
+        run: |
+          SHORTSHA="$(echo "${GITHUB_SHA}" | cut -c1-7)"
+          DATESTAMP="$(date -u +'%Y%m%d-%H%M%S')"
+          AUTO_TAG="android-${DATESTAMP}-${SHORTSHA}"
+          TAG="${{ inputs.release_tag || '' }}"
+          NAME="${{ inputs.release_name || '' }}"
+          echo "tag=${TAG:-$AUTO_TAG}" >> $GITHUB_OUTPUT
+          echo "name=${NAME:-${TAG:-$AUTO_TAG}}" >> $GITHUB_OUTPUT
+
+      - name: Create Git tag if not on tag
+        if: ${{ github.ref_type != 'tag' }}
+        run: |
+          git tag "${{ steps.tag.outputs.tag }}"
+          git push origin "${{ steps.tag.outputs.tag }}"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: ${{ steps.tag.outputs.name }}
+          prerelease: ${{ inputs.prerelease || true }}
+          generate_release_notes: true
+          files: android/app/build/outputs/apk/release/app-release.apk
