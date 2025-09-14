@@ -40,6 +40,9 @@ jobs:
       run:
         shell: bash
         working-directory: simulator
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@v4
 
@@ -76,7 +79,7 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
-        
+
   ci:
     name: CI — Simulator
     runs-on: ubuntu-latest

@@ -38,6 +38,9 @@ jobs:
       run:
         shell: bash
         working-directory: ios
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@v5
 

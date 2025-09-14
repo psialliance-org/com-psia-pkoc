@@ -40,6 +40,9 @@ jobs:
       run:
         shell: bash
         working-directory: android
+    permissions:
+      contents: read
+      security-events: write
 
     steps:
       - uses: actions/checkout@v5
