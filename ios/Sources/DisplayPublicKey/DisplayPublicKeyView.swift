@@ -1,4 +1,3 @@
-
 import SwiftUI
 import CoreImage
 import CoreImage.CIFilterBuiltins
@@ -6,13 +5,13 @@ import Toast
 import BigInt
 
 struct DisplayPublicKeyView : View
-
 {
     @State private var uncompressedPublicKey: Data? = nil
     @State private var publicKey: String = ""
-    @State private var selectedOption : DisplayPublicKeyOption = .FullPublicKey
+    @State private var selectedOption: DisplayPublicKeyOption = .FullPublicKey
+    @State private var customBits: Int = 64
 
-    var body : some View
+    var body: some View
     {
         VStack
         {
@@ -23,47 +22,37 @@ struct DisplayPublicKeyView : View
                 Text("Full Public Key").tag(DisplayPublicKeyOption.FullPublicKey)
                 Text("64 Bit").tag(DisplayPublicKeyOption.Bit64)
                 Text("128 Bit").tag(DisplayPublicKeyOption.Bit128)
-				Text("200 Bit").tag(DisplayPublicKeyOption.Bit200)
+                Text("200 Bit").tag(DisplayPublicKeyOption.Bit200)
                 Text("256 Bit").tag(DisplayPublicKeyOption.Bit256)
+                Text("Custom (X bits)").tag(DisplayPublicKeyOption.CustomBits)
             }
             .padding(.vertical, 8)
             .onChange(of: selectedOption)
             {
-                newValue in guard let keyData = uncompressedPublicKey,
-                    keyData.count == 65,
-                    keyData[0] == 0x04
-                else
+                _ in updatePublicKeyDisplay()
+            }
+
+            if selectedOption == .CustomBits
+            {
+                HStack
                 {
-                    publicKey = "Invalid key"
-                    return
+                    Spacer()
+
+                    Stepper(value: $customBits, in: 8...256, step: 8)
+                    {
+                        Text("\(customBits) bits")
+                            .font(.headline)
+                            .frame(minWidth: 120)
+                            .multilineTextAlignment(.center)
+                    }
+                    .onChange(of: customBits)
+                    {
+                        _ in updatePublicKeyDisplay()
+                    }
+
+                    Spacer()
                 }
-
-                let xComponent = keyData[1..<33]
-
-                switch newValue
-                {
-                    case .FullPublicKey:
-                        publicKey = keyData.hexadecimal()
-
-                    case .Bit64:
-                        let last8 = xComponent.suffix(8)
-                        let value = BigUInt(Data(last8))
-                        publicKey = value.description
-
-                    case .Bit128:
-                        let last16 = xComponent.suffix(16)
-                        let value = BigUInt(Data(last16))
-                        publicKey = value.description
-						
-					case .Bit200:
-						let last25 = xComponent.suffix(25)
-						let value = BigUInt(Data(last25))
-						publicKey = value.description
-
-                    case .Bit256:
-                        let value = BigUInt(Data(xComponent))
-                        publicKey = value.description
-                }
+                .padding(.vertical)
             }
 
             GeometryReader
@@ -81,9 +70,11 @@ struct DisplayPublicKeyView : View
                                 .resizable()
                                 .scaledToFit()
                                 .frame(maxWidth: geometry.size.width * 0.7)
-                                .background(RoundedRectangle(cornerRadius: 16)
-                                    .fill(Color(.systemBackground))
-                                    .shadow(radius: 5))
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(Color(.systemBackground))
+                                        .shadow(radius: 5)
+                                )
                         }
                         else
                         {
@@ -97,7 +88,7 @@ struct DisplayPublicKeyView : View
             }
             .frame(maxHeight: 300)
             .layoutPriority(1)
-            
+
             Text(publicKey)
                 .font(.system(size: 14, design: .monospaced))
                 .multilineTextAlignment(.leading)
@@ -108,7 +99,7 @@ struct DisplayPublicKeyView : View
                 .background(Color(.secondarySystemBackground))
                 .cornerRadius(8)
                 .padding(.horizontal)
-            
+
             Button(action:
             {
                 UIPasteboard.general.string = publicKey
@@ -117,15 +108,71 @@ struct DisplayPublicKeyView : View
             {
                 Label("Copy", systemImage: "doc.on.doc")
                     .padding(.horizontal)
-            }.padding(.vertical, 8)
+            }
+            .padding(.vertical, 8)
 
             Spacer()
-        }.onAppear
+        }
+        .onAppear
         {
             let keyData = CryptoProvider.exportPublicKey().x963Representation
             uncompressedPublicKey = keyData
             publicKey = keyData.hexadecimal()
+            updatePublicKeyDisplay()
         }
+        .onChange(of: uncompressedPublicKey)
+        {
+            _ in updatePublicKeyDisplay()
+        }
+    }
+
+    private func updatePublicKeyDisplay()
+    {
+        guard let keyData = uncompressedPublicKey,
+              keyData.count == 65,
+              keyData[0] == 0x04
+        else
+        {
+            publicKey = "Invalid key"
+            return
+        }
+
+        let xComponent = keyData[1..<33]
+
+        switch selectedOption
+        {
+            case .FullPublicKey:
+                publicKey = keyData.hexadecimal()
+
+            case .Bit64:
+                publicKey = decimalOfLeastSignificantBits(of: xComponent, bits: 64)
+
+            case .Bit128:
+                publicKey = decimalOfLeastSignificantBits(of: xComponent, bits: 128)
+
+            case .Bit200:
+                publicKey = decimalOfLeastSignificantBits(of: xComponent, bits: 200)
+
+            case .Bit256:
+                publicKey = decimalOfLeastSignificantBits(of: xComponent, bits: 256)
+
+            case .CustomBits:
+                publicKey = decimalOfLeastSignificantBits(of: xComponent, bits: customBits)
+        }
+    }
+
+    private func decimalOfLeastSignificantBits(of xBytesSlice: Data.SubSequence, bits: Int) -> String
+    {
+        let full = BigUInt(Data(xBytesSlice))
+
+        if bits >= 256
+        {
+            return full.description
+        }
+
+        let mask = (BigUInt(1) << Int(bits)) - 1
+        let value = full & mask
+        return value.description
     }
 
     private func generateQRCode(from string: String, targetSize: CGSize) -> UIImage?
@@ -135,7 +182,8 @@ struct DisplayPublicKeyView : View
         filter.setValue(Data(string.utf8), forKey: "inputMessage")
         filter.setValue("L", forKey: "inputCorrectionLevel")
 
-        guard let outputImage = filter.outputImage else
+        guard let outputImage = filter.outputImage
+        else
         {
             return nil
         }
