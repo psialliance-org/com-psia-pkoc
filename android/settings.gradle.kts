@@ -20,5 +20,8 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "PSIA PKOC Credential App"
-include(":app")
- 
+include(":credential")
+include(":shared")
+include(":simulator")
+
+project(":shared").projectDir = file("shared")

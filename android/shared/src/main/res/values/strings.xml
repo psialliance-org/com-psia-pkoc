@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">PSIA PKOC Core Library</string>
+    <string name="enter_custom_bit_length_65_255">Enter custom bit length (65–255)</string>
+    <string name="copy_key">Copy Key</string>
+    <string name="public_key_qr_code">Public Key QR Code</string>
+    <string-array name="key_options">
+        <item>Full Public Key</item>
+        <item>64-bit</item>
+        <item>128-bit</item>
+        <item>200-bit</item>
+        <item>256-bit</item>
+    </string-array>
+
+</resources>
