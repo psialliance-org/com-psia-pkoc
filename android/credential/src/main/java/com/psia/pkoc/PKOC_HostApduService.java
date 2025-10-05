@@ -7,17 +7,14 @@ import android.nfc.cardemulation.HostApduService;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.psia.pkoc.core.CryptoProvider;
-import com.psia.pkoc.core.NFC_Packet;
 import com.psia.pkoc.core.NFC_PacketType;
 import com.psia.pkoc.core.PKOC_Preferences;
 import com.psia.pkoc.core.PKOC_TransmissionType;
 import com.psia.pkoc.core.TLVProvider;
+import com.psia.pkoc.core.transactions.NfcNormalFlowTransaction;
 
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
-
-import java.util.ArrayList;
 
 public class PKOC_HostApduService extends HostApduService
 {
@@ -53,30 +50,12 @@ public class PKOC_HostApduService extends HostApduService
 
         if (apduHex.startsWith(AUTHENTICATION_COMMAND_PREFIX))
         {
-            byte[] transactionId = null;
+            var normalFlow = new NfcNormalFlowTransaction(true);
             String authCommandHexData = apduHex.substring(AUTHENTICATION_COMMAND_PREFIX.length());
-            ArrayList<NFC_Packet> packets = TLVProvider.GetNfcValues(Hex.decode(authCommandHexData));
-
-            for (int i = 0; i < packets.size(); i++)
+            var vr = normalFlow.processNewData(Hex.decode(authCommandHexData));
+            if (vr.isValid)
             {
-                NFC_Packet packet = packets.get(i);
-                if (packet.PacketType == NFC_PacketType.TransactionIdentifier)
-                {
-                    transactionId = packet.Data;
-                }
-            }
-
-            if (transactionId != null)
-            {
-                byte[] publicKey = CryptoProvider.getUncompressedPublicKeyBytes();
-                byte[] publicKeyTlv = TLVProvider.GetNfcTLV(NFC_PacketType.UncompressedPublicKey, publicKey);
-
-                byte[] signature = CryptoProvider.GetSignedMessage(transactionId);
-                byte[] SignatureWithoutAsn = CryptoProvider.RemoveASNHeaderFromSignature(signature);
-
-                byte[] signatureTlv = TLVProvider.GetNfcTLV(NFC_PacketType.DigitalSignature, SignatureWithoutAsn);
-
-                response = Arrays.concatenate(publicKeyTlv, signatureTlv, Hex.decode(SUCCESS_STATUS));
+                response = Arrays.concatenate(normalFlow.toWrite(), Hex.decode(SUCCESS_STATUS));
 
                 Intent intent = new Intent("com.psia.pkoc.CREDENTIAL_SENT");
                 intent.setPackage(getPackageName());

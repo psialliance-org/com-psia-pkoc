@@ -176,6 +176,7 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
             if (_flowModel.transientKeyPair == null)
             {
                 _flowModel.transientKeyPair = CreateTransientKeyPair();
+                assert _flowModel.transientKeyPair != null;
                 byte[] rawSharedSecret = CryptoProvider.getSharedSecret(
                         _flowModel.transientKeyPair.getPrivate(),
                         _flowModel.reader.getReaderTransientPublicKey());
