@@ -30,7 +30,8 @@ concurrency:
 
 env:
   ANDROID_WORKDIR: android
-  APP_MODULE: app
+  CREDENTIAL_MODULE: credential
+  SIMULATOR_MODULE: simulator
   ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
   ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
   ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -70,13 +71,23 @@ jobs:
       - name: Make Gradle executable
         run: chmod +x ./gradlew
 
-      - name: Assemble signed release APK
-        run: ./gradlew :${{ env.APP_MODULE }}:clean :${{ env.APP_MODULE }}:assembleRelease --stacktrace
+      - name: Assemble signed credential release APK
+        run: ./gradlew :${{ env.CREDENTIAL_MODULE }}:clean :${{ env.CREDENTIAL_MODULE }}:assembleRelease --stacktrace
 
-      - name: Rename APK for release
+      - name: Assemble signed simulator release APK
+        run: ./gradlew :${{ env.SIMULATOR_MODULE }}:clean :${{ env.SIMULATOR_MODULE }}:assembleRelease --stacktrace
+
+      - name: Rename credential APK for release
         run: |
-          SRC=app/build/outputs/apk/release/app-release.apk
-          DEST=app/build/outputs/apk/release/pkoc-android-${{ github.run_number }}.apk
+          SRC=credential/build/outputs/apk/release/app-release.apk
+          DEST=credential/build/outputs/apk/release/pkoc-android-credential-${{ github.run_number }}.apk
+          cp "$SRC" "$DEST"
+          echo "APK_PATH=$DEST" >> $GITHUB_ENV
+
+      - name: Rename simulator APK for release
+        run: |
+          SRC=simulator/build/outputs/apk/release/app-release.apk
+          DEST=simulator/build/outputs/apk/release/pkoc-android-simulator-${{ github.run_number }}.apk
           cp "$SRC" "$DEST"
           echo "APK_PATH=$DEST" >> $GITHUB_ENV
 
