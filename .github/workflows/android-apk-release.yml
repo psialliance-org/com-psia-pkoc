@@ -74,15 +74,15 @@ jobs:
       - name: Assemble signed credential release APK
         run: ./gradlew :${{ env.CREDENTIAL_MODULE }}:clean :${{ env.CREDENTIAL_MODULE }}:assembleRelease --stacktrace
 
-      - name: Assemble signed simulator release APK
-        run: ./gradlew :${{ env.SIMULATOR_MODULE }}:clean :${{ env.SIMULATOR_MODULE }}:assembleRelease --stacktrace
-
       - name: Rename credential APK for release
         run: |
           SRC=credential/build/outputs/apk/release/app-release.apk
           DEST=credential/build/outputs/apk/release/pkoc-android-credential-${{ github.run_number }}.apk
           cp "$SRC" "$DEST"
           echo "APK_PATH=$DEST" >> $GITHUB_ENV
+
+      - name: Assemble signed simulator release APK
+        run: ./gradlew :${{ env.SIMULATOR_MODULE }}:assembleRelease --stacktrace
 
       - name: Rename simulator APK for release
         run: |
