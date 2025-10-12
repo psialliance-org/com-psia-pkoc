@@ -6,12 +6,10 @@ This repo hosts three apps that enable secure, interoperable identity exchange o
 ### Build & Test Pipelines
 [![iOS — Build & Test](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/ios-build-test.yml/badge.svg)](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/ios-build-test.yml)
 [![Android - Build & Test](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/android-build-test.yml/badge.svg)](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/android-build-test.yml)
-[![Simulator - Build & Test](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/simulator-build-test.yml/badge.svg)](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/simulator-build-test.yml)
 
 ### Release/Test Pipelines
 [![iOS - TestFlight](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/ios-testflight-release.yml/badge.svg)](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/ios-testflight-release.yml)
 [![Android - Signed Release APK](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/android-apk-release.yml/badge.svg)](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/android-apk-release.yml)
-[![Simulator - Signed Release APK](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/simulator-apk-release.yml/badge.svg)](https://github.com/psialliance-org/com-psia-pkoc/actions/workflows/simulator-apk-release.yml)
 
 ## Repository Layout
 
