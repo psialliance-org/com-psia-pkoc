@@ -77,19 +77,12 @@ jobs:
       - name: Assemble signed simulator release APK
         run: ./gradlew :${{ env.SIMULATOR_MODULE }}:clean :${{ env.SIMULATOR_MODULE }}:assembleRelease --stacktrace
 
-      - name: Rename credential APK for release
-        run: |
-          SRC=credential/build/outputs/apk/release/credential-release.apk
-          DEST=credential/build/outputs/apk/release/pkoc-android-credential-${{ github.run_number }}.apk
-          cp "$SRC" "$DEST"
-          echo "APK_PATH=$DEST" >> $GITHUB_ENV
-
       - name: Rename simulator APK for release
         run: |
-          SRC=simulator/build/outputs/apk/release/simulator-release.apk
+          SRC=simulator/build/outputs/apk/release/app-release.apk
           DEST=simulator/build/outputs/apk/release/pkoc-android-simulator-${{ github.run_number }}.apk
           cp "$SRC" "$DEST"
-          echo "APK_PATH=$DEST" >> $GITHUB_ENV
+          echo "SIMULATOR_APK=$DEST" >> $GITHUB_ENV
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
@@ -99,4 +92,6 @@ jobs:
           name: android/${{ github.run_number }}
           prerelease: true
           generate_release_notes: true
-          files: ${{ env.ANDROID_WORKDIR }}/${{ env.APK_PATH }}
+        files: |
+          ${{ env.ANDROID_WORKDIR }}/${{ env.CREDENTIAL_APK }}
+          ${{ env.ANDROID_WORKDIR }}/${{ env.SIMULATOR_APK }}
