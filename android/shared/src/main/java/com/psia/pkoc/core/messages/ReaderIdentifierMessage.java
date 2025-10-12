@@ -12,7 +12,7 @@ import com.psia.pkoc.core.interfaces.TransactionMessage;
 import com.psia.pkoc.core.packets.ReaderNoncePacket;
 import com.psia.pkoc.core.validations.SuccessResult;
 import com.psia.pkoc.core.packets.ProtocolVersionPacket;
-import com.psia.pkoc.core.packets.CompressedTransientPublicKeyPacket;
+import com.psia.pkoc.core.packets.ReaderEphemeralPublicKeyPacket;
 import com.psia.pkoc.core.packets.ReaderIdentifierPacket;
 import com.psia.pkoc.core.packets.SiteIdentifierPacket;
 import com.psia.pkoc.core.validations.UnexpectedPacketResult;
@@ -20,11 +20,11 @@ import com.psia.pkoc.core.validations.ValidatedBeforeCompleteResult;
 
 import org.bouncycastle.util.Arrays;
 
-public class ReaderIdentifierMessage<TPacket, TType> implements TransactionMessage<TPacket, TType>
+public class ReaderIdentifierMessage<TPacket> implements TransactionMessage<TPacket>
 {
     private boolean isNfc = false;
     private ProtocolVersionPacket protocolVersion;
-    private CompressedTransientPublicKeyPacket compressedKey;
+    private ReaderEphemeralPublicKeyPacket compressedKey;
     private ReaderIdentifierPacket readerLocationId;
     private SiteIdentifierPacket siteId;
     private ReaderNoncePacket readerNonce;
@@ -33,14 +33,13 @@ public class ReaderIdentifierMessage<TPacket, TType> implements TransactionMessa
     {
     }
 
-    public ReaderIdentifierMessage(ProtocolVersionPacket _protocolVersion, ReaderNoncePacket _readerNonce, ReaderIdentifierPacket _readerIdentifier)
+    public ReaderIdentifierMessage(ReaderNoncePacket _readerNonce, ReaderIdentifierPacket _readerIdentifier)
     {
-        protocolVersion = _protocolVersion;
         readerNonce = _readerNonce;
         readerLocationId = _readerIdentifier;
     }
 
-    public ReaderIdentifierMessage(ProtocolVersionPacket _protocolVersion, CompressedTransientPublicKeyPacket _compressedKey, ReaderIdentifierPacket _readerLocationId, SiteIdentifierPacket _siteId)
+    public ReaderIdentifierMessage(ProtocolVersionPacket _protocolVersion, ReaderEphemeralPublicKeyPacket _compressedKey, ReaderIdentifierPacket _readerLocationId, SiteIdentifierPacket _siteId)
     {
         protocolVersion = _protocolVersion;
         compressedKey = _compressedKey;
@@ -53,7 +52,7 @@ public class ReaderIdentifierMessage<TPacket, TType> implements TransactionMessa
         return protocolVersion;
     }
 
-    public CompressedTransientPublicKeyPacket getCompressedKey()
+    public ReaderEphemeralPublicKeyPacket getCompressedKey()
     {
         return compressedKey;
     }
@@ -76,7 +75,7 @@ public class ReaderIdentifierMessage<TPacket, TType> implements TransactionMessa
     private ValidationResult handleProtocolVersion(byte[] data)
     {
         var obj = new ProtocolVersionPacket(data);
-        ValidationResult vr = obj.validate(data);
+        ValidationResult vr = obj.validate();
         if (vr instanceof SuccessResult)
         {
             protocolVersion = obj;
@@ -86,8 +85,8 @@ public class ReaderIdentifierMessage<TPacket, TType> implements TransactionMessa
 
     private ValidationResult handlePublicKey(byte[] data)
     {
-        var obj = new CompressedTransientPublicKeyPacket(data);
-        ValidationResult vr = obj.validate(data);
+        var obj = new ReaderEphemeralPublicKeyPacket(data);
+        ValidationResult vr = obj.validate();
         if (vr instanceof SuccessResult)
         {
             compressedKey = obj;
@@ -98,7 +97,7 @@ public class ReaderIdentifierMessage<TPacket, TType> implements TransactionMessa
     public ValidationResult handleReaderIdentifier(byte[] data)
     {
         var obj = new ReaderIdentifierPacket(data);
-        ValidationResult vr = obj.validate(data);
+        ValidationResult vr = obj.validate();
         if (vr instanceof SuccessResult)
         {
             readerLocationId = obj;
@@ -109,7 +108,7 @@ public class ReaderIdentifierMessage<TPacket, TType> implements TransactionMessa
     public ValidationResult handleSiteIdentifier(byte[] data)
     {
         var obj = new SiteIdentifierPacket(data);
-        ValidationResult vr = obj.validate(data);
+        ValidationResult vr = obj.validate();
         if (vr instanceof SuccessResult)
         {
             siteId = obj;
@@ -120,7 +119,7 @@ public class ReaderIdentifierMessage<TPacket, TType> implements TransactionMessa
     private ValidationResult handleReaderNonce(byte[] data)
     {
         var obj = new ReaderNoncePacket(data);
-        ValidationResult vr = obj.validate(data);
+        ValidationResult vr = obj.validate();
         if (vr instanceof SuccessResult)
         {
             readerNonce = obj;
@@ -173,9 +172,19 @@ public class ReaderIdentifierMessage<TPacket, TType> implements TransactionMessa
     @Override
     public ValidationResult validate()
     {
-        if (protocolVersion == null || readerLocationId == null)
+        if (getReaderNonce() == null)
         {
-            return new ValidatedBeforeCompleteResult();
+            if (protocolVersion == null || readerLocationId == null || siteId == null || compressedKey == null)
+            {
+                return new ValidatedBeforeCompleteResult();
+            }
+        }
+        else
+        {
+            if (readerLocationId == null || siteId == null)
+            {
+                return new ValidatedBeforeCompleteResult();
+            }
         }
 
         return new SuccessResult();

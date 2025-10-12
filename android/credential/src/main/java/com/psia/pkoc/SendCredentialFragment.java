@@ -62,12 +62,15 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.psia.pkoc.core.Constants;
 import com.psia.pkoc.core.CryptoProvider;
 import com.psia.pkoc.core.PKOC_ConnectionType;
 import com.psia.pkoc.core.PKOC_Preferences;
 import com.psia.pkoc.core.PKOC_TransmissionType;
+import com.psia.pkoc.core.ReaderDto;
+import com.psia.pkoc.core.SiteDto;
 import com.psia.pkoc.databinding.FragmentSendCredentialBinding;
 
 /**
@@ -671,6 +674,13 @@ public class SendCredentialFragment extends Fragment
                     return true;
                 }
 
+                if (menuItem.getItemId() == R.id.action_scan_reader_qr)
+                {
+                    NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_content_main);
+                    navController.navigate(R.id.action_sendCredentialFragment_to_scanReaderQrFragment);
+                    return true;
+                }
+
                 return false;
             }
         });
@@ -844,7 +854,11 @@ public class SendCredentialFragment extends Fragment
             BluetoothDevice device = mBTAdapter.getRemoteDevice(address);
 
             Log.i("SendCredentialFragment", "device: " + device);
-            PKOC_BluetoothCallbackGatt callback = new PKOC_BluetoothCallbackGatt(requireActivity(), finalToFlow, updateUIHandler);
+
+            ArrayList<SiteDto> siteDtos = (ArrayList<SiteDto>) PKOC_Application.getDb().siteDao().list().stream().map(SiteModel::toDto).collect(Collectors.toList());
+            ArrayList<ReaderDto> readerDtos = (ArrayList<ReaderDto>) PKOC_Application.getDb().readerDao().list().stream().map(ReaderModel::toDto).collect(Collectors.toList());
+
+            PKOC_BluetoothCallbackGatt callback = new PKOC_BluetoothCallbackGatt(requireActivity(), finalToFlow, updateUIHandler, siteDtos, readerDtos);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             {

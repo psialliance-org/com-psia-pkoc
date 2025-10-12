@@ -4,11 +4,11 @@ import com.psia.pkoc.core.ValidationResult;
 import com.psia.pkoc.core.interfaces.TransactionPacket;
 import com.psia.pkoc.core.validations.SuccessResult;
 
-public class SiteIdentifierPacket implements TransactionPacket
+public class ReaderLocationIdentifierPacket implements TransactionPacket
 {
     private final byte[] identifier;
 
-    public SiteIdentifierPacket(byte[] data)
+    public ReaderLocationIdentifierPacket(byte[] data)
     {
         identifier = data;
     }

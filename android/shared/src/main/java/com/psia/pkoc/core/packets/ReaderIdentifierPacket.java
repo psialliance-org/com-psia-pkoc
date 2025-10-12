@@ -21,17 +21,15 @@ public class ReaderIdentifierPacket implements TransactionPacket
         return Arrays.copyOf(readerLocationGuid16, readerLocationGuid16.length);
     }
 
-    @Override
     public byte[] encode()
     {
         return Arrays.copyOf(readerLocationGuid16, readerLocationGuid16.length);
     }
 
-    @Override
-    public ValidationResult validate(byte[] data)
+    public ValidationResult validate()
     {
         var expectedSizes = new int[]{16, 32};
-        var sizeMismatch = new SizeMismatchResult(data.length, expectedSizes);
+        var sizeMismatch = new SizeMismatchResult(readerLocationGuid16.length, expectedSizes);
         if (sizeMismatch.isValid == false)
         {
             return sizeMismatch;

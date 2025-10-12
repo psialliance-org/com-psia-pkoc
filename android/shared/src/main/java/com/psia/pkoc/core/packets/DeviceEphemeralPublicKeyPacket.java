@@ -4,24 +4,31 @@ import com.psia.pkoc.core.ValidationResult;
 import com.psia.pkoc.core.interfaces.TransactionPacket;
 import com.psia.pkoc.core.validations.SuccessResult;
 
-public class SiteIdentifierPacket implements TransactionPacket
-{
-    private final byte[] identifier;
+import org.bouncycastle.util.Arrays;
 
-    public SiteIdentifierPacket(byte[] data)
+public class DeviceEphemeralPublicKeyPacket implements TransactionPacket
+{
+    private final byte[] key;
+
+    public DeviceEphemeralPublicKeyPacket(byte[] data)
     {
-        identifier = data;
+        key = data;
     }
 
     @Override
     public byte[] encode()
     {
-        return identifier;
+        return key;
     }
 
     @Override
     public ValidationResult validate()
     {
         return new SuccessResult();
+    }
+
+    public byte[] getX()
+    {
+        return Arrays.copyOfRange(key, 1, 33);
     }
 }

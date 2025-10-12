@@ -9,4 +9,5 @@
     <string name="b_advertising_status_b"><![CDATA["<b>Advertising Status:</b> "]]></string>
     <string name="elatec_GmbH" translatable="false">Elatec GmbH</string>
     <string name="display_reader_details">Display Reader Details</string>
+    <string name="display_public_key">Display Public Key</string>
 </resources>

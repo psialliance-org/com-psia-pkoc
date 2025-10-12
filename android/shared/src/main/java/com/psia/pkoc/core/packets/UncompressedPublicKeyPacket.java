@@ -24,15 +24,15 @@ public class UncompressedPublicKeyPacket implements TransactionPacket
     }
 
     @Override
-    public ValidationResult validate(byte[] data)
+    public ValidationResult validate()
     {
-        var size = new SizeMismatchResult(data.length, 65);
+        var size = new SizeMismatchResult(key65.length, 65);
         if (size.isValid == false)
         {
             return size;
         }
 
-        boolean startsWith04 = (data[0] & 0xFF) == 0x04;
+        boolean startsWith04 = (key65[0] & 0xFF) == 0x04;
         if (!startsWith04)
         {
             return new IncorrectKeyPrefixResult();

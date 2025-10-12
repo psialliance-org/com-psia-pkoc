@@ -6,6 +6,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Index;
 
+import com.psia.pkoc.core.ReaderDto;
+
 @Entity(
     tableName = "readers",
     primaryKeys = { "siteIdentifier", "readerIdentifier" },
@@ -54,4 +56,14 @@ public class ReaderModel
 
     @NonNull public byte[] getSiteIdentifier() { return _siteIdentifier; }
     public void setSiteIdentifier(@NonNull byte[] v) { _siteIdentifier = v; }
+
+    public ReaderDto toDto()
+    {
+        return new ReaderDto(
+            this._protocolVersion,
+            this._readerTransientPublicKey,
+            this._readerIdentifier,
+            this._siteIdentifier
+        );
+    }
 }

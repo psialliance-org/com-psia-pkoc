@@ -38,15 +38,15 @@ public class ResponsePacket implements TransactionPacket
     }
 
     @Override
-    public ValidationResult validate(byte[] data)
+    public ValidationResult validate()
     {
-        var sizeMismatchResult = new SizeMismatchResult(data.length, 1);
+        var sizeMismatchResult = new SizeMismatchResult(encode().length, 1);
         if (!sizeMismatchResult.isValid)
         {
             return sizeMismatchResult;
         }
 
-        if (data[0] >= ReaderUnlockStatus.values().length)
+        if (encode()[0] >= ReaderUnlockStatus.values().length)
         {
             return new UnexpectedPacketResult();
         }

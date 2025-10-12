@@ -10,6 +10,8 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -49,6 +51,7 @@ public class DisplayPublicKeyFragment extends Fragment
             binding.customKeyLengthInput.setVisibility(View.INVISIBLE);
             binding.publicKeyTextView.setVisibility(View.INVISIBLE);
             binding.copyKeyButton.setVisibility(View.INVISIBLE);
+            binding.instructionalTextForReader.setVisibility(View.VISIBLE);
 
             var publicKey = CryptoProvider.getUncompressedPublicKeyBytes();
 
@@ -57,7 +60,7 @@ public class DisplayPublicKeyFragment extends Fragment
                 JSONObject obj = new JSONObject();
                 obj.put("siteUuid", siteUUID);
                 obj.put("readerUuid", readerUUID);
-                obj.put("publicKey", publicKey);
+                obj.put("publicKey", Hex.toHexString(publicKey));
                 String jsonBlob = obj.toString();
                 updateQRCode(jsonBlob);
             }
@@ -78,7 +81,15 @@ public class DisplayPublicKeyFragment extends Fragment
                              @Nullable Bundle savedInstanceState)
     {
         binding = FragmentDisplayPublicKeyBinding.inflate(inflater, container, false);
+        setHasOptionsMenu(true);
         return binding.getRoot();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater)
+    {
+        menu.clear();
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override

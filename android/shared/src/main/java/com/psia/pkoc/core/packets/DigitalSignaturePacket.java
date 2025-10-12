@@ -21,9 +21,9 @@ public class DigitalSignaturePacket implements TransactionPacket
         return Arrays.copyOf(signature64, signature64.length);
     }
 
-    public ValidationResult validate(byte[] data)
+    public ValidationResult validate()
     {
-        var size = new SizeMismatchResult(data.length, 64);
+        var size = new SizeMismatchResult(signature64.length, 64);
         if (size.isValid == false)
         {
             return size;

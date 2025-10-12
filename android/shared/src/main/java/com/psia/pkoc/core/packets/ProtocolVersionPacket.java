@@ -91,9 +91,9 @@ public class ProtocolVersionPacket implements TransactionPacket
         return data;
     }
 
-    public ValidationResult validate(byte[] data)
+    public ValidationResult validate()
     {
-        var sizeMismatch = new SizeMismatchResult(data.length, 2, 5);
+        var sizeMismatch = new SizeMismatchResult(encode().length, 2, 5);
         if (sizeMismatch.isValid == false)
         {
             return sizeMismatch;

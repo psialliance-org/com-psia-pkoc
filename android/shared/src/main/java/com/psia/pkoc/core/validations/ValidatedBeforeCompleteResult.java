@@ -8,6 +8,6 @@ public class ValidatedBeforeCompleteResult extends ValidationResult
     {
         cancelTransaction = false;
         isValid = false;
-        message = "A message was validated before the transaction was completed. This is allowed in the specification, but may signal that a reader is not sending required TLVs for this transaction.";
+        message = "A message was validated before the transaction was completed. This is allowed in the specification, but may signal that a reader is not sending the required TLVs for this transaction.";
     }
 }

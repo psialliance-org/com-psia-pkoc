@@ -7,7 +7,7 @@ import com.psia.pkoc.core.validations.SuccessResult;
 
 public class ReaderNoncePacket implements TransactionPacket
 {
-    private byte[] nonce;
+    private final byte[] nonce;
 
     public ReaderNoncePacket(byte[] data)
     {
@@ -21,9 +21,9 @@ public class ReaderNoncePacket implements TransactionPacket
     }
 
     @Override
-    public ValidationResult validate(byte[] data)
+    public ValidationResult validate()
     {
-        var sizeValidation = new SizeMismatchResult(data.length, 16, 65);
+        var sizeValidation = new SizeMismatchResult(nonce.length, 16, 65);
         if (sizeValidation.isValid == false)
         {
             return sizeValidation;
