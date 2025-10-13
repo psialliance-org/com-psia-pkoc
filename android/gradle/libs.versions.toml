@@ -11,7 +11,7 @@ activity = "1.11.0"
 constraintlayout = "2.2.1"
 navigationUi = "2.9.5"
 robolectric = "4.16"
-roomVersion = "2.8.1"
+roomVersion = "2.8.2"
 zxingAndroidEmbedded = "4.3.0"
 
 [libraries]
