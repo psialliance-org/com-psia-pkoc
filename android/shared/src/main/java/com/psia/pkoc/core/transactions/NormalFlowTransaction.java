@@ -21,16 +21,17 @@ import com.psia.pkoc.core.validations.UnexpectedPacketResult;
 
 import java.security.SecureRandom;
 
-public class NormalFlowTransaction<TPacket, TType> implements Transaction
+public class NormalFlowTransaction<TPacket> implements Transaction
 {
     private static final String TAG = "NormalFlowTransaction";
 
-    private final boolean isDevice;
+    protected final boolean isDevice;
     protected byte[] toWrite;
     @Nullable
     private final Activity activity;
 
     public TransactionMessage<TPacket> currentMessage;
+    private ReaderIdentifierMessage<TPacket> initialReaderMessage;
 
     public NormalFlowTransaction(boolean _isDevice)
     {
@@ -40,23 +41,27 @@ public class NormalFlowTransaction<TPacket, TType> implements Transaction
     public NormalFlowTransaction(boolean _isDevice, @Nullable Activity _activity)
     {
         Log.d(TAG, "Constructor called with isDevice: " + _isDevice);
-        currentMessage = new ReaderIdentifierMessage<>();
         isDevice = _isDevice;
         activity = _activity;
 
         if (!isDevice)
         {
-            Log.d(TAG, "Device-initiated transaction, preparing ReaderIdentifierMessage.");
-            byte[] transactionId = new byte[16]; // Generate or obtain a transaction ID
-            new SecureRandom().nextBytes(transactionId); // Ensure it's random
+            Log.d(TAG, "Reader-initiated transaction, preparing ReaderIdentifierMessage.");
+            byte[] transactionId = new byte[16];
+            new SecureRandom().nextBytes(transactionId);
             var transactionIdPacket = new ReaderNoncePacket(transactionId);
 
-            byte[] readerIdentifier = new byte[32]; // Obtain the reader identifier
-            new SecureRandom().nextBytes(readerIdentifier); // Ensure it's random
+            byte[] readerIdentifier = new byte[32];
+            new SecureRandom().nextBytes(readerIdentifier);
             var readerIdentifierPacket = new ReaderIdentifierPacket(readerIdentifier);
 
-            currentMessage = new ReaderIdentifierMessage<>(transactionIdPacket, readerIdentifierPacket);
+            initialReaderMessage = new ReaderIdentifierMessage<>(transactionIdPacket, readerIdentifierPacket);
+            currentMessage = initialReaderMessage;
             toWrite = currentMessage.encodePackets();
+        }
+        else
+        {
+            currentMessage = new ReaderIdentifierMessage<>();
         }
     }
 
@@ -92,15 +97,6 @@ public class NormalFlowTransaction<TPacket, TType> implements Transaction
                                 new LastUpdateTimePacket(CryptoProvider.getLastUpdateTime(activity))
                             );
                         }
-                        else
-                        {
-                            // This case should not happen in a normal flow, but we handle it for robustness.
-                            currentMessage = DeviceCredentialMessage.forBleNormal(
-                                readerIdentifierMessage.getCompressedKey(),
-                                readerIdentifierMessage.getProtocolVersion(),
-                                null
-                            );
-                        }
                     }
 
                     toWrite = currentMessage.encodePackets();
@@ -114,18 +110,23 @@ public class NormalFlowTransaction<TPacket, TType> implements Transaction
                 Log.d(TAG, "ReaderIdentifierMessage processing returned validation result: " + vr.isValid);
                 return vr;
             }
+            else
+            {
+                currentMessage = new DeviceCredentialMessage<>(initialReaderMessage.getReaderNonce().encode());
+                return currentMessage.processNewPacket(packet);
+            }
         }
 
         if (currentMessage instanceof DeviceCredentialMessage)
         {
-            Log.d(TAG, "Transitioning from DeviceCredentialMessage to ReaderResponseMessage.");
-            currentMessage = new ReaderResponseMessage<>();
+            Log.d(TAG, "Processing as DeviceCredentialMessage.");
+            return currentMessage.processNewPacket(packet);
         }
 
         if (currentMessage instanceof ReaderResponseMessage)
         {
             Log.d(TAG, "Processing as ReaderResponseMessage.");
-            var readerResponseMessage = (ReaderResponseMessage<TPacket, TType>) currentMessage;
+            var readerResponseMessage = (ReaderResponseMessage<TPacket>) currentMessage;
             var vr = readerResponseMessage.processNewPacket(packet);
             var messageValidation = readerResponseMessage.validate();
             if (vr.isValid && messageValidation.isValid)
@@ -151,7 +152,7 @@ public class NormalFlowTransaction<TPacket, TType> implements Transaction
     {
         if (currentMessage instanceof ReaderResponseMessage)
         {
-            var responsePacket = ((ReaderResponseMessage<TPacket, TType>)currentMessage).getResponsePacket();
+            var responsePacket = ((ReaderResponseMessage<TPacket>)currentMessage).getResponsePacket();
             if (responsePacket != null)
             {
                 return responsePacket.getReaderUnlockStatus();
@@ -164,7 +165,52 @@ public class NormalFlowTransaction<TPacket, TType> implements Transaction
     @Override
     public ValidationResult processNewData(byte[] data)
     {
+        // To be implemented in subclass
         return new SuccessResult();
+    }
+
+    public byte[] getPublicKey()
+    {
+        if (currentMessage instanceof DeviceCredentialMessage)
+        {
+            var credentialMessage = (DeviceCredentialMessage<TPacket>) currentMessage;
+            if (credentialMessage.getPublicKeyPacket() != null)
+            {
+                return credentialMessage.getPublicKeyPacket().encode();
+            }
+        }
+        return null;
+    }
+
+    public byte[] getSignature()
+    {
+        if (currentMessage instanceof DeviceCredentialMessage)
+        {
+            var credentialMessage = (DeviceCredentialMessage<TPacket>) currentMessage;
+            if (credentialMessage.getSignaturePacket() != null)
+            {
+                return credentialMessage.getSignaturePacket().encode();
+            }
+        }
+        return null;
+    }
+
+    public byte[] getTransactionId()
+    {
+        if (initialReaderMessage != null && initialReaderMessage.getReaderNonce() != null)
+        {
+            return initialReaderMessage.getReaderNonce().encode();
+        }
+        return null;
+    }
+
+    public ValidationResult validate()
+    {
+        if (currentMessage instanceof DeviceCredentialMessage)
+        {
+            return ((DeviceCredentialMessage<TPacket>) currentMessage).validate();
+        }
+        return new ValidationResult(false, false, "Invalid message type for validation");
     }
 
     @Override

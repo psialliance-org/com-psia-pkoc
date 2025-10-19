@@ -40,6 +40,7 @@ public class BleEcdheFlowTransaction extends BleNormalFlowTransaction
     private final ArrayList<ReaderDto> readerDtos;
     private int counter = 1;
     private final Activity activity;
+    private DeviceEphemeralPublicKeyPacket deviceEphemeralPublicKeyPacket;
 
     public BleEcdheFlowTransaction(boolean _isDevice, ArrayList<SiteDto> _siteDtos, ArrayList<ReaderDto> _readerDtos, Activity _activity)
     {
@@ -118,7 +119,7 @@ public class BleEcdheFlowTransaction extends BleNormalFlowTransaction
 
                     var publicKeyDes = transientKeyPair.getPublic().getEncoded();
                     var publicKey = CryptoProvider.getUncompressedPublicKeyBytes(publicKeyDes);
-                    var deviceEphemeralPublicKeyPacket = new DeviceEphemeralPublicKeyPacket(publicKey);
+                    deviceEphemeralPublicKeyPacket = new DeviceEphemeralPublicKeyPacket(publicKey);
                     var protocolVersionPacket = new ProtocolVersionPacket(readerIdentifierMessage.getProtocolVersion().encode());
 
                     var deviceIdentifierMessage = new DeviceIdentifierMessage(deviceEphemeralPublicKeyPacket, protocolVersionPacket);
@@ -156,8 +157,15 @@ public class BleEcdheFlowTransaction extends BleNormalFlowTransaction
                 {
                     Log.i(TAG, "ReaderDigitalSignatureMessage validated successfully.");
 
+                    byte[] toSign = Arrays.concatenate(
+                        readerIdentifierMessage.getSiteId().encode(),
+                        readerIdentifierMessage.getReaderLocationId().encode(),
+                        deviceEphemeralPublicKeyPacket.getX(),
+                        readerIdentifierMessage.getCompressedKey().getX()
+                    );
+
                     var deviceEncryptedCredentialMessage = new DeviceEncryptedCredentialMessage(
-                            readerIdentifierMessage.getCompressedKey().encode(),
+                            toSign,
                             readerIdentifierMessage.getProtocolVersion(),
                             sharedSecret,
                             counter,
@@ -177,7 +185,7 @@ public class BleEcdheFlowTransaction extends BleNormalFlowTransaction
             }
             else if (currentMessage instanceof ReaderResponseMessage)
             {
-                var readerResponseMessage = (ReaderResponseMessage<BLE_Packet, ?>) currentMessage;
+                var readerResponseMessage = (ReaderResponseMessage<BLE_Packet>) currentMessage;
                 var vr = readerResponseMessage.processNewPacket(packet);
 
                 if (!vr.isValid)

@@ -10,14 +10,11 @@ import com.psia.pkoc.core.NFC_PacketType;
 import com.psia.pkoc.core.TLVProvider;
 import com.psia.pkoc.core.ValidationResult;
 import com.psia.pkoc.core.interfaces.TransactionMessage;
-import com.psia.pkoc.core.packets.DeviceEphemeralPublicKeyPacket;
 import com.psia.pkoc.core.packets.DigitalSignaturePacket;
 import com.psia.pkoc.core.packets.LastUpdateTimePacket;
 import com.psia.pkoc.core.packets.ProtocolVersionPacket;
 import com.psia.pkoc.core.packets.ReaderEphemeralPublicKeyPacket;
-import com.psia.pkoc.core.packets.ReaderLocationIdentifierPacket;
 import com.psia.pkoc.core.packets.ReaderNoncePacket;
-import com.psia.pkoc.core.packets.SiteIdentifierPacket;
 import com.psia.pkoc.core.packets.UncompressedPublicKeyPacket;
 import com.psia.pkoc.core.validations.InvalidSignatureResult;
 import com.psia.pkoc.core.validations.SuccessResult;
@@ -35,6 +32,12 @@ public class DeviceCredentialMessage<TPacket> implements TransactionMessage<TPac
     private DigitalSignaturePacket digitalSignature;
     private LastUpdateTimePacket lastUpdateTime;
     private final ProtocolVersionPacket protocolIdentifier;
+
+    public DeviceCredentialMessage(byte[] originalMessage)
+    {
+        this.originalMessage = originalMessage;
+        this.protocolIdentifier = null;
+    }
 
     protected DeviceCredentialMessage(byte[] toSign, ProtocolVersionPacket _protocolIdentifier, LastUpdateTimePacket _lastUpdateTime)
     {
@@ -70,21 +73,14 @@ public class DeviceCredentialMessage<TPacket> implements TransactionMessage<TPac
         return new DeviceCredentialMessage<>(toSign, protocolIdentifier, lastUpdateTime);
     }
 
-    public static <TPacket> DeviceCredentialMessage<TPacket> forBleEcdhe(
-        SiteIdentifierPacket siteIdentifier,
-        ReaderLocationIdentifierPacket readerLocationIdentifier,
-        DeviceEphemeralPublicKeyPacket deviceEphemeralPublicKey,
-        ReaderEphemeralPublicKeyPacket readerEphemeralPublicKey,
-        ProtocolVersionPacket protocolIdentifier,
-        LastUpdateTimePacket lastUpdateTime)
+    public UncompressedPublicKeyPacket getPublicKeyPacket()
     {
-        byte[] toSign = Arrays.concatenate(
-            siteIdentifier.encode(),
-            readerLocationIdentifier.encode(),
-            deviceEphemeralPublicKey.getX(),
-            readerEphemeralPublicKey.getX()
-        );
-        return new DeviceCredentialMessage<>(toSign, protocolIdentifier, lastUpdateTime);
+        return uncompressedPublicKey;
+    }
+
+    public DigitalSignaturePacket getSignaturePacket()
+    {
+        return digitalSignature;
     }
 
     private ValidationResult handlePublicKey(byte[] data)
@@ -175,6 +171,8 @@ public class DeviceCredentialMessage<TPacket> implements TransactionMessage<TPac
         return new UnexpectedPacketResult();
     }
 
+
+
     public ValidationResult validate()
     {
         Log.d(TAG, "validate called.");
@@ -186,8 +184,8 @@ public class DeviceCredentialMessage<TPacket> implements TransactionMessage<TPac
 
         var isValid = CryptoProvider.validateSignedMessage(
             uncompressedPublicKey.encode(),
-            digitalSignature.encode(),
-            originalMessage);
+            originalMessage,
+            digitalSignature.encode());
 
         if (!isValid)
         {

@@ -9,6 +9,7 @@ import com.psia.pkoc.core.NFC_PacketType;
 import com.psia.pkoc.core.TLVProvider;
 import com.psia.pkoc.core.ValidationResult;
 import com.psia.pkoc.core.interfaces.TransactionMessage;
+import com.psia.pkoc.core.packets.NfcProtocolVersionPacket;
 import com.psia.pkoc.core.packets.ReaderNoncePacket;
 import com.psia.pkoc.core.validations.SuccessResult;
 import com.psia.pkoc.core.packets.ProtocolVersionPacket;
@@ -37,6 +38,7 @@ public class ReaderIdentifierMessage<TPacket> implements TransactionMessage<TPac
     {
         readerNonce = _readerNonce;
         readerLocationId = _readerIdentifier;
+        isNfc = true;
     }
 
     public ReaderIdentifierMessage(ProtocolVersionPacket _protocolVersion, ReaderEphemeralPublicKeyPacket _compressedKey, ReaderIdentifierPacket _readerLocationId, SiteIdentifierPacket _siteId)
@@ -193,18 +195,19 @@ public class ReaderIdentifierMessage<TPacket> implements TransactionMessage<TPac
     @Override
     public byte[] encodePackets()
     {
-        var protocolVersionData = protocolVersion.encode();
         var readerLocationIdData = readerLocationId.encode();
 
         if (isNfc)
         {
-            var readerNonceData = readerNonce.encode();
+            var protocolVersionData = new NfcProtocolVersionPacket().encode();
             var protocolVersionTlv = TLVProvider.GetNfcTLV(NFC_PacketType.ProtocolVersion, protocolVersionData);
+            var readerNonceData = readerNonce.encode();
             var readerNonceTlv = TLVProvider.GetNfcTLV(NFC_PacketType.TransactionIdentifier, readerNonceData);
             var readerLocationIdTlv = TLVProvider.GetNfcTLV(NFC_PacketType.ReaderIdentifier, readerLocationIdData);
             return Arrays.concatenate(protocolVersionTlv, readerNonceTlv, readerLocationIdTlv);
         }
 
+        var protocolVersionData = protocolVersion.encode();
         var protocolVersionTlv = TLVProvider.GetBleTLV(BLE_PacketType.ProtocolVersion, protocolVersionData);
         var compressedKeyData = compressedKey.encode();
         var compressedKeyTlv = TLVProvider.GetBleTLV(BLE_PacketType.CompressedTransientPublicKey, compressedKeyData);

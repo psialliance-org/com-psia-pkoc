@@ -13,7 +13,7 @@ import com.psia.pkoc.core.validations.SuccessResult;
 import com.psia.pkoc.core.validations.UnexpectedPacketResult;
 import com.psia.pkoc.core.validations.ValidatedBeforeCompleteResult;
 
-public class ReaderResponseMessage<TPacket, TType> implements TransactionMessage<TPacket>
+public class ReaderResponseMessage<TPacket> implements TransactionMessage<TPacket>
 {
     private static final String TAG = "ReaderResponseMessage";
     private ResponsePacket responsePacket;
