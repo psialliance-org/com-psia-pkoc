@@ -82,7 +82,7 @@ public class ScanReaderQrFragment extends Fragment
     {
         try
         {
-            JSONObject jsobnObject = new JSONObject(contents);
+            JSONObject jsonObject = new JSONObject(contents);
             String siteUuid = jsonObject.getString("siteUuid");
             String readerUuid = jsonObject.getString("readerUuid");
             String publicKey = jsonObject.getString("publicKey");
