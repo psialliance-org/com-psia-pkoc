@@ -21,7 +21,6 @@ public class PKOC_HostApduService extends HostApduService
     @Override
     public byte[] processCommandApdu(byte[] apdu, Bundle extras)
     {
-//        CryptoProvider.initializeCredentials(this);
         SharedPreferences prefs = getSharedPreferences("MainActivity", Context.MODE_PRIVATE);
         int transmissionTypeInt = prefs.getInt(PKOC_Preferences.PKOC_TransmissionType, PKOC_TransmissionType.BLE.ordinal());
         PKOC_TransmissionType transmissionType = PKOC_TransmissionType.values()[transmissionTypeInt];
@@ -31,11 +30,6 @@ public class PKOC_HostApduService extends HostApduService
         }
 
         Log.d("NFC", "Received APDU: " + Hex.toHexString(apdu));
-
-        if (apdu == null)
-        {
-            return NfcNormalFlowTransaction.GENERAL_ERROR_STATUS;
-        }
 
         if (normalFlow == null)
         {

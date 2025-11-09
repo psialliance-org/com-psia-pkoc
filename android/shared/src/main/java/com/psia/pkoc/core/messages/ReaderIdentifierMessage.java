@@ -183,7 +183,7 @@ public class ReaderIdentifierMessage<TPacket> implements TransactionMessage<TPac
         }
         else
         {
-            if (readerLocationId == null || siteId == null)
+            if (readerLocationId == null)
             {
                 return new ValidatedBeforeCompleteResult();
             }
