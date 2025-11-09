@@ -81,7 +81,10 @@ final class QrScannerUiView : UIView, AVCaptureMetadataOutputObjectsDelegate
         {
             if !captureSession.isRunning
             {
-                captureSession.startRunning()
+                sessionQueue.async
+                {
+                    self.captureSession.startRunning()
+                }
             }
         }
         else
