@@ -120,7 +120,21 @@ public class NormalFlowTransaction<TPacket> implements Transaction
         if (currentMessage instanceof DeviceCredentialMessage)
         {
             Log.d(TAG, "Processing as DeviceCredentialMessage.");
-            return currentMessage.processNewPacket(packet);
+            ValidationResult vr = currentMessage.processNewPacket(packet);
+            var messageValidation = currentMessage.validate();
+            if (vr.isValid && messageValidation.isValid)
+            {
+                Log.i(TAG, "DeviceCredentialMessage processed successfully. Transitioning to ReaderResponseMessage.");
+                currentMessage = new ReaderResponseMessage<>();
+                return new SuccessResult();
+            }
+            else if (messageValidation.cancelTransaction)
+            {
+                Log.w(TAG, "Transaction cancelled during DeviceCredentialMessage processing.");
+                return messageValidation;
+            }
+            Log.d(TAG, "DeviceCredentialMessage processing returned validation result: " + vr.isValid);
+            return vr;
         }
 
         if (currentMessage instanceof ReaderResponseMessage)
@@ -208,7 +222,7 @@ public class NormalFlowTransaction<TPacket> implements Transaction
     {
         if (currentMessage instanceof DeviceCredentialMessage)
         {
-            return ((DeviceCredentialMessage<TPacket>) currentMessage).validate();
+            return currentMessage.validate();
         }
         return new ValidationResult(false, false, "Invalid message type for validation");
     }
@@ -222,6 +236,10 @@ public class NormalFlowTransaction<TPacket> implements Transaction
         }
         byte[] toReturn = toWrite.clone();
         toWrite = null;
+        if (isDevice && currentMessage instanceof DeviceCredentialMessage)
+        {
+            currentMessage = new ReaderResponseMessage<>();
+        }
         return toReturn;
     }
 }

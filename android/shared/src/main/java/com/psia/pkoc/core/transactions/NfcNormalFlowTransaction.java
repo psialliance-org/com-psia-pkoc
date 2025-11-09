@@ -14,7 +14,7 @@ import java.nio.ByteBuffer;
 public class NfcNormalFlowTransaction extends NormalFlowTransaction<NFC_Packet>
 {
     public static final String SELECT_COMMAND_STRING = "00a4040008a00000089800000100";
-    public static final String AUTHENTICATION_COMMAND_PREFIX_STRING = "80800001";
+    public static final String AUTHENTICATION_COMMAND_PREFIX_STRING = "8080000138";
     public static final byte[] SUCCESS_STATUS = Hex.decode("9000");
     public static final byte[] GENERAL_ERROR_STATUS = Hex.decode("6f00");
     public static final String SUPPORTED_PROTOCOL_VERSION = "0100";
@@ -61,13 +61,13 @@ public class NfcNormalFlowTransaction extends NormalFlowTransaction<NFC_Packet>
             byte[] protocolVersionTlv = TLVProvider.GetNfcTLV(NFC_PacketType.ProtocolVersion, protocolVersion);
             return Arrays.concatenate(protocolVersionTlv, SUCCESS_STATUS);
         }
-        else if (command.length > 4 && command[0] == (byte)0x80 && command[1] == (byte)0x80)
-        {
-            int lc = command[4] & 0xFF;
-            byte[] data = new byte[lc];
-            System.arraycopy(command, 5, data, 0, lc);
 
-            var vr = processNewData(data);
+        var apduHex = Hex.toHexString(command);
+        if (Hex.toHexString(command).startsWith(AUTHENTICATION_COMMAND_PREFIX_STRING))
+        {
+            String authCommandHexData = apduHex.substring(AUTHENTICATION_COMMAND_PREFIX_STRING.length());
+            var vr = processNewData(Hex.decode(authCommandHexData));
+
             if (vr.isValid)
             {
                 transactionSuccessful = true;
