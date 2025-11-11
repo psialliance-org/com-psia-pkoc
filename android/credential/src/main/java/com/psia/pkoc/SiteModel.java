@@ -5,6 +5,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import com.psia.pkoc.core.SiteDto;
+
 @Entity(tableName = "sites")
 public class SiteModel
 {
@@ -28,5 +30,10 @@ public class SiteModel
     {
         this.SiteUUID = siteUUID;
         this.PublicKey = publicKey;
+    }
+
+    public SiteDto toDto()
+    {
+        return new SiteDto(this.SiteUUID, this.PublicKey);
     }
 }

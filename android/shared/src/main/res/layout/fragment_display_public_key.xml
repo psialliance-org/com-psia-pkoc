@@ -31,6 +31,19 @@
         android:scaleType="fitCenter" />
 
     <TextView
+        android:id="@+id/instructionalTextForReader"
+        android:text="@string/instructional_text_for_reader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:paddingTop="16dp"
+        android:textColor="#000000"
+        android:textIsSelectable="true"
+        android:textAlignment="center"
+        android:visibility="invisible"
+        android:textSize="24sp" />
+
+    <TextView
         android:id="@+id/publicKeyTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

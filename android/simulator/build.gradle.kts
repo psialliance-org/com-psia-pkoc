@@ -70,6 +70,8 @@ dependencies {
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
+    implementation(libs.navigation.fragment)
+    implementation(libs.navigation.ui)
     implementation(libs.constraintlayout)
     implementation(libs.bcpkix.jdk15to18)
     implementation(libs.bcprov.jdk15to18)

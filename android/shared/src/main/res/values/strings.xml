@@ -3,6 +3,7 @@
     <string name="enter_custom_bit_length_65_255">Enter custom bit length (65–255)</string>
     <string name="copy_key">Copy Key</string>
     <string name="public_key_qr_code">Public Key QR Code</string>
+    <string name="instructional_text_for_reader">Please scan this QR code to add this reader as a trusted device in your PKOC credential application.</string>
     <string-array name="key_options">
         <item>Full Public Key</item>
         <item>64-bit</item>

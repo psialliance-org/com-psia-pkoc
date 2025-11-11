@@ -17,22 +17,3 @@ let RangeValue = "RangeValue";
 let DiscoveryRangeValue = "DiscoveryRangeValue"
 let DisplayMAC = "DisplayMAC";
 let EulaAccepted = "EulaAccepted";
-
-let KnownReaders : [ReaderModel]  =
-{
-    [
-        ReaderModel(
-            ProtocolVersion: [200],
-            ReaderIdentifier: UUID(uuidString: "ad0cbc8f-c353-427a-b479-37b5efcff6be")!.asUInt8Array(),
-            SiteIdentifier: UUID(uuidString: "b9897ed0-5272-4341-979a-b69850112d80")!.asUInt8Array())
-    ]
-}()
-
-let KnownSites : [SiteModel] =
-{
-   [
-        SiteModel(
-            SiteIdentifier: UUID(uuidString: "b9897ed0-5272-4341-979a-b69850112d80")!.asUInt8Array(),
-            PublicKey: "04b71bb4b0de53f06a09ea6c91b483a898645005a30ec9422b95a67908f640abac440b1e4e705db4a626f7ac4e4dcfeba9f7157872446e61f58282c426f4e838af".hexStringToBytes()!)
-   ]
-}()

@@ -1,10 +1,5 @@
 package com.psia.pkoc;
 
-import static java.lang.System.arraycopy;
-import static com.psia.pkoc.core.CryptoProvider.CreateTransientKeyPair;
-import static com.psia.pkoc.core.CryptoProvider.GetSignedMessage;
-import static com.psia.pkoc.core.CryptoProvider.getUncompressedPublicKeyBytes;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothGatt;
@@ -13,24 +8,22 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.psia.pkoc.core.*;
+import com.psia.pkoc.core.Constants;
+import com.psia.pkoc.core.PKOC_ConnectionType;
+import com.psia.pkoc.core.ReaderDto;
+import com.psia.pkoc.core.SiteDto;
+import com.psia.pkoc.core.interfaces.Transaction;
+import com.psia.pkoc.core.transactions.BleEcdheFlowTransaction;
+import com.psia.pkoc.core.transactions.BleNormalFlowTransaction;
 
-import org.bouncycastle.util.encoders.Hex;
-
-import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Arrays;
-import java.util.UUID;
+
 
 /**
  * Bluetooth Gatt Callback for PKOC
@@ -40,9 +33,7 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
     private final Activity mainActivity;
     private Handler bHandler;
     private final Handler uiHandler;
-    private static int handleDatagramsCounter = 0;
-    private static int completeTransactionCounter = 0;
-    private final FlowModel _flowModel;
+    private Transaction transaction;
 
     BluetoothGattService requiredService;
     BluetoothGattCharacteristic writeCharacteristic;
@@ -60,245 +51,26 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
         return requiredService;
     }
 
-    @SuppressLint("MissingPermission")
-    private void handleDatagrams(BluetoothGatt gatt, byte[] datagrams)
-    {
-        handleDatagramsCounter++;
-        Log.d("handleDatagrams", "handleDatagrams called " + handleDatagramsCounter + " times");
-        Log.d("handleDatagrams", "Received datagrams: " + Arrays.toString(datagrams));
-
-        Log.d("handleDatagrams", "This is getting called for both normal and perfect data flows: " + Arrays.toString(datagrams));
-        //This is called in Normal Flow and ECHDE Flow to populate the datagram.
-        ArrayList<BLE_Packet> gattTypes = TLVProvider.GetBleValues(datagrams);
-
-        for (int a = 0; a < gattTypes.size(); a++)
-        {
-            byte[] data = gattTypes.get(a).Data;
-            Log.d("handleDatagrams", "Processing packet type: " + gattTypes.get(a).PacketType + ", data: " + Arrays.toString(data));
-
-            switch (gattTypes.get(a).PacketType)
-            {
-                case ProtocolVersion:
-                    Log.d("handleDatagrams", "ProtocolVersion data: " + Arrays.toString(gattTypes.get(a).Data));
-                    _flowModel.reader.setProtocolVersion(gattTypes.get(a).Data);
-                    break;
-
-                case CompressedTransientPublicKey:
-                    Log.d("handleDatagrams", "CompressedTransientPublicKey data: " + Arrays.toString(gattTypes.get(a).Data));
-                    _flowModel.reader.setReaderTransientPublicKey(gattTypes.get(a).Data);
-                    break;
-
-                case ReaderLocationIdentifier:
-                    Log.d("handleDatagrams", "ReaderLocationIdentifier data: " + Arrays.toString(gattTypes.get(a).Data));
-                    Log.d("handleDatagrams", "ReaderLocationIdentifier UUID: " + bytesToUUID(data));
-
-                    _flowModel.reader.setReaderIdentifier(gattTypes.get(a).Data);
-                    break;
-
-                case SiteIdentifier:
-                    Log.d("handleDatagrams", "SiteIdentifier data: " + Arrays.toString(gattTypes.get(a).Data));
-                    Log.d("handleDatagrams", "SiteIdentifier UUID: " + bytesToUUID(data));
-                    _flowModel.reader.setSiteIdentifier(gattTypes.get(a).Data);
-                    break;
-
-                case Response:
-                    Message message = new Message();
-                    _flowModel.status = ReaderUnlockStatus.values()[data[0]];
-                    message.what = data[0];
-                    uiHandler.sendMessage(message);
-                    gatt.disconnect();
-                    return;
-
-                case DigitalSignature:
-                    if (_flowModel.reader == null)
-                    {
-                        gatt.disconnect();
-                        return;
-                    }
-
-                    SiteModel siteToFind = null;
-
-                    ReaderModel readerFromDb = PKOC_Application
-                        .getDb()
-                        .readerDao()
-                        .findByIds(_flowModel.reader.getReaderIdentifier(), _flowModel.reader.getSiteIdentifier());
-
-                    if (readerFromDb != null)
-                    {
-                        siteToFind = PKOC_Application
-                            .getDb()
-                            .siteDao()
-                            .findById(readerFromDb.getSiteIdentifier());
-                    }
-
-                    if (siteToFind == null)
-                    {
-                        gatt.disconnect();
-                        return;
-                    }
-
-                    byte[] originalMessage = generateSignatureMessage();
-
-                    _flowModel.readerValid = CryptoProvider.validateSignedMessage(
-                            Objects.requireNonNull(siteToFind).PublicKey,
-                            originalMessage,
-                            data);
-
-                    if (!_flowModel.readerValid)
-                    {
-                        Log.d("PKOC_BluetoothCallbackGatt", "Reader not valid");
-                        gatt.disconnect();
-                        return;
-                    }
-                    Log.d("PKOC_BluetoothCallbackGatt", "Reader valid");
-                    break;
-            }
-        }
-
-        if (_flowModel.connectionType == PKOC_ConnectionType.ECHDE_Full)
-        {
-            Log.d("FlowType", "Executing ECDHE Perfect Security Flow");
-            if (_flowModel.reader == null)
-            {
-                Log.d("PKOC_BluetoothCallbackGatt", "Reader not found in perfect security flow");
-                _flowModel.status = ReaderUnlockStatus.Unrecognized;
-                gatt.disconnect();
-                return;
-            }
-            Log.d("PKOC_BluetoothCallbackGatt", "Reader found in prefect security flow");
-            if (_flowModel.reader.getReaderIdentifier().length == 0)
-            {
-                _flowModel.status = ReaderUnlockStatus.Unrecognized;
-                gatt.disconnect();
-                return;
-            }
-
-            if (_flowModel.transientKeyPair == null)
-            {
-                _flowModel.transientKeyPair = CreateTransientKeyPair();
-                byte[] rawSharedSecret = CryptoProvider.getSharedSecret(
-                        _flowModel.transientKeyPair.getPrivate(),
-                        _flowModel.reader.getReaderTransientPublicKey());
-
-                // Hash the raw shared secret to derive AES-CCM key per PKOC spec
-                _flowModel.sharedSecret = CryptoProvider.deriveAesKeyFromSharedSecretSimple(rawSharedSecret);
-                Log.d("handleDatagrams", "transientKeyPair was null, creating new one");
-                byte[] transientPublicKeyEncoded = _flowModel.transientKeyPair.getPublic().getEncoded();
-                byte[] transientPublicKey = getUncompressedPublicKeyBytes(transientPublicKeyEncoded);
-                byte[] transientPublicKeyTLV = TLVProvider.GetBleTLV(BLE_PacketType.UncompressedTransientPublicKey, transientPublicKey);
-
-                BluetoothGattService requiredService = tryGetService(gatt);
-
-                BluetoothGattCharacteristic reqCharacteristic = requiredService.getCharacteristic(Constants.WriteUUID);
-                reqCharacteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
-                reqCharacteristic.setValue(transientPublicKeyTLV);
-
-                Log.d("handleDatagrams", "Write to GATT server with updated characteristics with the newly created transient key pair in ECDHE Flow: " + Arrays.toString(reqCharacteristic.getValue()));
-                //In ECDHE Perfect Security mode we are coming here to send to the client
-                gatt.writeCharacteristic(reqCharacteristic);
-
-                return;
-            }
-        }
-
-        if (_flowModel.reader.getReaderTransientPublicKey() != null || _flowModel.sharedSecret != null)
-        {
-            //In Normal Flow this is our first call to that will end up writing to the GATT server
-            Log.d("handleDatagrams", "Reader transient public key found, calling completeTransaction");
-            completeTransaction(gatt);
-        }
-    }
-
-    private byte[] generateSignatureMessage()
-    {
-        if (_flowModel.connectionType == PKOC_ConnectionType.ECHDE_Full)
-        {
-            Log.d("SignatureMessage", "Went into signature Message Generation");
-            byte[] siteIdentifier = _flowModel.reader.getSiteIdentifier();
-            byte[] readerIdentifier = _flowModel.reader.getReaderIdentifier();
-
-            byte[] deviceEphemeralPublicKey = _flowModel.transientKeyPair.getPublic().getEncoded();
-            byte[] deviceX = CryptoProvider.getPublicKeyComponentX(deviceEphemeralPublicKey);
-
-            byte[] readerPk = _flowModel.reader.getReaderTransientPublicKey();
-            byte[] readerX = new byte[32];
-            if (readerPk != null)
-            {
-                arraycopy(readerPk, 1, readerX, 0, 32);
-            }
-
-            return org.bouncycastle.util.Arrays.concatenate(siteIdentifier, readerIdentifier, deviceX, readerX);
-        }
-
-        return _flowModel.reader.getReaderTransientPublicKey();
-    }
-
-    @SuppressLint("MissingPermission")
-    private void completeTransaction (BluetoothGatt gatt)
-    {
-        Log.d("completeTransaction", "completeTransaction called " + completeTransactionCounter + " times");
-        completeTransactionCounter++;
-
-        byte[] pkTLVBytes = TLVProvider.GetBleTLV(BLE_PacketType.PublicKey, getUncompressedPublicKeyBytes());
-
-        byte[] toSign = generateSignatureMessage();
-        byte[] SignedMessage = GetSignedMessage(toSign);
-        byte[] SignatureWithoutASM = CryptoProvider.RemoveASNHeaderFromSignature(SignedMessage);
-        byte[] SignatureTLV = TLVProvider.GetBleTLV(BLE_PacketType.DigitalSignature, SignatureWithoutASM);
-
-        SharedPreferences sharedPref = mainActivity.getPreferences(Context.MODE_PRIVATE);
-        int pkocCreationTime = (int) sharedPref.getLong(PKOC_Preferences.PKOC_CreationTime, System.currentTimeMillis());
-        byte[] creationTime = ByteBuffer.allocate(4).putInt(pkocCreationTime).array();
-        byte[] creationTimeTLV = TLVProvider.GetBleTLV(BLE_PacketType.LastUpdateTime, creationTime);
-        byte[] secureMessage = org.bouncycastle.util.Arrays.concatenate(pkTLVBytes, SignatureTLV, creationTimeTLV);
-        if (_flowModel.connectionType == PKOC_ConnectionType.ECHDE_Full && _flowModel.readerValid)
-        {
-            Log.d("completeTransaction", "ECHDE Flow build secure message using bouncycastle - BONG");
-
-            // Log the secure message before encryption
-            Log.d("completeTransaction", "Secure message before encryption: " + Arrays.toString(secureMessage));
-            Log.d("completeTransaction", "Secure message in Hex[] " + Hex.toHexString(secureMessage));
-
-            byte[] encrypted = CryptoProvider.getAES256(_flowModel.sharedSecret, secureMessage, _flowModel.counter);
-
-            Log.d("completeTransaction", "Printing the encrypted data " + Hex.toHexString(encrypted));
-
-            // Log the encrypted data
-            Log.d("completeTransaction", "Encrypted data: " + Arrays.toString(encrypted));
-
-
-            secureMessage = TLVProvider.GetBleTLV(BLE_PacketType.EncryptedDataFollows, encrypted);
-
-            // Log the final secure message
-            Log.d("completeTransaction", "Final secure message: " + Arrays.toString(secureMessage));
-
-            // Dhruv Added a log to log in Hex
-            Log.d("completeTransaction", "Final secure message: " + Hex.toHexString(secureMessage));
-        }
-
-        BluetoothGattService requiredService = tryGetService(gatt);
-        BluetoothGattCharacteristic reqCharacteristic = requiredService.getCharacteristic(Constants.WriteUUID);
-        reqCharacteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
-        reqCharacteristic.setValue(secureMessage);
-
-        Log.d("WriteCharacteristic", "Printing the final value before sending: " + Arrays.toString(secureMessage));
-
-        gatt.writeCharacteristic(reqCharacteristic);
-    }
-
     /**
      * Constructor
      * @param parent Activity
      * @param toUse Enumeration for PKOC flow option
      * @param updateUIHandler Handler to receive UI updates
+     * @param siteDtos list of known sites
+     * @param readerDtos list of known readers
      */
-    public PKOC_BluetoothCallbackGatt (Activity parent, PKOC_ConnectionType toUse, Handler updateUIHandler)
+    public PKOC_BluetoothCallbackGatt (Activity parent, PKOC_ConnectionType toUse, Handler updateUIHandler, ArrayList<SiteDto> siteDtos, ArrayList<ReaderDto> readerDtos)
     {
         mainActivity = parent;
 
-        _flowModel = new FlowModel();
-        _flowModel.reader = new ReaderModel(new byte[0], new byte[0]);
-        _flowModel.connectionType = toUse;
+        if (toUse == PKOC_ConnectionType.Uncompressed)
+        {
+            transaction = new BleNormalFlowTransaction(true, mainActivity);
+        }
+        else if (toUse == PKOC_ConnectionType.ECHDE_Full)
+        {
+            transaction = new BleEcdheFlowTransaction(true, siteDtos, readerDtos, mainActivity);
+        }
 
         uiHandler = updateUIHandler;
 
@@ -324,32 +96,9 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
 
         bHandler.post(() ->
         {
-            /*
-            #define  GATT_SUCCESS                        0x0000
-            https://android.googlesource.com/platform/external/bluetooth/bluedroid/+/5738f83aeb59361a0a2eda2460113f6dc9194271/stack/include/gatt_api.h
-             */
-
             if (status != 0x0000 || newState == BluetoothProfile.STATE_DISCONNECTED)
             {
                 gatt.close();
-
-                if(_flowModel == null || _flowModel.status == null)
-                {
-                    Message message = new Message();
-                    message.what = ReaderUnlockStatus.Unknown.ordinal();
-                    uiHandler.sendMessage(message);
-                }
-
-                if (_flowModel != null)
-                {
-                    if (_flowModel.status == ReaderUnlockStatus.Unrecognized)
-                    {
-                        Message message = new Message();
-                        _flowModel.status = ReaderUnlockStatus.Unrecognized;
-                        message.what = ReaderUnlockStatus.Unrecognized.ordinal();
-                        uiHandler.sendMessage(message);
-                    }
-                }
             }
 
             if (newState == BluetoothProfile.STATE_CONNECTED)
@@ -449,99 +198,40 @@ public class PKOC_BluetoothCallbackGatt extends BluetoothGattCallback
      * @param gatt Bluetooth GATT
      * @param characteristic Characteristic
      */
+    @SuppressLint("MissingPermission")
     @Override
     public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic)
     {
         super.onCharacteristicChanged(gatt, characteristic);
-        // This is being called because the server has a change it has notified this client of and will send the data in the characteristic.
 
         bHandler.post(() ->
         {
-            byte[] charData = characteristic.getValue();
-            Log.d("CharacteristicChanged", "Characteristic data: " + Arrays.toString(charData));
-
-            ArrayList<BLE_Packet> packetsFromMessage = new ArrayList<>();
-            int offset2 = 0;
-
-            while (offset2 < charData.length)
+            final byte[] value = characteristic.getValue();
+            if (value == null)
             {
-                byte type = charData[offset2];
-                int length = charData[offset2 + 1];
+                return;
+            }
 
-                // Ensure length does not exceed the remaining bytes in charData
-                if (offset2 + 2 + length > charData.length)
+            var validationResult = transaction.processNewData(value);
+            if(validationResult.isValid)
+            {
+                var toWrite = transaction.toWrite();
+                if (toWrite != null)
                 {
-                    Log.e("CharacteristicChanged", "Invalid length: " + length + " at offset: " + offset2);
-                    break;
-                }
-
-                if (type == BLE_PacketType.EncryptedDataFollows.getType())
-                {
-                    byte[] encryptedData = new byte[length];
-                    System.arraycopy(charData, offset2 + 2, encryptedData, 0, length);
-                    Log.d("CharacteristicChanged", "Encrypted data: " + Arrays.toString(encryptedData));
-                    byte[] unencryptedData = CryptoProvider.getFromAES256(_flowModel.sharedSecret, encryptedData, _flowModel.counter);
-                    _flowModel.counter++;
-                    Log.d("CharacteristicChanged", "Decrypted data: " + Arrays.toString(unencryptedData));
-                    packetsFromMessage.addAll(TLVProvider.GetBleValues(unencryptedData));
-                    offset2 += length + 2;
+                    writeCharacteristic.setValue(toWrite);
+                    gatt.writeCharacteristic(writeCharacteristic);
                 }
                 else
                 {
-                    byte[] data = new byte[length];
-                    System.arraycopy(charData, offset2 + 2, data, 0, length);
-                    packetsFromMessage.add(new BLE_Packet(BLE_PacketType.decode(type), data));
-                    offset2 += length + 2;
+                    Message message = new Message();
+                    message.what = transaction.getReaderUnlockStatus().ordinal();
+                    uiHandler.sendMessage(message);
                 }
             }
-
-            for (BLE_Packet packet : packetsFromMessage)
+            else if (validationResult.cancelTransaction)
             {
-                if (packet != null)
-                {
-                    switch (packet.PacketType)
-                    {
-                        case PublicKey:
-                            _flowModel.connectionType = PKOC_ConnectionType.Uncompressed;
-                            _flowModel.publicKey = packet.Data;
-                            Log.d("CharacteristicChanged", "Determined PKOC flow: Normal flow");
-                            Log.d("CharacteristicChanged", "Public key: " + Arrays.toString(packet.Data));
-                            break;
-                        case DigitalSignature:
-                            _flowModel.signature = packet.Data;
-                            Log.d("CharacteristicChanged", "Signature: " + Arrays.toString(packet.Data));
-                            break;
-                        case UncompressedTransientPublicKey:
-                            Log.d("CharacteristicChanged", "Uncompressed transient public key: " + Arrays.toString(packet.Data));
-                            _flowModel.receivedTransientPublicKey = packet.Data;
-                            break;
-                        case EncryptedDataFollows:
-                            Log.w("CharacteristicChanged", "Unexpected EncryptedDataFollows packet");
-                            break;
-                        case LastUpdateTime:
-                            _flowModel.creationTime = new BigInteger(packet.Data).intValue();
-                            Log.d("CharacteristicChanged", "Creation time: " + _flowModel.creationTime);
-                            break;
-                        case ProtocolVersion:
-                            _flowModel.protocolVersion = new byte[]{(byte) 0x0C, (byte) 0x03, (short) 0x0000, (short) 0x0001};
-                            Log.d("CharacteristicChanged", "ProtocolVersion: " + Arrays.toString(packet.Data));
-                        default:
-                            break;
-                    }
-                }
+                gatt.disconnect();
             }
-
-            // Call handleDatagrams after processing the packets
-            handleDatagrams(gatt, charData);
         });
     }
-
-
-    private static String bytesToUUID(byte[] bytes) {
-        ByteBuffer bb = ByteBuffer.wrap(bytes);
-        long high = bb.getLong();
-        long low = bb.getLong();
-        return new UUID(high, low).toString();
-    }
-
 }

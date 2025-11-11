@@ -9,7 +9,8 @@ struct ContentView : View
     @State var qrLinkSelected = false
     @State var sitesLinkSelected = false
     @State var logsLinkSelected = false
-
+    @State var importReaderQrLinkSelected = false
+    
     @State var _transmissionType : TransmissionType = TransmissionType.BLE
 
     func loadValues()
@@ -139,7 +140,13 @@ struct ContentView : View
                         {
                             Label("Sites & Readers", systemImage: "list.bullet.rectangle")
                         }).navigationTitle("Sites & Readers")
-                        
+                        Button(action:
+                        {
+                            importReaderQrLinkSelected = true
+                        }, label:
+                        {
+                            Label("Scan Reader", systemImage: "qrcode.viewfinder")
+                        }).navigationTitle("Scan Reader QR Code")
                         Button(action:
                         {
                             logsLinkSelected = true
@@ -178,6 +185,13 @@ struct ContentView : View
                     destination: DisplayPublicKeyView().navigationTitle("Display QR Public Key"),
                     isActive: $qrLinkSelected
                 ) { EmptyView() }.hidden()
+            )
+            .background(
+                NavigationLink(
+                    destination: ReaderQrImportView().navigationTitle("Scan Reader QR Code"),
+                    isActive: $importReaderQrLinkSelected
+                )
+                { EmptyView() }.hidden()
             )
             .background(
                 NavigationLink(

@@ -160,6 +160,12 @@ public class CryptoProvider
         return pk;
     }
 
+    public static long getLastUpdateTime(Activity activity)
+    {
+        SharedPreferences sharedPref = activity.getPreferences(Context.MODE_PRIVATE);
+        return sharedPref.getLong(PKOC_Preferences.PKOC_CreationTime, 0);
+    }
+
     /**
      * Get uncompressed public key x bytes
      * @param publicKey DER-encoded public key
@@ -307,11 +313,11 @@ public class CryptoProvider
     }
 
     /**
-     * From compressed public key
-     * @param pubKey Get a key from a 33 byte long byte array
+     * Decode a public key from a byte array.
+     * @param pubKey Get a key from a 33- or 65-byte long byte array
      * @return Public key
      */
-    public static Key fromCompressedPublicKey(byte[] pubKey)
+    public static Key decodePublicKey(byte[] pubKey)
     {
         try
         {
@@ -433,7 +439,7 @@ public class CryptoProvider
         {
             KeyAgreement keyAgreement = KeyAgreement.getInstance(HandshakeAlgorithm);
             keyAgreement.init(privateKey);
-            keyAgreement.doPhase(fromCompressedPublicKey(publicKey), true);
+            keyAgreement.doPhase(decodePublicKey(publicKey), true);
             return keyAgreement.generateSecret();
         }
         catch (Exception e)
