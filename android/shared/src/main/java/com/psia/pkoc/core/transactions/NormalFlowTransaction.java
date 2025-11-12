@@ -29,6 +29,7 @@ public class NormalFlowTransaction<TPacket> implements Transaction
     protected byte[] toWrite;
     @Nullable
     private final Activity activity;
+    private DeviceCredentialMessage<TPacket> deviceCredentialMessage;
 
     public TransactionMessage<TPacket> currentMessage;
     private ReaderIdentifierMessage<TPacket> initialReaderMessage;
@@ -99,6 +100,7 @@ public class NormalFlowTransaction<TPacket> implements Transaction
                         }
                     }
 
+                    deviceCredentialMessage = (DeviceCredentialMessage<TPacket>) currentMessage;
                     toWrite = currentMessage.encodePackets();
                     return new SuccessResult();
                 }
@@ -113,6 +115,7 @@ public class NormalFlowTransaction<TPacket> implements Transaction
             else
             {
                 currentMessage = new DeviceCredentialMessage<>(initialReaderMessage.getReaderNonce().encode());
+                deviceCredentialMessage = (DeviceCredentialMessage<TPacket>) currentMessage;
                 return currentMessage.processNewPacket(packet);
             }
         }
@@ -185,26 +188,18 @@ public class NormalFlowTransaction<TPacket> implements Transaction
 
     public byte[] getPublicKey()
     {
-        if (currentMessage instanceof DeviceCredentialMessage)
+        if (deviceCredentialMessage != null && deviceCredentialMessage.getPublicKeyPacket() != null)
         {
-            var credentialMessage = (DeviceCredentialMessage<TPacket>) currentMessage;
-            if (credentialMessage.getPublicKeyPacket() != null)
-            {
-                return credentialMessage.getPublicKeyPacket().encode();
-            }
+            return deviceCredentialMessage.getPublicKeyPacket().encode();
         }
         return null;
     }
 
     public byte[] getSignature()
     {
-        if (currentMessage instanceof DeviceCredentialMessage)
+        if (deviceCredentialMessage != null && deviceCredentialMessage.getSignaturePacket() != null)
         {
-            var credentialMessage = (DeviceCredentialMessage<TPacket>) currentMessage;
-            if (credentialMessage.getSignaturePacket() != null)
-            {
-                return credentialMessage.getSignaturePacket().encode();
-            }
+            return deviceCredentialMessage.getSignaturePacket().encode();
         }
         return null;
     }
@@ -221,6 +216,10 @@ public class NormalFlowTransaction<TPacket> implements Transaction
     public ValidationResult validate()
     {
         if (currentMessage instanceof DeviceCredentialMessage)
+        {
+            return currentMessage.validate();
+        }
+        if (currentMessage instanceof ReaderResponseMessage)
         {
             return currentMessage.validate();
         }
