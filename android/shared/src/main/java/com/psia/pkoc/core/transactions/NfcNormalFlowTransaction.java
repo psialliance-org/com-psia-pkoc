@@ -4,6 +4,7 @@ import com.psia.pkoc.core.NFC_Packet;
 import com.psia.pkoc.core.NFC_PacketType;
 import com.psia.pkoc.core.TLVProvider;
 import com.psia.pkoc.core.ValidationResult;
+import com.psia.pkoc.core.messages.ReaderResponseMessage;
 import com.psia.pkoc.core.validations.SuccessResult;
 
 import org.bouncycastle.util.Arrays;
@@ -14,7 +15,7 @@ import java.nio.ByteBuffer;
 public class NfcNormalFlowTransaction extends NormalFlowTransaction<NFC_Packet>
 {
     public static final String SELECT_COMMAND_STRING = "00a4040008a00000089800000100";
-    public static final String AUTHENTICATION_COMMAND_PREFIX_STRING = "8080000138";
+    public static final String AUTHENTICATION_COMMAND_PREFIX_STRING = "80800001";
     public static final byte[] SUCCESS_STATUS = Hex.decode("9000");
     public static final byte[] GENERAL_ERROR_STATUS = Hex.decode("6f00");
     public static final String SUPPORTED_PROTOCOL_VERSION = "0100";
@@ -65,7 +66,7 @@ public class NfcNormalFlowTransaction extends NormalFlowTransaction<NFC_Packet>
         var apduHex = Hex.toHexString(command);
         if (Hex.toHexString(command).startsWith(AUTHENTICATION_COMMAND_PREFIX_STRING))
         {
-            String authCommandHexData = apduHex.substring(AUTHENTICATION_COMMAND_PREFIX_STRING.length());
+            String authCommandHexData = apduHex.substring(AUTHENTICATION_COMMAND_PREFIX_STRING.length() + 2);
             var vr = processNewData(Hex.decode(authCommandHexData));
 
             if (vr.isValid)
@@ -132,6 +133,16 @@ public class NfcNormalFlowTransaction extends NormalFlowTransaction<NFC_Packet>
         }
     }
 
+    @Override
+    public ValidationResult validate()
+    {
+        if (!isDevice && currentMessage instanceof ReaderResponseMessage)
+        {
+            return new SuccessResult();
+        }
+        return super.validate();
+    }
+
     public byte[] getCommandToWrite()
     {
         if (isDevice)
@@ -145,8 +156,9 @@ public class NfcNormalFlowTransaction extends NormalFlowTransaction<NFC_Packet>
                 return Hex.decode(SELECT_COMMAND_STRING);
             case AWAITING_AUTHENTICATION:
                 byte[] data = toWrite();
-                ByteBuffer command = ByteBuffer.allocate(data.length + 5);
-                command.put(Hex.decode(AUTHENTICATION_COMMAND_PREFIX_STRING));
+                var prefix = Hex.decode(AUTHENTICATION_COMMAND_PREFIX_STRING);
+                ByteBuffer command = ByteBuffer.allocate(data.length + prefix.length + 1);
+                command.put(prefix);
                 command.put((byte) data.length);
                 command.put(data);
                 return command.array();
