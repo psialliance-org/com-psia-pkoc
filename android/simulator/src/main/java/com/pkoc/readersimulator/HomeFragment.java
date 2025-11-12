@@ -80,9 +80,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
@@ -117,7 +119,7 @@ public class HomeFragment extends Fragment implements NfcAdapter.ReaderCallback
     private BluetoothManager mBluetoothManager;
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
     private BluetoothGattServer mBluetoothGattServer;
-    private final ArrayList<FlowModel> _connectedDevices = new ArrayList<>();
+    private final List<FlowModel> _connectedDevices = new CopyOnWriteArrayList<>();
 
     private ActivityResultLauncher<String[]> requestPermissionLauncher;
 
@@ -687,6 +689,7 @@ public class HomeFragment extends Fragment implements NfcAdapter.ReaderCallback
             }
             else if (newState == BluetoothProfile.STATE_DISCONNECTED)
             {
+                timeoutHandler.removeCallbacks(timeoutRunnable);
                 int toRemove = -1;
 
                 for (int a = 0; a < _connectedDevices.size(); a++)
@@ -869,6 +872,7 @@ public class HomeFragment extends Fragment implements NfcAdapter.ReaderCallback
                             {
                                 requireActivity().runOnUiThread(() -> Toast.makeText(requireContext(), "Error: Failed to decrypt message.", Toast.LENGTH_LONG).show());
                                 mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null);
+                                timeoutHandler.removeCallbacks(timeoutRunnable);
                                 onGattOperationCompleted();
                                 return;
                             }
@@ -943,6 +947,7 @@ public class HomeFragment extends Fragment implements NfcAdapter.ReaderCallback
                         {
                             requireActivity().runOnUiThread(() -> Toast.makeText(requireContext(), "Error: Failed to establish secure channel.", Toast.LENGTH_LONG).show());
                             mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null);
+                            timeoutHandler.removeCallbacks(timeoutRunnable);
                             onGattOperationCompleted();
                             return;
                         }
@@ -961,6 +966,7 @@ public class HomeFragment extends Fragment implements NfcAdapter.ReaderCallback
                         {
                             requireActivity().runOnUiThread(() -> Toast.makeText(requireContext(), "Error: Failed to sign message.", Toast.LENGTH_LONG).show());
                             mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null);
+                            timeoutHandler.removeCallbacks(timeoutRunnable);
                             onGattOperationCompleted();
                             return;
                         }
@@ -980,6 +986,7 @@ public class HomeFragment extends Fragment implements NfcAdapter.ReaderCallback
                         && deviceModel.publicKey != null
                         && deviceModel.signature != null)
                 {
+                    timeoutHandler.removeCallbacks(timeoutRunnable);
                     byte[] pubKey = deviceModel.publicKey;
                     byte[] signature = deviceModel.signature;
 
@@ -1108,10 +1115,8 @@ public class HomeFragment extends Fragment implements NfcAdapter.ReaderCallback
 
         private FlowModel getDeviceCredentialModel(BluetoothDevice device)
         {
-            for (int a = 0; a < _connectedDevices.size(); a++)
+            for (FlowModel connectedDevice : _connectedDevices)
             {
-                FlowModel connectedDevice = _connectedDevices.get(a);
-
                 if (connectedDevice.connectedDevice.getAddress().equals((device.getAddress())))
                 {
                     return connectedDevice;
