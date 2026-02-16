@@ -1,12 +1,9 @@
-import com.google.protobuf.gradle.id
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.gradle.kotlin.dsl.implementation
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.protobuf)
 }
 
 android {
@@ -69,31 +66,6 @@ android {
     }
 }
 
-protobuf {
-    protoc {
-        artifact = "com.google.protobuf:protoc:${libs.versions.protobuf.get()}"
-    }
-    plugins {
-        id("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:${libs.versions.grpc.get()}"
-        }
-    }
-    generateProtoTasks {
-        all().forEach { task ->
-            task.builtins {
-                id("java") {
-                    option("lite")
-                }
-            }
-            task.plugins {
-                id("grpc") {
-                    option("lite")
-                }
-            }
-        }
-    }
-}
-
 tasks.withType<Test>().configureEach {
     testLogging {
         events = setOf(
@@ -111,7 +83,6 @@ tasks.withType<Test>().configureEach {
 dependencies {
     implementation(project(":shared"))
     implementation(libs.conscrypt.android)
-    implementation(libs.okhttp)
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
@@ -120,11 +91,6 @@ dependencies {
     implementation(libs.navigation.ui)
     implementation(libs.bcpkix.jdk15to18)
     implementation(libs.bcprov.jdk15to18)
-    implementation(libs.protobuf.javalite)
-    implementation(libs.grpc.okhttp)
-    implementation(libs.grpc.protobuf.lite)
-    implementation(libs.grpc.stub)
-    compileOnly(libs.annotations.api)
     testImplementation(libs.robolectric)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

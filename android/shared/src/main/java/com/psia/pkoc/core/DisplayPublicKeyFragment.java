@@ -26,12 +26,18 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.psia.pkoc.core.databinding.FragmentDisplayPublicKeyBinding;
+import com.psia.pkoc.core.grpc.CredentialService;
+import com.psia.pkoc.core.grpc.GrpcWebException;
+import com.sentryinteractive.opencredential.api.credential.GetCredentialsResponse;
 
 import org.bouncycastle.util.encoders.Hex;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.PublicKey;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class DisplayPublicKeyFragment extends Fragment
 {
@@ -92,10 +98,34 @@ public class DisplayPublicKeyFragment extends Fragment
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+    /*DELETE*/
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
+
+        /**
+         * DELETE d
+         */
+
+        executor.execute(() -> {
+            try {
+                GetCredentialsResponse credentials = CredentialService.getInstance()
+                        .getCredentials();
+                System.out.println(credentials);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (GrpcWebException e) {
+                throw new RuntimeException(e);
+            }
+
+        });
+
+        /**
+         * DELETE u
+         */
 
         if (initializeForReaderMode())
         {
