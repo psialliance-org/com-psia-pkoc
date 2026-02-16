@@ -8,8 +8,11 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.psia.pkoc.core.CryptoProvider;
 import com.psia.pkoc.core.grpc.CredentialService;
 import com.psia.pkoc.databinding.ActivityCredentialSelectionBinding;
 import com.sentryinteractive.opencredential.api.common.Identity;
@@ -37,12 +40,31 @@ public class CredentialSelectionActivity extends AppCompatActivity
     private final List<Credential> emailCredentials = new ArrayList<>();
     private final Map<Integer, CheckBox> checkBoxMap = new HashMap<>();
 
+    private final ActivityResultLauncher<Intent> loginLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result ->
+            {
+                if (result.getResultCode() == RESULT_OK)
+                {
+                    loadCredentials();
+                }
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         binding = ActivityCredentialSelectionBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        CryptoProvider.initializeCredentials(this);
+
+        String orgName = getIntent().getStringExtra(ConsentActivity.EXTRA_ORG_NAME);
+
+        if (orgName != null)
+        {
+            binding.permissionTitle.setText(getString(R.string.cred_sel_permission_title, orgName));
+        }
 
         setupListeners();
         loadCredentials();
@@ -59,8 +81,9 @@ public class CredentialSelectionActivity extends AppCompatActivity
 
         binding.addNewEmail.setOnClickListener(v ->
         {
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.putExtra(LoginActivity.EXTRA_RETURN_ON_SUCCESS, true);
+            loginLauncher.launch(intent);
         });
 
         binding.retryButton.setOnClickListener(v -> loadCredentials());
@@ -103,8 +126,10 @@ public class CredentialSelectionActivity extends AppCompatActivity
                 runOnUiThread(() ->
                 {
                     binding.progressBar.setVisibility(View.GONE);
-                    binding.errorText.setText(getString(R.string.cred_sel_loading_error));
-                    binding.errorContainer.setVisibility(View.VISIBLE);
+                    // Show empty state — user can add a new email
+                    emailCredentials.clear();
+                    populateCredentials();
+                    binding.scrollView.setVisibility(View.VISIBLE);
                 });
             }
         });
@@ -115,11 +140,11 @@ public class CredentialSelectionActivity extends AppCompatActivity
         binding.credentialList.removeAllViews();
         checkBoxMap.clear();
 
+        binding.approveButton.setEnabled(!emailCredentials.isEmpty());
+
         if (emailCredentials.isEmpty())
         {
-            binding.errorText.setText(getString(R.string.cred_sel_no_credentials));
-            binding.errorContainer.setVisibility(View.VISIBLE);
-            binding.retryButton.setVisibility(View.GONE);
+            // Nothing to show — "Add new email" is still visible
             return;
         }
 
@@ -162,11 +187,27 @@ public class CredentialSelectionActivity extends AppCompatActivity
             params.bottomMargin = 16;
             checkBox.setLayoutParams(params);
 
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> updateApproveButton());
+
             binding.credentialList.addView(checkBox);
             checkBoxMap.put(i, checkBox);
 
             addDivider();
         }
+    }
+
+    private void updateApproveButton()
+    {
+        boolean anyChecked = false;
+        for (CheckBox cb : checkBoxMap.values())
+        {
+            if (cb.isChecked())
+            {
+                anyChecked = true;
+                break;
+            }
+        }
+        binding.approveButton.setEnabled(anyChecked);
     }
 
     private void addDivider()
@@ -184,17 +225,21 @@ public class CredentialSelectionActivity extends AppCompatActivity
         Intent intent = new Intent(this, MainActivity.class);
 
         int selectedCount = 0;
+        List<String> selectedHexIds = new ArrayList<>();
         for (Map.Entry<Integer, CheckBox> entry : checkBoxMap.entrySet())
         {
             if (entry.getValue().isChecked())
             {
-                byte[] credBytes = emailCredentials.get(entry.getKey()).toByteArray();
+                Credential cred = emailCredentials.get(entry.getKey());
+                byte[] credBytes = cred.toByteArray();
                 intent.putExtra(EXTRA_CREDENTIAL_PREFIX + selectedCount, credBytes);
                 selectedCount++;
+                selectedHexIds.add(Hex.toHexString(cred.getCredential().toByteArray()));
             }
         }
 
         intent.putExtra(EXTRA_SELECTED_COUNT, selectedCount);
+        CredentialStore.saveSelectedCredentials(this, selectedHexIds);
         startActivity(intent);
         finish();
     }

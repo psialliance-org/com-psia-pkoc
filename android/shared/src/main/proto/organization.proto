@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package com.sentryinteractive.opencredential.organization.v1alpha;
+
+import "google/protobuf/empty.proto";
+import "types.proto";
+
+option java_multiple_files = true;
+option java_package = "com.sentryinteractive.opencredential.api.organization";
+option java_outer_classname = "OrganizationProtoV1Alpha";
+
+service OrganizationService {
+  rpc GetOrganizationByInviteCode(GetOrganizationByInviteCodeRequest) returns (Organization);
+  rpc GetOrganizationById(GetOrganizationByIdRequest) returns (Organization);
+  rpc ShareCredentialWithOrganization(ShareCredentialWithOrganizationRequest) returns (google.protobuf.Empty);
+  rpc RevokeSharedCredentialFromOrganization(RevokeSharedCredentialFromOrganizationRequest) returns (google.protobuf.Empty);
+}
+
+message GetOrganizationByInviteCodeRequest {
+  string invite_code = 1;
+}
+
+message GetOrganizationByIdRequest {
+  string organization_id = 1;
+}
+
+message ShareCredentialWithOrganizationRequest {
+  string organization_id = 1;
+  com.sentryinteractive.opencredential.common.v1alpha.Identity identity = 2;
+  string invite_code = 3;
+}
+
+message RevokeSharedCredentialFromOrganizationRequest {
+  string organization_id = 1;
+  optional com.sentryinteractive.opencredential.common.v1alpha.Identity identity = 2;
+}
+
+message Organization {
+  string organization_id = 1;
+  string name = 2;
+  string contact_email = 3;
+  optional string contact_phone = 4;
+  optional string contact_address = 5;
+}

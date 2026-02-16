@@ -1,7 +1,6 @@
 package com.psia.pkoc;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -11,66 +10,138 @@ import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.psia.pkoc.core.CryptoProvider;
+import com.psia.pkoc.core.grpc.CredentialService;
 import com.psia.pkoc.databinding.ActivityLoginBinding;
 import com.psia.pkoc.core.grpc.GrpcWebException;
 import com.psia.pkoc.core.grpc.VerificationService;
 import com.sentryinteractive.opencredential.api.common.CredentialType;
+import com.sentryinteractive.opencredential.api.common.Identity;
+import com.sentryinteractive.opencredential.api.credential.Credential;
+import com.sentryinteractive.opencredential.api.credential.GetCredentialsResponse;
 import com.sentryinteractive.opencredential.api.verification.StartEmailVerificationResponse;
 
+import org.bouncycastle.util.encoders.Hex;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class LoginActivity extends AppCompatActivity
 {
     private static final String TAG = "LoginActivity";
-    private static final String PREFS_NAME = "pkoc_login_prefs";
-    private static final String KEY_VERIFICATION_COMPLETED = "verification_completed";
-    private static final String KEY_VERIFIED_EMAIL = "verified_email";
+
+    /** When true, finish() with RESULT_OK after 2FA instead of navigating. */
+    public static final String EXTRA_RETURN_ON_SUCCESS = "return_on_success";
 
     private ActivityLoginBinding binding;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private boolean returnOnSuccess;
     private String verificationToken;
-    private String currentEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
 
-        // TODO: re-enable auto-redirect to PKOC template when flow is finalised
-        // if (isVerified())
-        // {
-        //     navigateToMain();
-        //     return;
-        // }
+        returnOnSuccess = getIntent().getBooleanExtra(EXTRA_RETURN_ON_SUCCESS, false);
 
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         CryptoProvider.initializeCredentials(this);
-        setupListeners();
+
+        if (!returnOnSuccess)
+        {
+            checkSavedCredentials();
+        }
+        else
+        {
+            setupListeners();
+        }
     }
 
-    private boolean isVerified()
+    private void checkSavedCredentials()
     {
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        return prefs.getBoolean(KEY_VERIFICATION_COMPLETED, false);
+        Set<String> savedIds = CredentialStore.getSelectedCredentialIds(this);
+        if (savedIds.isEmpty())
+        {
+            showNoContext();
+            return;
+        }
+
+        // Show loading while we verify credentials against server
+        binding.emailStep.setVisibility(View.GONE);
+        binding.progressBar.setVisibility(View.VISIBLE);
+
+        executor.execute(() ->
+        {
+            try
+            {
+                GetCredentialsResponse response = CredentialService.getInstance().getCredentials();
+
+                List<Credential> matched = new ArrayList<>();
+                for (Credential cred : response.getCredentialsList())
+                {
+                    if (!cred.hasIdentity()
+                            || cred.getIdentity().getIdentityCase() != Identity.IdentityCase.EMAIL)
+                    {
+                        continue;
+                    }
+                    String hexId = Hex.toHexString(cred.getCredential().toByteArray());
+                    if (savedIds.contains(hexId))
+                    {
+                        matched.add(cred);
+                    }
+                }
+
+                runOnUiThread(() ->
+                {
+                    binding.progressBar.setVisibility(View.GONE);
+                    if (matched.isEmpty())
+                    {
+                        CredentialStore.clear(LoginActivity.this);
+                        showNoContext();
+                    }
+                    else
+                    {
+                        navigateToMainWithCredentials(matched);
+                    }
+                });
+            }
+            catch (Exception e)
+            {
+                Log.e(TAG, "Failed to verify saved credentials", e);
+                runOnUiThread(() ->
+                {
+                    binding.progressBar.setVisibility(View.GONE);
+                    showNoContext();
+                });
+            }
+        });
     }
 
-    private void setVerified(String email)
-    {
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        prefs.edit()
-                .putBoolean(KEY_VERIFICATION_COMPLETED, true)
-                .putString(KEY_VERIFIED_EMAIL, email)
-                .apply();
-    }
-
-    private void navigateToMain()
+    private void navigateToMainWithCredentials(List<Credential> credentials)
     {
         Intent intent = new Intent(this, MainActivity.class);
+        int count = 0;
+        for (Credential cred : credentials)
+        {
+            intent.putExtra(CredentialSelectionActivity.EXTRA_CREDENTIAL_PREFIX + count, cred.toByteArray());
+            count++;
+        }
+        intent.putExtra(CredentialSelectionActivity.EXTRA_SELECTED_COUNT, count);
         startActivity(intent);
         finish();
+    }
+
+    private void showNoContext()
+    {
+        binding.emailStep.setVisibility(View.GONE);
+        binding.codeStep.setVisibility(View.GONE);
+        binding.title.setVisibility(View.GONE);
+        binding.noContextContainer.setVisibility(View.VISIBLE);
     }
 
     private void navigateToCredentialSelection()
@@ -101,7 +172,6 @@ public class LoginActivity extends AppCompatActivity
             return;
         }
 
-        currentEmail = email;
         setLoading(true);
         hideErrors();
 
@@ -186,8 +256,15 @@ public class LoginActivity extends AppCompatActivity
                 runOnUiThread(() ->
                 {
                     setLoading(false);
-                    setVerified(currentEmail);
-                    navigateToCredentialSelection();
+                    if (returnOnSuccess)
+                    {
+                        setResult(RESULT_OK);
+                        finish();
+                    }
+                    else
+                    {
+                        navigateToCredentialSelection();
+                    }
                 });
             }
             catch (GrpcWebException e)
