@@ -1,6 +1,7 @@
 package com.psia.pkoc.core.grpc;
 
-import com.google.protobuf.Empty;
+import com.sentryinteractive.opencredential.api.credential.CredentialFilter;
+import com.sentryinteractive.opencredential.api.credential.GetCredentialsRequest;
 import com.sentryinteractive.opencredential.api.credential.GetCredentialsResponse;
 
 import java.io.IOException;
@@ -37,9 +38,12 @@ public class CredentialService
         return instance;
     }
 
-    public GetCredentialsResponse getCredentials() throws IOException, GrpcWebException
+    public GetCredentialsResponse getCredentials(CredentialFilter filter) throws IOException, GrpcWebException
     {
-        byte[] responseBytes = client.call(SERVICE_PATH, "GetCredentials", Empty.getDefaultInstance());
+        GetCredentialsRequest request = GetCredentialsRequest.newBuilder()
+                .setFilter(filter)
+                .build();
+        byte[] responseBytes = client.call(SERVICE_PATH, "GetCredentials", request);
         byte[] msgBytes = client.parseGrpcWebDataFrame(responseBytes);
         return GetCredentialsResponse.parseFrom(msgBytes);
     }

@@ -28,6 +28,7 @@ import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.psia.pkoc.core.databinding.FragmentDisplayPublicKeyBinding;
 import com.psia.pkoc.core.grpc.CredentialService;
 import com.psia.pkoc.core.grpc.GrpcWebException;
+import com.sentryinteractive.opencredential.api.credential.CredentialFilter;
 import com.sentryinteractive.opencredential.api.credential.GetCredentialsResponse;
 
 import org.bouncycastle.util.encoders.Hex;
@@ -113,7 +114,7 @@ public class DisplayPublicKeyFragment extends Fragment
         executor.execute(() -> {
             try {
                 GetCredentialsResponse credentials = CredentialService.getInstance()
-                        .getCredentials();
+                        .getCredentials(CredentialFilter.CREDENTIAL_FILTER_SAME_KEY);
                 System.out.println(credentials);
             } catch (IOException e) {
                 throw new RuntimeException(e);

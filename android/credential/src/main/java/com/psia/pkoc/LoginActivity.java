@@ -17,6 +17,7 @@ import com.psia.pkoc.core.grpc.VerificationService;
 import com.sentryinteractive.opencredential.api.common.CredentialType;
 import com.sentryinteractive.opencredential.api.common.Identity;
 import com.sentryinteractive.opencredential.api.credential.Credential;
+import com.sentryinteractive.opencredential.api.credential.CredentialFilter;
 import com.sentryinteractive.opencredential.api.credential.GetCredentialsResponse;
 import com.sentryinteractive.opencredential.api.verification.StartEmailVerificationResponse;
 
@@ -24,6 +25,7 @@ import org.bouncycastle.util.encoders.Hex;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -79,7 +81,8 @@ public class LoginActivity extends AppCompatActivity
         {
             try
             {
-                GetCredentialsResponse response = CredentialService.getInstance().getCredentials();
+                GetCredentialsResponse response = CredentialService.getInstance()
+                        .getCredentials(CredentialFilter.CREDENTIAL_FILTER_SAME_KEY);
 
                 List<Credential> matched = new ArrayList<>();
                 for (Credential cred : response.getCredentialsList())
@@ -179,7 +182,7 @@ public class LoginActivity extends AppCompatActivity
         {
             try
             {
-                byte[] publicKeyDer = CryptoProvider.GetPublicKey().getEncoded();
+                byte[] publicKeyDer = Objects.requireNonNull(CryptoProvider.GetPublicKey()).getEncoded();
 
                 StartEmailVerificationResponse response = VerificationService.getInstance()
                         .startEmailVerification(

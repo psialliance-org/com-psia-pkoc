@@ -17,6 +17,7 @@ import com.psia.pkoc.core.grpc.CredentialService;
 import com.psia.pkoc.databinding.ActivityCredentialSelectionBinding;
 import com.sentryinteractive.opencredential.api.common.Identity;
 import com.sentryinteractive.opencredential.api.credential.Credential;
+import com.sentryinteractive.opencredential.api.credential.CredentialFilter;
 import com.sentryinteractive.opencredential.api.credential.GetCredentialsResponse;
 
 import org.bouncycastle.util.encoders.Hex;
@@ -99,7 +100,8 @@ public class CredentialSelectionActivity extends AppCompatActivity
         {
             try
             {
-                GetCredentialsResponse response = CredentialService.getInstance().getCredentials();
+                GetCredentialsResponse response = CredentialService.getInstance()
+                        .getCredentials(CredentialFilter.CREDENTIAL_FILTER_SAME_KEY);
 
                 List<Credential> filtered = new ArrayList<>();
                 for (Credential cred : response.getCredentialsList())
@@ -153,6 +155,7 @@ public class CredentialSelectionActivity extends AppCompatActivity
         for (Credential cred : emailCredentials)
         {
             String email = cred.getIdentity().getEmail();
+            //noinspection DataFlowIssue
             emailCount.put(email, emailCount.getOrDefault(email, 0) + 1);
         }
 
@@ -163,7 +166,8 @@ public class CredentialSelectionActivity extends AppCompatActivity
         {
             Credential cred = emailCredentials.get(i);
             String email = cred.getIdentity().getEmail();
-            boolean hasDuplicate = emailCount.containsKey(email) && emailCount.get(email) > 1;
+            //noinspection DataFlowIssue
+            boolean hasDuplicate = emailCount.containsKey(email) && emailCount.getOrDefault(email, 0) > 1;
 
             String label = email;
             if (hasDuplicate)
