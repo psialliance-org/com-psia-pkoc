@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.psia.pkoc.core.CryptoProvider;
 import com.psia.pkoc.core.grpc.CredentialService;
+import com.psia.pkoc.core.grpc.OrganizationService;
 import com.psia.pkoc.databinding.ActivityCredentialSelectionBinding;
 import com.sentryinteractive.opencredential.api.common.Identity;
 import com.sentryinteractive.opencredential.api.credential.Credential;
@@ -41,6 +42,9 @@ public class CredentialSelectionActivity extends AppCompatActivity
     private final List<Credential> emailCredentials = new ArrayList<>();
     private final Map<Integer, CheckBox> checkBoxMap = new HashMap<>();
 
+    private String organizationId;
+    private String inviteCode;
+
     private final ActivityResultLauncher<Intent> loginLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result ->
@@ -60,6 +64,8 @@ public class CredentialSelectionActivity extends AppCompatActivity
 
         CryptoProvider.initializeCredentials(this);
 
+        organizationId = getIntent().getStringExtra(ConsentActivity.EXTRA_ORG_ID);
+        inviteCode = getIntent().getStringExtra(ConsentActivity.EXTRA_INVITE_CODE);
         String orgName = getIntent().getStringExtra(ConsentActivity.EXTRA_ORG_NAME);
 
         if (orgName != null)
@@ -226,25 +232,51 @@ public class CredentialSelectionActivity extends AppCompatActivity
 
     private void onApproveClicked()
     {
-        Intent intent = new Intent(this, MainActivity.class);
+        binding.approveButton.setEnabled(false);
 
-        int selectedCount = 0;
+        List<Credential> selected = new ArrayList<>();
         List<String> selectedHexIds = new ArrayList<>();
         for (Map.Entry<Integer, CheckBox> entry : checkBoxMap.entrySet())
         {
             if (entry.getValue().isChecked())
             {
                 Credential cred = emailCredentials.get(entry.getKey());
-                byte[] credBytes = cred.toByteArray();
-                intent.putExtra(EXTRA_CREDENTIAL_PREFIX + selectedCount, credBytes);
-                selectedCount++;
+                selected.add(cred);
                 selectedHexIds.add(Hex.toHexString(cred.getCredential().toByteArray()));
             }
         }
 
-        intent.putExtra(EXTRA_SELECTED_COUNT, selectedCount);
-        CredentialStore.saveSelectedCredentials(this, selectedHexIds);
-        startActivity(intent);
-        finish();
+        executor.execute(() ->
+        {
+            try
+            {
+                for (Credential cred : selected)
+                {
+                    OrganizationService.getInstance().shareCredentialWithOrganization(
+                            organizationId,
+                            cred.getIdentity(),
+                            inviteCode
+                    );
+                }
+
+                runOnUiThread(() ->
+                {
+                    Intent intent = new Intent(this, MainActivity.class);
+                    for (int i = 0; i < selected.size(); i++)
+                    {
+                        intent.putExtra(EXTRA_CREDENTIAL_PREFIX + i, selected.get(i).toByteArray());
+                    }
+                    intent.putExtra(EXTRA_SELECTED_COUNT, selected.size());
+                    CredentialStore.saveSelectedCredentials(this, selectedHexIds);
+                    startActivity(intent);
+                    finish();
+                });
+            }
+            catch (Exception e)
+            {
+                Log.e(TAG, "Failed to share credential with organization", e);
+                runOnUiThread(() -> binding.approveButton.setEnabled(true));
+            }
+        });
     }
 }

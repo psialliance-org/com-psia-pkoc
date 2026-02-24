@@ -1,7 +1,9 @@
 package com.psia.pkoc.core.grpc;
 
+import com.sentryinteractive.opencredential.api.common.Identity;
 import com.sentryinteractive.opencredential.api.organization.GetOrganizationByInviteCodeRequest;
 import com.sentryinteractive.opencredential.api.organization.Organization;
+import com.sentryinteractive.opencredential.api.organization.ShareCredentialWithOrganizationRequest;
 
 import java.io.IOException;
 
@@ -47,5 +49,17 @@ public class OrganizationService
         byte[] responseBytes = client.call(SERVICE_PATH, "GetOrganizationByInviteCode", request);
         byte[] msgBytes = client.parseGrpcWebDataFrame(responseBytes);
         return Organization.parseFrom(msgBytes);
+    }
+
+    public void shareCredentialWithOrganization(String organizationId, Identity identity, String inviteCode)
+            throws IOException, GrpcWebException
+    {
+        ShareCredentialWithOrganizationRequest request = ShareCredentialWithOrganizationRequest.newBuilder()
+                .setOrganizationId(organizationId)
+                .setIdentity(identity)
+                .setInviteCode(inviteCode)
+                .build();
+
+        client.call(SERVICE_PATH, "ShareCredentialWithOrganization", request);
     }
 }
