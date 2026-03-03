@@ -81,10 +81,7 @@ public class CredentialSelectionActivity extends AppCompatActivity
     {
         binding.approveButton.setOnClickListener(v -> onApproveClicked());
 
-        binding.cancelButton.setOnClickListener(v ->
-        {
-            // TODO: handle cancel
-        });
+        binding.cancelButton.setOnClickListener(v -> finishAffinity());
 
         binding.addNewEmail.setOnClickListener(v ->
         {
