@@ -1,7 +1,7 @@
 package com.psia.pkoc;
 
 import android.content.Intent;
-import android.graphics.Color;
+import androidx.core.content.ContextCompat;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -183,7 +183,7 @@ public class CredentialSelectionActivity extends AppCompatActivity
             CheckBox checkBox = new CheckBox(this);
             checkBox.setText(label);
             checkBox.setChecked(true);
-            checkBox.setTextColor(Color.parseColor("#212121"));
+            checkBox.setTextColor(ContextCompat.getColor(this, R.color.textPrimary));
             checkBox.setTextSize(15);
             checkBox.setPadding(8, 0, 8, 0);
 
@@ -223,7 +223,7 @@ public class CredentialSelectionActivity extends AppCompatActivity
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, 1);
         divider.setLayoutParams(params);
-        divider.setBackgroundColor(Color.parseColor("#E0E0E0"));
+        divider.setBackgroundColor(ContextCompat.getColor(this, R.color.divider));
         binding.credentialList.addView(divider);
     }
 
