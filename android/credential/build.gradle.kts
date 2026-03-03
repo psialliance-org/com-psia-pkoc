@@ -11,7 +11,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.sentryinteractive.pkoc.testapp"
+        applicationId = "com.psia.pkoc"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
