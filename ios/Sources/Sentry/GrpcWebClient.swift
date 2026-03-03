@@ -55,10 +55,7 @@ final class GrpcWebClient
     {
         guard responseData.count >= 5 else { throw GrpcWebError.malformedResponse }
         let flags = responseData[responseData.startIndex]
-        let length = Int(responseData[responseData.startIndex + 1]) << 24
-                   | Int(responseData[responseData.startIndex + 2]) << 16
-                   | Int(responseData[responseData.startIndex + 3]) << 8
-                   | Int(responseData[responseData.startIndex + 4])
+        let length = Int(responseData.readBigEndianUInt32(at: responseData.startIndex + 1))
         guard (flags & 0x80) == 0 else { throw GrpcWebError.malformedResponse }
         guard responseData.count >= 5 + length else { throw GrpcWebError.malformedResponse }
         return responseData[(responseData.startIndex + 5)..<(responseData.startIndex + 5 + length)]
@@ -70,10 +67,7 @@ final class GrpcWebClient
     {
         var result = Data(capacity: 5 + message.count)
         result.append(0x00)  // flags: no compression
-        result.append(UInt8((message.count >> 24) & 0xFF))
-        result.append(UInt8((message.count >> 16) & 0xFF))
-        result.append(UInt8((message.count >> 8) & 0xFF))
-        result.append(UInt8(message.count & 0xFF))
+        result.appendBigEndianUInt32(UInt32(message.count))
         result.append(message)
         return result
     }
@@ -103,10 +97,7 @@ final class GrpcWebClient
         while offset + 5 <= data.count
         {
             let flags = data[offset]
-            let len = Int(data[offset + 1]) << 24
-                    | Int(data[offset + 2]) << 16
-                    | Int(data[offset + 3]) << 8
-                    | Int(data[offset + 4])
+            let len = Int(data.readBigEndianUInt32(at: offset + 1))
             if (flags & 0x80) != 0, offset + 5 + len <= data.count,
                let trailers = String(data: data[(offset + 5)..<(offset + 5 + len)], encoding: .utf8)
             {
@@ -185,5 +176,17 @@ private extension Data
             .replacingOccurrences(of: "+", with: "-")
             .replacingOccurrences(of: "/", with: "_")
             .replacingOccurrences(of: "=", with: "")
+    }
+
+    func readBigEndianUInt32(at offset: Int) -> UInt32
+    {
+        self.subdata(in: offset..<(offset + 4))
+            .withUnsafeBytes { $0.load(as: UInt32.self).bigEndian }
+    }
+
+    mutating func appendBigEndianUInt32(_ value: UInt32)
+    {
+        var big = value.bigEndian
+        append(Data(bytes: &big, count: 4))
     }
 }
