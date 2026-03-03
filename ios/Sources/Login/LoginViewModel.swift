@@ -42,12 +42,7 @@ final class LoginViewModel: ObservableObject
         {
             do
             {
-                let publicKeyX963 = CryptoProvider.exportPublicKey().x963Representation
-                let spkiPrefix = Data([
-                    0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01,
-                    0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00
-                ])
-                let derKey = spkiPrefix + publicKeyX963
+                let derKey = CryptoProvider.exportPublicKey().derRepresentation
 
                 let response = try await VerificationService.shared.startEmailVerification(
                     email: trimmed,

@@ -134,12 +134,7 @@ final class GrpcWebClient
             let privateKey = CryptoProvider.exportPrivateKey()
             let publicKey  = CryptoProvider.exportPublicKey()
 
-            // SubjectPublicKeyInfo (DER) for P-256 – matches Java's PublicKey.getEncoded()
-            let spkiPrefix = Data([
-                0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01,
-                0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00
-            ])
-            let derPublicKey = spkiPrefix + publicKey.x963Representation
+            let derPublicKey = publicKey.derRepresentation
 
             // content-digest: sha-256=:<base64>:
             let bodyHash     = SHA256.hash(data: body)
