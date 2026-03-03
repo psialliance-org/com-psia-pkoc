@@ -2,6 +2,7 @@ import SwiftUI
 
 /// Deeplink entry point: shows org details and asks for consent.
 /// Mirrors Android's ConsentActivity.
+@available(iOS 15.0, *)
 struct ConsentView: View
 {
     var inviteCode: String
@@ -9,6 +10,7 @@ struct ConsentView: View
     var onProceed: ((_ inviteCode: String, _ orgName: String, _ orgId: String) -> Void)?
     var onCancel: (() -> Void)?
 
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var vm: ConsentViewModel
 
     init(inviteCode: String,
@@ -66,10 +68,10 @@ struct ConsentView: View
     {
         VStack(alignment: .center, spacing: 20)
         {
-            Image(uiImage: UIImage(named: ProductImages.PSIA_Logo_Typographic)!)
+            Image(uiImage: UIImage(named: ProductImages.Sentry_Logo)!)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(height: 64)
+                .frame(height: 80)
 
             Text("\(org.name) needs your permission to use smartphone access")
                 .font(.headline)
@@ -84,8 +86,8 @@ struct ConsentView: View
 
             VStack(alignment: .leading, spacing: 12)
             {
-                dataRow(icon: "at", label: "Email Address")
-                dataRow(icon: "iphone", label: "Phone Number")
+                dataRow(icon: "envelope", label: "Email Address")
+                dataRow(icon: "phone", label: "Phone Number")
                 dataRow(icon: "qrcode", label: "Unique Identifiers")
             }
 
@@ -158,6 +160,7 @@ struct ConsentView: View
 
             Button("Cancel")
             {
+                dismiss()
                 onCancel?()
             }
             .frame(maxWidth: .infinity)

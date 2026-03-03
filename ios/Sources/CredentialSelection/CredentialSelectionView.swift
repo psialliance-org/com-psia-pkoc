@@ -81,10 +81,21 @@ struct CredentialSelectionView: View
     {
         VStack(spacing: 8)
         {
-            Image(uiImage: UIImage(named: ProductImages.PSIA_Logo_Typographic)!)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(height: 56)
+            HStack(spacing: 12)
+            {
+                Image(uiImage: UIImage(named: ProductImages.Sentry_Logo)!)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: 56)
+
+                Text("– – – \u{25B8}")
+                    .foregroundColor(Color(.systemGray4))
+                    .font(.system(size: 16))
+
+                Image(systemName: "building.2")
+                    .font(.system(size: 32))
+                    .foregroundColor(.secondary)
+            }
 
             if !organizationName.isEmpty
             {

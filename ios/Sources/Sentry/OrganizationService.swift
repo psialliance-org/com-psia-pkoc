@@ -35,7 +35,7 @@ final class OrganizationService
             identity: identity,
             inviteCode: inviteCode
         )
-        // Returns google.protobuf.Empty — just fire the call
+        // Fire and forget
         _ = try await client.call(
             servicePath: servicePath,
             method: "ShareCredentialWithOrganization",

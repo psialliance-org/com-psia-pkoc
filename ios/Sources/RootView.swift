@@ -36,17 +36,21 @@ struct RootView: View
         }
         .sheet(item: $vm.pendingInviteCode)
         { inviteCode in
-            ConsentView(
-                inviteCode: inviteCode,
-                onProceed:
-                { code, orgName, orgId in
-                    vm.onConsentProceeded(inviteCode: code, orgName: orgName, orgId: orgId)
-                },
-                onCancel:
-                {
-                    vm.onConsentCancelled()
-                }
-            )
+            if #available(iOS 15.0, *) {
+                ConsentView(
+                    inviteCode: inviteCode,
+                    onProceed:
+                        { code, orgName, orgId in
+                            vm.onConsentProceeded(inviteCode: code, orgName: orgName, orgId: orgId)
+                        },
+                    onCancel:
+                        {
+                            vm.onConsentCancelled()
+                        }
+                )
+            } else {
+                // Fallback on earlier versions
+            }
         }
         .onAppear { vm.start() }
         .onOpenURL { url in vm.handleUniversalLink(url: url) }

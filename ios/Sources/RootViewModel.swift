@@ -16,6 +16,9 @@ final class RootViewModel: ObservableObject
     @Published var state: AppState = .loading
     @Published var pendingInviteCode: String? = nil  // set by universal link
 
+    // TODO: Remove — temporary invite code for testing without deeplinks
+    private let testInviteCode: String? = "2a87c473-da2f-4ac2-81ac-fb067396a458"
+
     func start()
     {
         loadKeysAndRoute()
@@ -72,6 +75,11 @@ final class RootViewModel: ObservableObject
         guard !savedIds.isEmpty else
         {
             state = .noContext
+            // TODO: Remove — auto-trigger consent for testing
+            if let code = testInviteCode
+            {
+                pendingInviteCode = code
+            }
             return
         }
 
