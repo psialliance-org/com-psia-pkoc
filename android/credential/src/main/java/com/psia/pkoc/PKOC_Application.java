@@ -4,6 +4,10 @@ import android.app.Application;
 
 import androidx.room.Room;
 
+import org.conscrypt.Conscrypt;
+
+import java.security.Security;
+
 public class PKOC_Application extends Application
 {
     private static PKOC_Database db;
@@ -12,6 +16,7 @@ public class PKOC_Application extends Application
     public void onCreate()
     {
         super.onCreate();
+        Security.insertProviderAt(Conscrypt.newProvider(), 1);
         db = Room.databaseBuilder(getApplicationContext(), PKOC_Database.class, "pkoc.db")
                 .build();
     }

@@ -10,6 +10,6 @@ struct PSIAExperienceApp: App
 
     var body: some Scene
     {
-        WindowGroup { ContentView() }
+        WindowGroup { RootView() }
     }
 }

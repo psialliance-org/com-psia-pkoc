@@ -157,6 +157,88 @@ sequenceDiagram
     R->>C: Access decision / next-step APDUs
 ```
 
+## Deep Links (Universal Links / App Links)
+
+The apps use deep links to handle organization invite flows. When a user taps a link like `https://<host>/share/<inviteCode>`, the app opens directly to the consent screen.
+
+The default host is `mobile.opencredential.sentryinteractive.com`. You can change it to your own domain.
+
+### Server-side setup
+
+Your deep link host must serve two verification files so that iOS and Android can associate the link with your app.
+
+**iOS** -- `https://<host>/.well-known/apple-app-site-association`
+
+```json
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "<TEAM_ID>.<BUNDLE_ID>",
+        "paths": ["/share/*"]
+      }
+    ]
+  }
+}
+```
+
+Replace `<TEAM_ID>` with your Apple Team ID and `<BUNDLE_ID>` with your app's bundle identifier (default: `com.elatec.pkoc`).
+
+**Android** -- `https://<host>/.well-known/assetlinks.json`
+
+```json
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "<APPLICATION_ID>",
+      "sha256_cert_fingerprints": ["<YOUR_SIGNING_CERT_SHA256>"]
+    }
+  }
+]
+```
+
+Replace `<APPLICATION_ID>` with your Android application ID (default: `com.psia.pkoc`) and `<YOUR_SIGNING_CERT_SHA256>` with the SHA-256 fingerprint of your signing certificate. For debug builds, get it with:
+
+```bash
+keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android
+```
+
+For release builds, use your release keystore instead.
+
+### Changing the deep link host
+
+If you want to use a different domain, update the following files:
+
+**Android** -- `android/credential/src/main/AndroidManifest.xml`
+
+Change the `android:host` attribute in the `ConsentActivity` intent filter:
+
+```xml
+<data
+    android:scheme="https"
+    android:host="your.domain.com"
+    android:pathPrefix="/share/" />
+```
+
+**iOS** -- `ios/Sources/PSIAExperienceApp.entitlements`
+
+Change the associated domain:
+
+```xml
+<key>com.apple.developer.associated-domains</key>
+<array>
+    <string>applinks:your.domain.com</string>
+</array>
+```
+
+### Debug vs Release
+
+- **Android**: App Links verification (`android:autoVerify="true"`) requires the `assetlinks.json` file to be accessible over HTTPS on your domain. During debug, if you haven't set up the server file, links will show a disambiguation dialog instead of opening the app directly. The app will still work once the user selects it.
+- **iOS**: Universal Links require the `apple-app-site-association` file on the server for both debug and release builds. During development, you can add `applinks:your.domain.com?mode=developer` to your entitlements to use the Apple CDN's developer mode, which refreshes the association more frequently.
+
 ## Security & Cryptography
 
 - **Cryptography:** AES-CCM and asymmetric key operations per PKOC guidance.  
