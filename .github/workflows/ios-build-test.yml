@@ -18,7 +18,7 @@ jobs:
     outputs:
       ios: ${{ steps.filter.outputs.ios }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - id: filter
@@ -42,7 +42,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup Xcode 16.4
         uses: maxim-lobanov/setup-xcode@v1
