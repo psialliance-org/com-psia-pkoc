@@ -4,6 +4,8 @@ import CryptoKit
 
 struct ContentView : View
 {
+    var selectedCredentials: [SentryCredential] = []
+
     @State var settingsLinkSelected = false
     @State var aboutLinkSelected = false
     @State var qrLinkSelected = false
@@ -98,7 +100,7 @@ struct ContentView : View
             .onAppear()
             {
                 loadValues()
-                loadSecureKeysData()
+                // Keys are initialized by RootViewModel before ContentView is shown.
             }
             .navigationTitle("PSIA PKOC Credential")
             .toolbar

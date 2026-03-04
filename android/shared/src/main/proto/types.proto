@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package com.sentryinteractive.opencredential.common.v1alpha;
+
+option java_multiple_files = true;
+option java_package = "com.sentryinteractive.opencredential.api.common";
+option java_outer_classname = "TypesProtoV1Alpha";
+
+enum CredentialType {
+  CREDENTIAL_TYPE_UNSPECIFIED = 0;
+  CREDENTIAL_TYPE_P256 = 1;
+  CREDENTIAL_TYPE_P384 = 2;
+  CREDENTIAL_TYPE_P521 = 3;
+  CREDENTIAL_TYPE_ED25519 = 4;
+  CREDENTIAL_TYPE_ED448 = 5;
+  CREDENTIAL_TYPE_ML_DSA_44 = 6;
+  CREDENTIAL_TYPE_ML_DSA_65 = 7;
+  CREDENTIAL_TYPE_ML_DSA_87 = 8;
+}
+
+message Identity {
+  oneof identity {
+    // Normalized email address (e.g. info@sentryinteractive.com)
+    string email = 1;
+    // E-164 formatted phone number (e.g. +1234567890)
+    string phone = 2;
+  }
+}

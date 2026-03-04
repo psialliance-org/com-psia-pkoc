@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -41,13 +41,13 @@ jobs:
           xcode-version: '16.4'
 
       - name: Import signing certificate (p12)
-        uses: apple-actions/import-codesign-certs@v5
+        uses: apple-actions/import-codesign-certs@v6
         with:
           p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
           p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
 
       - name: Download application provisioning profile (App Store)
-        uses: apple-actions/download-provisioning-profiles@v4
+        uses: apple-actions/download-provisioning-profiles@v5
         with:
           bundle-id: ${{ env.BUNDLE_ID }}
           profile-type: IOS_APP_STORE
@@ -56,7 +56,7 @@ jobs:
           api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
 
       - name: Download extension provisioning profile (App Store)
-        uses: apple-actions/download-provisioning-profiles@v4
+        uses: apple-actions/download-provisioning-profiles@v5
         with:
           bundle-id: ${{ env.EXT_BUNDLE_ID }}
           profile-type: IOS_APP_STORE

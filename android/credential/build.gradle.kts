@@ -1,7 +1,6 @@
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.gradle.kotlin.dsl.implementation
 
 plugins {
     alias(libs.plugins.android.application)
@@ -83,6 +82,7 @@ tasks.withType<Test>().configureEach {
 
 dependencies {
     implementation(project(":shared"))
+    implementation(libs.conscrypt.android)
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
