@@ -59,7 +59,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Validate Gradle Wrapper
-        uses: gradle/actions/wrapper-validation@v5
+        uses: gradle/actions/wrapper-validation@v6
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
