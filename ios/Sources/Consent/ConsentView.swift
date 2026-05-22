@@ -68,11 +68,14 @@ struct ConsentView: View
     {
         VStack(alignment: .center, spacing: 20)
         {
-            Image(uiImage: UIImage(named: ProductImages.Sentry_Logo)!)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(height: 80)
-
+            if let uiImage = UIImage(named: ProductImages.Sentry_Logo)
+            {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: 80)
+            }
+            
             Text("\(org.name) needs your permission to use smartphone access")
                 .font(.headline)
                 .multilineTextAlignment(.center)
