@@ -83,11 +83,13 @@ struct CredentialSelectionView: View
         {
             HStack(spacing: 12)
             {
-                Image(uiImage: UIImage(named: ProductImages.Sentry_Logo)!)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 56)
-
+                if let uiImage = UIImage(named: ProductImages.Sentry_Logo)
+                {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(height: 56)
+                }
                 Text("– – – \u{25B8}")
                     .foregroundColor(Color(.systemGray4))
                     .font(.system(size: 16))
