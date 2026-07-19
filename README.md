@@ -1,4 +1,4 @@
-﻿# PKOC Mobile Credential Suite
+# PKOC Mobile Credential Suite
 
 A multi-platform, open-source codebase implementing the **PKOC** (Public Key Open Credential) protocol across **Android** and **iOS**.  
 This repo hosts three apps that enable secure, interoperable identity exchange over **Bluetooth Low Energy (BLE)** and **Near Field Communication (NFC)**.
@@ -31,9 +31,33 @@ This repo hosts three apps that enable secure, interoperable identity exchange o
 
 | Component              | Platform | Transport           | Highlights                                                                  |
 |------------------------|----------|---------------------|------------------------------------------------------------------------------|
-| **Mobile Credential**  | Android  | BLE, NFC (HCE)      | Advertises credential over BLE; HCE-based NFC flow; AES-CCM; secure storage |
-| **Reader Simulator**   | Android  | BLE, NFC            | Emulates PKOC reader; enrollment tools; verbose logging & message tracing    |
+| **Mobile Credential**  | Android  | BLE, NFC (HCE)      | BLE ECDHE PFS with per-reader certificate (v2.0.1); NFC HCE with SE V2 Validated Mode; AES-CCM; secure storage |
+| **Reader Simulator**   | Android  | BLE, NFC            | Emulates PKOC reader; per-reader cert + SE V2 Validated Mode; multi-supplier config; enrollment tools; verbose logging |
 | **Mobile Credential**  | iOS      | BLE, NFC (SE)       | BLE credentialing; NFC via Secure Element (requires entitlements)           |
+
+## PKOC 2.0.1 — Validated Mode
+
+The Android apps implement PKOC **2.0.1 Validated Mode** across both transports. Validated Mode is an upgrade over the baseline flows: where the reader previously trusted a credential or reader on presentation alone, it now cryptographically verifies a certificate against a provisioned trust anchor before completing the transaction. Baseline (Standard / v1.x) flows remain supported, and the apps fall back to them gracefully when a peer does not support Validated Mode.
+
+### BLE — Per-Reader Certificate (Reader → Credential)
+
+- The reader presents a **Reader Certificate** (fixed 138-byte structure, `TLV 0x10`) carrying its public key, signed by a **Site Issuer** key.
+- The credential verifies the Site Issuer signature over the certificate against a provisioned Site Issuer trust anchor (chain-of-trust), then binds the ECDHE handshake to the certificate's Reader Public Key.
+- Trust model is **discovery-and-pin**: the full certificate chain is verified on first contact, then the certificate is pinned for subsequent taps. Revocation is enforced on every transaction, including pinned ones.
+- On-device indicators show the outcome: the reader displays a Validated Mode banner, and the credential indicates whether trust was established by chain verification (first contact) or by pin.
+
+### NFC — Secure Element V2 (SE V2)
+
+- Reader drives the SE V2 sequence: `SELECT` → **GET DATA (INFO)** → **GET DATA (PKOC-CVC)** → **INTERNAL AUTHENTICATE**.
+- The credential presents a **PKOC-CVC** (Card Verifiable Certificate). In Validated Mode the reader resolves the certificate's Issuer Identification Reference (IIR, tag `42`) to a configured supplier and verifies the issuer signature before authenticating.
+- **Standard vs Validated:** Validated Mode requires a matching supplier and does not fall back after a validation failure. If the tapped card does not advertise SE V2 at all, the reader falls back to the SE V1 Standard Flow and indicates the fallback on the result screen.
+- The reader result screen surfaces the Reader-to-PACS output (credential / derived identifier / extension) alongside the subject public key.
+
+### Multi-Supplier Trust Model
+
+- Reader trust is keyed by **IIR**, so multiple credential suppliers can be trusted simultaneously; migrating suppliers is adding the incoming IIR and retiring the outgoing one.
+- The Reader Simulator provides a **PKOC Credential Suppliers** screen to add/retire suppliers by IIR (EC P-256 issuer public key), with Validated Mode and validity-enforcement toggles.
+- Suppliers can be provisioned by scanning a **supplier QR** exported from the credential app, or entered manually.
 
 ## Quick Start
 
