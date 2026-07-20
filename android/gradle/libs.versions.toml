@@ -1,8 +1,8 @@
 [versions]
-agp = "9.2.1"
+agp = "9.3.0"
 annotationsApi = "6.0.53"
 bcpkixJdk15to18 = "1.84"
-conscryptAndroid = "2.6.0"
+conscryptAndroid = "2.6.1"
 core = "3.5.4"
 grpc = "1.82.2"
 junit = "4.13.2"
