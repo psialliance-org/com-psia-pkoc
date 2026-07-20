@@ -127,58 +127,69 @@ sequenceDiagram
     R->>C: Verification result
 ```
 
-### PKOC ECDHE Perfect Forward Secrecy Flow
+### BLE Validated Mode — ECDHE PFS + Per-Reader Certificate (v2.0.1)
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant R as Reader (Verifier)
+    participant R as Reader
     participant C as Credential (Phone)
-    participant B as Backend (Optional)
 
-    Note over R,C: Ephemeral ECDHE handshake with mutual authentication
+    Note over R,C: PKOC 2.0.1 BLE — ephemeral ECDHE with reader per-reader certificate
 
-    R->>R: Generate ephemeral key pair (r_e, R_e)
-    R->>C: Hello_R { proto_ver, suites, nonce_R, R_e }
-    C->>C: Generate ephemeral key pair (c_e, C_e)
-    C->>R: Hello_C { proto_ver, suite_sel, nonce_C, C_e }
+    R->>R: Generate ephemeral key pair
+    R->>C: Hello + Reader Certificate (TLV 0x10, Site Issuer-signed) + nonce + R_e
+    C->>C: Generate ephemeral key pair
 
-    Note over R,C: Both sides compute shared secret
-    R->>R: Z_R = ECDH(r_e, C_e)
-    C->>C: Z_C = ECDH(c_e, R_e)
+    Note over C: Verify reader certificate locally (no backend)
+    alt First contact
+        C->>C: Verify Site Issuer signature over certificate (chain-of-trust)
+        C->>C: Pin certificate
+    else Subsequent taps
+        C->>C: Match pinned certificate (discovery-and-pin)
+    end
+    C->>C: Enforce revocation (every transaction)
+    C->>R: Hello + nonce + C_e
+
+    Note over R,C: Both sides compute shared secret (ECDH)
+    R->>R: Z = ECDH(r_e, C_e)
+    C->>C: Z = ECDH(c_e, R_e)
 
     Note over R,C: Derive keys with HKDF over transcript
-    R->>R: k_enc_R, k_enc_C, iv_base = HKDF(Z_R, transcript)
-    C->>C: k_enc_R, k_enc_C, iv_base = HKDF(Z_C, transcript)
+    R->>C: Signed handshake bound to certificate Reader Public Key
+    C->>C: Verify handshake signature against certificate Reader Public Key
 
-    Note over R,C: Authenticate using long-term keys bound to transcript
-    R->>C: Auth_R { cert_R, sig_R(transcript) }
-    C->>R: Auth_C { cert_C, sig_C(transcript) }
-
-    alt Optional revocation check
-        R->>B: Validate cert_C
-        B-->>R: Status OK / Revoked
-    end
-
-    Note over R,C: Switch to AEAD channel (AES-CCM) with IV counter
-    R->>C: Encrypted Finished_R
-    C->>R: Encrypted Finished_C
-
-    Note over R,C: Application data exchange over encrypted channel
+    Note over R,C: AEAD channel (AES-CCM)
+    C->>R: Credential response (PKOC credential)
 ```
 
-### NFC/APDU Flow (high level)
+### NFC SE V2 Flow (v2.0.1)
 ```mermaid
 sequenceDiagram
+    autonumber
     participant R as Reader
-    participant C as Credential (HCE / SE)
-    Note over R,C: PKOC over NFC (ISO-DEP/APDU)
-    R->>C: SELECT AID
-    C->>R: FCI / app info
-    R->>C: Challenge (APDU)
-    C->>R: Signed response (APDU)
-    R->>R: Verify cryptographic proof
-    R->>C: Access decision / next-step APDUs
+    participant C as Credential (HCE / SE V2)
+
+    Note over R,C: PKOC 2.0.1 NFC — Secure Element V2
+
+    R->>C: SELECT (PKOC AID)
+    C->>R: Protocol version
+    R->>C: GET DATA (INFO)
+    alt Card advertises SE V2 (INFO 02 00)
+        C->>R: SE V2 indicator
+        R->>C: GET DATA (PKOC-CVC)
+        C->>R: PKOC-CVC
+        opt Validated Mode
+            R->>R: Resolve IIR (tag 42) to configured supplier
+            R->>R: Verify issuer signature over CVC (fail-closed, no fallback)
+        end
+        R->>C: INTERNAL AUTHENTICATE (challenge)
+        C->>R: Signature over challenge
+        R->>R: Verify signature against CVC subject key
+        R->>R: Emit Reader-to-PACS output (credential / derived id / extension)
+    else Card is SE V1 only
+        R->>C: SE V1 Standard Flow (fallback, indicated on result screen)
+    end
 ```
 
 ## Deep Links (Universal Links / App Links)
