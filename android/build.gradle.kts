@@ -12,9 +12,9 @@ allprojects {
             // 1.85 ships IANAObjectIdentifiers in BOTH bcprov and bcutil (bc-java #2356),
             // which fails :checkDebugDuplicateClasses. 1.84 has the clean split.
             force(
-                "org.bouncycastle:bcprov-jdk15to18:1.84",
-                "org.bouncycastle:bcutil-jdk15to18:1.84",
-                "org.bouncycastle:bcpkix-jdk15to18:1.84"
+                "org.bouncycastle:bcprov-jdk15to18:1.85.1",
+                "org.bouncycastle:bcutil-jdk15to18:1.85.1",
+                "org.bouncycastle:bcpkix-jdk15to18:1.85.1"
             )
         }
     }
